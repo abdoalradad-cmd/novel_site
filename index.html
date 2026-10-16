@@ -8373,4 +8373,381 @@
         <label>الصوت <select id="tts-voice"><option value="Microsoft Hoda - Arabic (Egypt)">Microsoft Hoda - Arabic (Egypt) (ar-EG)</option><option value="Microsoft Naayf - Arabic (Saudi)">Microsoft Naayf - Arabic (Saudi) (ar-SA)</option></select></label>
         <label><input type="checkbox" id="tts-auto"> تشغيل الفصل التالي تلقائياً</label>
         <p id="tts-hint">اضغط على أي فقرة في النص لتبدأ القراءة منها. تقدر تغيّر الصوت من القائمة.</p>
-      </div></div><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span></body></html>
+      </div></div><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><!-- ============================================================================
+     تحديث الأداء الشامل (إصلاح الـ PDF + إنهاء لاج الزجاج السائل + دعم العامية المصرية)
+     يوضع قبل </body> مباشرة دون حذف أي شيء من الكود الأصلي
+     ============================================================================ -->
+<style id="performance-and-pdf-fixes-style">
+    /* 1. إنهاء لاج وتهنيج الزجاج السائل (GPU Acceleration & Paint Containment) */
+    #liquid-ambient-bg {
+        will-change: auto !important;
+        contain: strict !important;
+        transform: translateZ(0);
+    }
+    /* إيقاف الأنيميشن المستمر للكرات الخلفية الذي يسبب سحب الرامات واللاج أثناء السكرول */
+    .liquid-orb {
+        animation: none !important;
+        filter: blur(55px) !important;
+        transform: translate3d(0, 0, 0) !important;
+        will-change: auto !important;
+    }
+    html.dark.liquid-glass .liquid-orb {
+        filter: blur(65px) !important;
+    }
+
+    /* تخفيف عبء الـ Backdrop Blur عن الكروت المتكررة لمنع التقطيع أثناء السكرول */
+    html.liquid-glass #novels-grid > div,
+    html.liquid-glass #chapters-list-grid > div,
+    html.liquid-glass .comment-card-item {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.72) 100%) !important;
+        transform: translateZ(0);
+        contain: layout style;
+    }
+    html.dark.liquid-glass #novels-grid > div,
+    html.dark.liquid-glass #chapters-list-grid > div,
+    html.dark.liquid-glass .comment-card-item {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: linear-gradient(145deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.78) 100%) !important;
+        transform: translateZ(0);
+        contain: layout style;
+    }
+
+    /* الإبقاء على الزجاج السائل الفاخر في العناصر الرئيسية الثابتة فقط وبأداء سريع */
+    html.liquid-glass header,
+    html.liquid-glass #author-bio-card,
+    html.liquid-glass #novel-details-content,
+    html.liquid-glass #reader-paper {
+        backdrop-filter: blur(14px) saturate(140%) !important;
+        -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+        transform: translate3d(0, 0, 0);
+    }
+
+    /* 2. تنسيقات الطباعة والـ PDF الاحترافية بدون تقطيع الحروف العربية */
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 18mm 15mm;
+        }
+        html, body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-family: 'Amiri', 'Cairo', serif !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+        body > *:not(#print-area) {
+            display: none !important;
+        }
+        #print-area {
+            display: block !important;
+            visibility: visible !important;
+            position: static !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            color: #111827 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        #print-area * {
+            visibility: visible !important;
+        }
+        .pdf-chapter-block {
+            page-break-before: always;
+            break-before: page;
+            padding-top: 10px;
+        }
+        .pdf-cover-block {
+            page-break-after: always;
+            break-after: page;
+        }
+    }
+</style>
+
+<script id="all-in-one-fixes-script">
+(function() {
+    'use strict';
+
+    // =========================================================================
+    // 1. إصلاح جذري لتجميع الفصول وتحويلها إلى PDF (حل مشكلة تقطيع الحروف والصفحات البيضاء)
+    // =========================================================================
+    function buildCleanNovelHtmlForPdf(novel) {
+        const primaryColor = (typeof siteConfig !== 'undefined' && siteConfig.primaryColor) ? siteConfig.primaryColor : '#065f46';
+        const siteTitle = (typeof siteConfig !== 'undefined' && siteConfig.siteTitle) ? siteConfig.siteTitle : 'روائع عبدالرحمن الرداد';
+
+        const chaptersHtml = (novel.chapters || []).map((ch, idx) => {
+            const paragraphs = String(ch.content || '')
+                .split('\n')
+                .map(p => p.trim())
+                .filter(Boolean)
+                .map(p => `<p style="margin: 0 0 14px 0; text-indent: 15px; line-height: 2.1; font-size: 18px; color: #111827; text-align: justify; font-family: 'Amiri', 'Cairo', serif;">${p}</p>`)
+                .join('');
+
+            return `
+                <div class="pdf-chapter-block" style="${idx > 0 ? 'page-break-before: always; break-before: page;' : ''} margin-bottom: 40px; direction: rtl;">
+                    <h2 style="font-size: 26px; font-weight: bold; color: ${primaryColor}; text-align: center; margin: 20px 0 24px 0; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb; font-family: 'Cairo', 'Amiri', sans-serif;">
+                        ${ch.title}
+                    </h2>
+                    <div>${paragraphs}</div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div dir="rtl" style="font-family: 'Amiri', 'Cairo', serif; background: #ffffff; color: #111827; width: 100%; max-width: 720px; margin: 0 auto; padding: 20px;">
+                <div class="pdf-cover-block" style="text-align: center; padding: 60px 30px; border: 4px double ${primaryColor}; border-radius: 20px; background: #fcf8f2; margin-bottom: 50px; page-break-after: always; break-after: page;">
+                    <p style="font-size: 15px; color: #6b7280; margin-bottom: 10px; font-family: 'Cairo', sans-serif;">${siteTitle}</p>
+                    <h1 style="font-size: 38px; font-weight: 900; color: ${primaryColor}; margin: 0 0 15px 0; font-family: 'Amiri', 'Cairo', serif;">رواية ${novel.title}</h1>
+                    <h3 style="font-size: 22px; color: #b45309; margin: 0 0 25px 0; font-family: 'Cairo', sans-serif;">تأليف الكاتب: ${novel.author}</h3>
+                    <div style="width: 80px; height: 3px; background: ${primaryColor}; margin: 0 auto 25px auto;"></div>
+                    <p style="font-size: 16px; max-width: 580px; margin: 0 auto; line-height: 2; color: #374151; text-align: center;">${novel.synopsis || ''}</p>
+                    <p style="font-size: 13px; color: #6b7280; margin-top: 35px; font-family: 'Cairo', sans-serif;">عدد الفصول: ${(novel.chapters || []).length} فصلاً كاملاً</p>
+                </div>
+                ${chaptersHtml}
+            </div>
+        `;
+    }
+
+    // استبدال دالة الطباعة السريعة لحفظ الـ PDF بأعلى جودة نصية بدون أي تهنيج مهما كان حجم الرواية
+    window.triggerPrintPdf = function() {
+        const novel = novels.find(n => n.id === currentNovelId);
+        if (!novel) return;
+
+        let printArea = document.getElementById('print-area');
+        if (!printArea) {
+            printArea = document.createElement('div');
+            printArea.id = 'print-area';
+            document.body.appendChild(printArea);
+        }
+
+        printArea.innerHTML = buildCleanNovelHtmlForPdf(novel);
+        printArea.classList.remove('hidden');
+
+        if (typeof closePdfModal === 'function') closePdfModal();
+        if (typeof showToast === 'function') {
+            showToast('جاري تجهيز ملف الـ PDF... اختر "حفظ بتنسيق PDF" (Save as PDF) من نافذة الطباعة');
+        }
+
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                printArea.classList.add('hidden');
+            }, 1000);
+        }, 350);
+    };
+
+    // استبدال دالة التحميل المباشر لتعمل بكفاءة وتتعامل مع الروايات الطويلة والخطوط العربية بدون تقطيع الحروف
+    window.generateDirectPdfFromChapters = async function() {
+        const novel = novels.find(n => n.id === currentNovelId);
+        if (!novel) return;
+
+        const btn = document.getElementById('btn-direct-pdf-download');
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-lg"></i> <span>جاري تجميع الفصول وتجهيز ملف الـ PDF...</span>`;
+        }
+
+        // حساب إجمالي طول النص (إذا كانت الرواية ضخمة جداً مثل 30 فصلاً، فإن html2canvas يفشل بسبب حدود المتصفح، لذا نستخدم محرك الـ PDF المباشر)
+        const totalChars = (novel.chapters || []).reduce((acc, ch) => acc + (ch.content ? ch.content.length : 0), 0);
+
+        if (totalChars > 45000 || typeof html2pdf === 'undefined') {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            window.triggerPrintPdf();
+            return;
+        }
+
+        let tempWrapper = null;
+        try {
+            // يجب وضع العنصر داخل الـ DOM فعلياً حتى لا يخرج الـ PDF فارغاً، مع إبطال letterRendering الذي يقطع الحروف العربية
+            tempWrapper = document.createElement('div');
+            tempWrapper.style.cssText = 'position: fixed; top: 0; left: 0; width: 794px; background: #ffffff; z-index: -9999; opacity: 0.01; pointer-events: none;';
+            tempWrapper.innerHTML = buildCleanNovelHtmlForPdf(novel);
+            document.body.appendChild(tempWrapper);
+
+            const safeFilename = `رواية_${novel.title.replace(/[^\u0600-\u06FFa-zA-Z0-9_-]+/g, '_')}.pdf`;
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: safeFilename,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: {
+                    scale: 1.5,
+                    useCORS: true,
+                    letterRendering: false, // مهم جداً: false لمنع تفكيك الحروف العربية!
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            await html2pdf().set(opt).from(tempWrapper.firstElementChild).save();
+            if (typeof closePdfModal === 'function') closePdfModal();
+            if (typeof showToast === 'function') showToast(`تم تحميل رواية "${novel.title}" بصيغة PDF بنجاح!`);
+        } catch (err) {
+            console.error('PDF generation fallback to native print:', err);
+            window.triggerPrintPdf();
+        } finally {
+            if (tempWrapper && tempWrapper.parentNode) {
+                tempWrapper.parentNode.removeChild(tempWrapper);
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+    };
+
+
+    // =========================================================================
+    // 2. دعم العامية المصرية في القارئ الصوتي (Egyptian Arabic TTS Normalizer)
+    // =========================================================================
+    let egyptianModeEnabled = localStorage.getItem('tts_egyptian_mode') !== '0';
+
+    // قاموس تحويل الكلمات العامية المصرية لنطق صوتي مضبوط لمحركات النطق العربي
+    const EGYPTIAN_PHONETIC_RULES = [
+        [/\bإزيك\b|\bازيك\b/g, 'إِزَّيَّك'],
+        [/\bإزاي\b|\bازاي\b/g, 'إِزَّاي'],
+        [/\bإيه\b|\bايه\b/g, 'إِيه'],
+        [/\bليه\b/g, 'لِيه'],
+        [/\bفين\b/g, 'فِين'],
+        [/\bامتى\b|\bإمتى\b/g, 'إِمْتَى'],
+        [/\bدلوقتي\b|\bدلوقتى\b/g, 'دِلْوَقْتِي'],
+        [/\bكدا\b|\bكده\b/g, 'كِدَه'],
+        [/\bأوي\b|\bاوي\b|\bأوى\b/g, 'أَوِي'],
+        [/\bعلشان\b|\bعشان\b/g, 'عَلَشَان'],
+        [/\bعايز\b/g, 'عَايِز'],
+        [/\bعايزة\b/g, 'عَايْزَة'],
+        [/\bعايزين\b/g, 'عَايْزِين'],
+        [/\bمفيش\b|\bمافيش\b/g, 'مَفِيش'],
+        [/\bمعرفش\b|\bماعرفش\b/g, 'مَعْرَفْش'],
+        [/\bمقدرش\b|\bماقدرش\b/g, 'مَقْدَرْش'],
+        [/\bملوش\b|\bمالهوش\b|\bملهوش\b/g, 'مَالُوش'],
+        [/\bمتخافش\b|\bماتخافش\b/g, 'مَتْخَافْش'],
+        [/\bمتخافيش\b|\bماتخافيش\b/g, 'مَتْخَافِيش'],
+        [/\bمتقلقش\b|\bماتقلقش\b/g, 'مَتِقْلَقْش'],
+        [/\bمتقلقيش\b|\bماتقلقيش\b/g, 'مَتِقْلَقِيش'],
+        [/\bمنامتش\b|\bمانمتش\b/g, 'مَنِمْتِش'],
+        [/\bمجاش\b|\bماجاش\b/g, 'مَجَاش'],
+        [/\bمحدش\b|\bماحدش\b/g, 'مَحَدِّش'],
+        [/\bمش\b/g, 'مِش'],
+        [/\bأهو\b|\bاهو\b/g, 'أَهُو'],
+        [/\bأهي\b|\bاهي\b|\bأهيه\b/g, 'أَهِي'],
+        [/\bأيوة\b|\bايوة\b|\bأيوه\b/g, 'أَيْوَه'],
+        [/\bلأ\b/g, 'لَأْ'],
+        [/\bيلا\b/g, 'يَلَّا'],
+        [/\bبقالي\b|\bبقالى\b/g, 'بَقَالِي'],
+        [/\bبقالك\b/g, 'بَقَالَك'],
+        [/\bلغاية\b/g, 'لِغَايِة'],
+        [/\bأومال\b|\bاومال\b|\bأمال\b/g, 'أُمَّال'],
+        [/\bبتاع\b/g, 'بِتَاع'],
+        [/\bبتاعتك\b/g, 'بِتَاعْتَك'],
+        [/\bبتاعتي\b|\bبتاعتى\b/g, 'بِتَاعْتِي'],
+        [/\bبرضه\b|\bبرضو\b|\bبردو\b/g, 'بَرْضُه'],
+        [/\bشوية\b/g, 'شِوَيَّة'],
+        [/\bخالص\b/g, 'خَالِص'],
+        [/\bفعلا\b/g, 'فِعْلًا'],
+        [/\bطبعا\b/g, 'طَبْعًا'],
+        [/\bمعلش\b/g, 'مَعْلِشّ'],
+        [/\bطيب\b|\bطب\b/g, 'طَيِّب'],
+        [/\bالنهارده\b|\bالنهاردة\b/g, 'النَّهَارْدَه'],
+        [/\bامبارح\b|\bإمبارح\b/g, 'إِمْبَارِح'],
+        [/\bبكرا\b|\bبكرة\b/g, 'بُكْرَه'],
+        [/\bأوضة\b|\bاوضة\b/g, 'أُوضَة'],
+        [/\bأوضتي\b|\bاوضتي\b/g, 'أُوضْتِي'],
+        [/\bترابيزة\b/g, 'تَرَابِيزَة'],
+        [/\bبلكونة\b/g, 'بَلَكُونَة'],
+        [/\bإزازة\b|\bازازة\b/g, 'إِزَازَة'],
+        [/\bكوباية\b/g, 'كُبَّايَة'],
+        [/\bفلوس\b/g, 'فُلُوس'],
+        [/\bهدوم\b/g, 'هُدُوم'],
+        [/\bجواز\b/g, 'جَوَاز'],
+        [/\bجوازة\b/g, 'جَوَازَة'],
+        [/\bعريس\b/g, 'عَرِيس'],
+        [/\bعروسة\b/g, 'عَرُوسَة'],
+        [/\bياختي\b|\bيااختي\b/g, 'يَا خْتِي'],
+        [/\bيخربيتك\b/g, 'يِخْرِب بَيْتَك'],
+        [/\bيالهوي\b|\bيا لهوي\b/g, 'يَا لَهْوِي'],
+        [/\bحاجة\b/g, 'حَاجَة'],
+        [/\bحاجات\b/g, 'حَاجَات'],
+        [/\bواحد\b/g, 'وَاحِد'],
+        [/\bواحدة\b/g, 'وَاحْدَة'],
+        [/\bاتنين\b/g, 'اِتْنِين'],
+        [/\bتلاتة\b/g, 'تَلَاتَة'],
+        [/\bعشانك\b|\bعلشانك\b/g, 'عَلَشَانَك'],
+        [/\bكويس\b/g, 'كُوَيِّس'],
+        [/\bكويسة\b/g, 'كُوَيِّسَة'],
+        [/\bكويسين\b/g, 'كُوَيِّسِين']
+    ];
+
+    function normalizeEgyptianDialect(text) {
+        if (!egyptianModeEnabled || !text) return text;
+        let out = String(text);
+        for (let i = 0; i < EGYPTIAN_PHONETIC_RULES.length; i++) {
+            out = out.replace(EGYPTIAN_PHONETIC_RULES[i][0], EGYPTIAN_PHONETIC_RULES[i][1]);
+        }
+        return out;
+    }
+
+    // اعتراض نطق المتصفح لتحويل النص للعامية المصرية واختيار الصوت المصري تلقائياً
+    if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+        const origSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+        window.speechSynthesis.speak = function(utterance) {
+            if (utterance && utterance.text) {
+                utterance.text = normalizeEgyptianDialect(utterance.text);
+
+                // محاولة اختيار صوت مصري (ar-EG) إن وجد ولم يقم المستخدم بتغيير الصوت يدوياً لغيره
+                const voices = window.speechSynthesis.getVoices() || [];
+                const egVoice = voices.find(v => /^ar[-_]EG/i.test(v.lang) || /egypt|مصر|hoda|salma|shakir/i.test(v.name));
+                if (egVoice && (!utterance.voice || !/^ar/i.test(utterance.voice.lang))) {
+                    utterance.voice = egVoice;
+                    utterance.lang = 'ar-EG';
+                } else if (!utterance.lang || utterance.lang === 'ar') {
+                    utterance.lang = 'ar-EG';
+                }
+            }
+            return origSpeak(utterance);
+        };
+    }
+
+    // إضافة زر تفعيل/إيقاف تحسين العامية المصرية داخل إعدادات شريط الصوت
+    function injectEgyptianDialectToggle() {
+        const settingsRow = document.getElementById('tts-settings');
+        if (settingsRow && !document.getElementById('tts-egyptian-toggle')) {
+            const label = document.createElement('label');
+            label.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.12);padding:4px 10px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);cursor:pointer;';
+            label.innerHTML = `
+                <input type="checkbox" id="tts-egyptian-toggle" ${egyptianModeEnabled ? 'checked' : ''}>
+                <span>🇪🇬 تحسين نطق العامية المصرية</span>
+            `;
+            const hint = document.getElementById('tts-hint');
+            if (hint) {
+                settingsRow.insertBefore(label, hint);
+            } else {
+                settingsRow.appendChild(label);
+            }
+
+            const checkbox = document.getElementById('tts-egyptian-toggle');
+            checkbox.addEventListener('change', function() {
+                egyptianModeEnabled = Boolean(this.checked);
+                localStorage.setItem('tts_egyptian_mode', egyptianModeEnabled ? '1' : '0');
+                if (typeof showToast === 'function') {
+                    showToast(egyptianModeEnabled ? 'تم تفعيل تحسين نطق العامية المصرية 🇪🇬' : 'تم التبديل إلى القراءة القياسية');
+                }
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(injectEgyptianDialectToggle, 500));
+    } else {
+        setTimeout(injectEgyptianDialectToggle, 500);
+    }
+})();
+</script></body></html>
