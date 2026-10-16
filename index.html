@@ -7280,4 +7280,86 @@
         <label>الصوت <select id="tts-voice"><option value="Microsoft Hoda - Arabic (Egypt)">Microsoft Hoda - Arabic (Egypt) (ar-EG)</option><option value="Microsoft Naayf - Arabic (Saudi)">Microsoft Naayf - Arabic (Saudi) (ar-SA)</option></select></label>
         <label><input type="checkbox" id="tts-auto"> تشغيل الفصل التالي تلقائياً</label>
         <p id="tts-hint">اضغط على أي فقرة في النص لتبدأ القراءة منها. تقدر تغيّر الصوت من القائمة.</p>
-      </div></div><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span></body></html>
+      </div></div><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<script id="safe-social-links-fixer-complete">
+(function() {
+    function injectSocialManager() {
+        const adminPanel = document.getElementById('view-admin') || document.querySelector('[id*="admin"]');
+        if (adminPanel && !document.getElementById('perfect-social-box')) {
+            let savedLinks = { facebook: '', youtube: '', wattpad: '' };
+            try { savedLinks = JSON.parse(localStorage.getItem('my_novel_social_links')) || savedLinks; } catch(e){}
+
+            const box = document.createElement('div');
+            box.id = 'perfect-social-box';
+            box.className = 'bg-slate-900 border border-amber-500 rounded-2xl p-4 sm:p-6 mb-6 shadow-2xl text-right';
+            box.innerHTML = `
+                <h3 class="text-base font-black text-amber-400 mb-2">🔗 إدارة روابط منصات التواصل (فيسبوك، يوتيوب، واتباد)</h3>
+                <p class="text-xs text-slate-300 mb-3">ضع روابط صفحاتك واضغط حفظ لكي تعمل الأزرار في الموقع فوراً.</p>
+                
+                <div class="space-y-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">رابط صفحة أو جروب الفيسبوك:</label>
+                        <input id="input-fb-link" type="url" value="${savedLinks.facebook}" placeholder="https://facebook.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none focus:border-amber-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">رابط قناة أو فيديو اليوتيوب:</label>
+                        <input id="input-yt-link" type="url" value="${savedLinks.youtube}" placeholder="https://youtube.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none focus:border-amber-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">رابط حساب الواتباد:</label>
+                        <input id="input-wt-link" type="url" value="${savedLinks.wattpad}" placeholder="https://wattpad.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none focus:border-amber-500" />
+                    </div>
+                </div>
+
+                <button type="button" id="btn-save-social-links" class="bg-amber-600 hover:bg-amber-500 text-white font-black px-5 py-2.5 rounded-xl text-xs cursor-pointer shadow-md transition-all">
+                    💾 حفظ روابط المنصات وتطبيقها فوراً
+                </button>
+            `;
+            adminPanel.insertBefore(box, adminPanel.firstChild);
+
+            document.getElementById('btn-save-social-links').onclick = () => {
+                const links = {
+                    facebook: document.getElementById('input-fb-link').value.trim(),
+                    youtube: document.getElementById('input-yt-link').value.trim(),
+                    wattpad: document.getElementById('input-wt-link').value.trim()
+                };
+                localStorage.setItem('my_novel_social_links', JSON.stringify(links));
+                alert('تم حفظ اللينكات بنجاح يا غالي! 🎉\nسيتم فتحها الآن عند الضغط على أزرار السوشيال في الموقع.');
+            };
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const target = e.target.closest('a, button, i, span');
+        if (!target) return;
+
+        let links = { facebook: '', youtube: '', wattpad: '' };
+        try { links = JSON.parse(localStorage.getItem('my_novel_social_links')) || links; } catch(e){}
+
+        const textContent = (target.textContent || '').toLowerCase();
+        const className = (target.className || '').toLowerCase();
+        const href = (target.getAttribute('href') || '').toLowerCase();
+
+        if (className.includes('facebook') || textContent.includes('فيسبوك') || href.includes('facebook.com')) {
+            if (links.facebook) {
+                e.preventDefault();
+                window.open(links.facebook, '_blank');
+            }
+        } else if (className.includes('youtube') || textContent.includes('يوتيوب') || href.includes('youtube.com')) {
+            if (links.youtube) {
+                e.preventDefault();
+                window.open(links.youtube, '_blank');
+            }
+        } else if (className.includes('wattpad') || textContent.includes('واتباد') || href.includes('wattpad.com')) {
+            if (links.wattpad) {
+                e.preventDefault();
+                window.open(links.wattpad, '_blank');
+            }
+        }
+    }, true);
+
+    setInterval(() => {
+        injectSocialManager();
+    }, 1000);
+})();
+</script></body></html>
