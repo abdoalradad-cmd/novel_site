@@ -1444,11 +1444,7 @@
                     <button onclick="editCurrentChapterFromReader()" class="admin-only-ui bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-colors" title="تعديل نص هذا الفصل" style="">
                         <i class="fa-solid fa-pen"></i>
                         <span class="hidden sm:inline">تعديل الفصل</span>
-                    </button>
-                <button id="btn-easy-copy" class="bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition-colors cursor-pointer" title="نسخ رابط الفصل بضغطة واحدة" fdprocessedid="erc8di">
-                <i class="fa-solid fa-clone"></i>
-                <span>نسخ الرابط</span>
-            </button></div>
+                    </button></div>
 
                 <!-- Customization Controls: Font Size & Reading Theme -->
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
@@ -8461,6 +8457,16 @@
     });
 })();
 </script>
+<!-- إصلاح: زر نسخ الرابط يعمل حتى لو تم حفظه داخل ملف HTML بدون أحداث الضغط -->
+<script id="easy-copy-delegation-fix">
+document.addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest('#btn-easy-copy') : null;
+    if (btn && !btn.onclick) {
+        e.preventDefault();
+        if (typeof window.easyCopyLink === 'function') window.easyCopyLink();
+    }
+});
+</script>
       <script>
         (function() {
           // The root element's background fills the whole page. As in CSS,
@@ -8653,19 +8659,31 @@
   function buildChunks() {
     TTS.chunks = [];
     TTS.starts = [];
-    const add = (el, raw) => {
+    const add = (el, raw, forcedKind) => {
+      const rawT = String(raw || '');
+      // فاصل مشهد (*** أو ___ ...) = وقفة طويلة بعد آخر جملة
+      if (/^[\s*\-_=#~•·.]{3,}$/.test(rawT)) {
+        const last = TTS.chunks[TTS.chunks.length - 1];
+        if (last) last.pause = Math.max(last.pause || 0, 1000);
+        return;
+      }
       const t = cleanForSpeech(raw);
       if (!t || !hasLetters(t)) return;
+      const kind = forcedKind || (/^\s*[-–—]/.test(rawT) || /^\s*[«"“]/.test(rawT) ? 'dialogue' : 'narration');
       let first = true;
       toSpeechPieces(t).forEach(piece => {
         if (!hasLetters(piece)) return;
         if (first) { TTS.starts.push(TTS.chunks.length); first = false; }
-        TTS.chunks.push({ text: piece, el });
+        TTS.chunks.push({ text: piece, el, kind });
       });
     };
     const title = document.getElementById('reader-chapter-title');
     const body = document.getElementById('reader-chapter-body');
-    if (title) add(title, title.textContent);
+    if (title) {
+      add(title, title.textContent, 'title');
+      const lastT = TTS.chunks[TTS.chunks.length - 1];
+      if (lastT && lastT.kind === 'title') lastT.pause = 700;
+    }
     if (body) {
       const ps = body.querySelectorAll('p');
       if (ps.length) ps.forEach(p => add(p, p.textContent));
@@ -8677,23 +8695,26 @@
   function loadVoices() {
     if (!supported) return;
     const all = speechSynthesis.getVoices() || [];
-    const rank = v => /^ar[-_]EG/i.test(v.lang) ? 0 : /^ar[-_]SA/i.test(v.lang) ? 1 : 2;
+    const score = v => (window.SpeechPrep ? window.SpeechPrep.voiceScore(v) : (/^ar[-_]EG/i.test(v.lang) ? 100 : 0));
     TTS.voices = all.filter(v => /^ar/i.test(v.lang) || /arab|عرب/i.test(v.name))
-                    .sort((a, b) => rank(a) - rank(b));
+                    .sort((a, b) => score(b) - score(a));
     const sel = document.getElementById('tts-voice');
     if (!sel) return;
     if (!TTS.voices.length) {
       sel.innerHTML = '<option value="">الصوت الافتراضي للجهاز</option>';
     } else {
-      sel.innerHTML = TTS.voices.map(v => `<option value="${v.voiceURI}">${v.name} (${v.lang})</option>`).join('');
+      sel.innerHTML = TTS.voices.map(v => `<option value="${v.voiceURI}">${(window.SpeechPrep && window.SpeechPrep.isNatural(v)) ? '⭐ ' : ''}${v.name} (${v.lang})</option>`).join('');
       const saved = TTS.voices.find(v => v.voiceURI === TTS.voiceURI);
       sel.value = (saved || TTS.voices[0]).voiceURI;
       TTS.voiceURI = sel.value;
     }
     const hintEl = document.getElementById('tts-hint');
     if (hintEl) {
+      const hasEg = TTS.voices.some(v => /^ar[-_]EG/i.test(v.lang) || /egypt|مصر|salma|shakir/i.test(v.name));
       hintEl.textContent = TTS.voices.length
-        ? 'اضغط على أي فقرة في النص لتبدأ القراءة منها. تقدر تغيّر الصوت من القائمة.'
+        ? (hasEg
+            ? 'اضغط على أي فقرة في النص لتبدأ القراءة منها. الأصوات اللي عليها ⭐ هي الأطبع على جهازك.'
+            : 'مفيش صوت مصري على جهازك فهتسمع بصوت عربي عام. عادةً متصفح Edge بيوفّر أصوات مصرية طبيعية (سلمى / شاكر).')
         : 'مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.';
     }
   }
@@ -8719,15 +8740,21 @@
     const c = TTS.chunks[TTS.idx];
     if (!c) { onChapterFinished(); return; }
 
-    const u = new SpeechSynthesisUtterance(c.text);
+    const SP = window.SpeechPrep;
+    const u = new SpeechSynthesisUtterance(SP ? SP.process(c.text) : c.text);
     const v = currentVoice();
     if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'ar-EG'; }
-    u.rate = TTS.rate;
-    u.pitch = 1;
+    const st = SP ? SP.styleFor(c.kind, c.text) : { rate: 1, pitch: 1 };
+    u.rate = Math.max(0.5, Math.min(2, TTS.rate * st.rate));
+    u.pitch = Math.max(0.5, Math.min(1.5, st.pitch));
     u.onend = function () {
       if (my !== TTS.gen) return;
-      TTS.idx++;
-      speakChunk(my);
+      const gap = SP ? SP.pauseFor(c, TTS.chunks[TTS.idx + 1]) : 0;
+      setTimeout(function () {
+        if (my !== TTS.gen) return;
+        TTS.idx++;
+        speakChunk(my);
+      }, gap);
     };
     u.onerror = function (e) {
       if (my !== TTS.gen) return;
@@ -9016,6 +9043,259 @@
 </script>
 
 <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<!-- ==================== محسّن القراءة الصوتية (سرد + عامية مصرية + وقفات) — داخل الملف بدون أي خدمة خارجية ==================== -->
+<script id="speech-prep-module">
+(function () {
+  'use strict';
+
+  /* ---------- إعدادات المستخدم (محفوظة محليًا) ---------- */
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  var OPT = {
+    dialect:    lsGet('tts_egyptian_mode', '1') !== '0',   // تحسين نطق العامية
+    expressive: lsGet('tts_expressive', '1') !== '0',      // تمييز الحوار/السرد + وقفات
+    numbers:    lsGet('tts_numbers', '1') !== '0'          // الأرقام بالحروف
+  };
+
+  /* ---------- حدود الكلمة العربية (الـ \b مبتشتغلش مع العربي) ---------- */
+  var AR = '\\u0600-\\u06FF\\u0750-\\u077F';
+  var BEFORE = '(^|[^' + AR + '])';          // بدون lookbehind عشان يشتغل على كل المتصفحات القديمة
+  var AFTER  = '(?![' + AR + '])';
+
+  /* ---------- قاموس العامية المصرية ----------
+     كل سطر: [الكتابات المحتملة, النطق المضبوط بالتشكيل]
+     بيتطبق بس لو الكلمة لوحدها (أو بحرف و/ف قبلها) ومفيهاش تشكيل. */
+  var DIALECT = [
+    [['إزيك','ازيك'], 'إِزَّيَّك'],
+    [['إزاي','ازاي'], 'إِزَّاي'],
+    [['إيه','ايه'], 'إِيه'],
+    [['ليه'], 'لِيه'],
+    [['فين'], 'فِين'],
+    [['إمتى','امتى'], 'إِمْتَى'],
+    [['دلوقتي','دلوقتى','دلوقت'], 'دِلْوَقْتِي'],
+    [['كدا','كده','كدة'], 'كِدَه'],
+    [['أوي','اوي','أوى','اوى'], 'أَوِي'],
+    [['علشان','عشان'], 'عَشَان'],
+    [['علشانك','عشانك'], 'عَشَانَك'],
+    [['عايز'], 'عَايِز'],
+    [['عايزة'], 'عَايْزَة'],
+    [['عايزين'], 'عَايْزِين'],
+    [['مفيش','مافيش'], 'مَفِيش'],
+    [['معرفش','ماعرفش'], 'مَعْرَفْش'],
+    [['مقدرش','ماقدرش'], 'مَقْدَرْش'],
+    [['ملوش','مالوش','مالهوش','ملهوش'], 'مَالُوش'],
+    [['متخافش','ماتخافش'], 'مَتْخَافْش'],
+    [['متخافيش','ماتخافيش'], 'مَتْخَافِيش'],
+    [['متقلقش','ماتقلقش'], 'مَتْقَلَقْش'],
+    [['متقلقيش','ماتقلقيش'], 'مَتْقَلَقِيش'],
+    [['مجاش','ماجاش'], 'مَجَاش'],
+    [['محدش','ماحدش'], 'مَحَدِّش'],
+    [['مش'], 'مِش'],
+    [['أهو','اهو'], 'أَهُو'],
+    [['أهي','اهي'], 'أَهِي'],
+    [['أيوة','ايوة','أيوه','ايوه'], 'أَيْوَه'],
+    [['لأ'], 'لَأ'],
+    [['يلا'], 'يَلَّا'],
+    [['بقالي','بقالى'], 'بَقَالِي'],
+    [['بقالك'], 'بَقَالَك'],
+    [['لغاية'], 'لِغَايِة'],
+    [['أومال','اومال','أمال'], 'أُمَّال'],
+    [['بتاع'], 'بِتَاع'],
+    [['بتاعتك'], 'بِتَاعْتَك'],
+    [['بتاعتي','بتاعتى'], 'بِتَاعْتِي'],
+    [['برضه','برضو','بردو'], 'بَرْضُه'],
+    [['شوية'], 'شُوَيَّة'],
+    [['خالص'], 'خَالِص'],
+    [['فعلا'], 'فِعْلًا'],
+    [['طبعا'], 'طَبْعًا'],
+    [['معلش'], 'مَعْلِش'],
+    [['النهارده','النهاردة'], 'النَّهَارْدَه'],
+    [['امبارح','إمبارح'], 'إِمْبَارِح'],
+    [['بكرا','بكره'], 'بُكْرَه'],
+    [['أوضة','اوضة'], 'أُوضَة'],
+    [['أوضتي','اوضتي'], 'أُوضْتِي'],
+    [['ترابيزة'], 'تَرَابِيزَة'],
+    [['بلكونة'], 'بَلَكُونَة'],
+    [['إزازة','ازازة'], 'إِزَازَة'],
+    [['كوباية'], 'كُبَّايَة'],
+    [['فلوس'], 'فُلُوس'],
+    [['هدوم'], 'هُدُوم'],
+    [['جوازة'], 'جَوَازَة'],
+    [['عروسة'], 'عَرُوسَة'],
+    [['يخربيتك'], 'يِخْرِب بَيْتَك'],
+    [['يالهوي','يالهوى'], 'يَا لَهْوِي'],
+    [['اتنين'], 'اِتْنِين'],
+    [['تلاتة'], 'تَلَاتَة'],
+    [['كويس'], 'كُوَيِّس'],
+    [['كويسة'], 'كُوَيِّسَة'],
+    [['كويسين'], 'كُوَيِّسِين'],
+    [['لسة','لسه'], 'لِسَّه'],
+    [['بقى'], 'بَقَى'],
+    [['اللي','اللى'], 'اللِي'],
+    [['ده'], 'دَه'],
+    [['دا'], 'دَا'],
+    [['دي','دى'], 'دِي'],
+    [['ماشي','ماشى'], 'مَاشِي'],
+    [['حاضر'], 'حَاضِر'],
+    [['خلاص'], 'خَلَاص'],
+    [['زي','زى'], 'زَي'],
+    [['عندك'], 'عِنْدَك'],
+    [['عندي','عندى'], 'عِنْدِي'],
+    [['عنده'], 'عِنْدُه'],
+    [['هنا'], 'هِنَا'],
+    [['هناك'], 'هِنَاك'],
+    [['جامد'], 'جَامِد'],
+    [['قوي','قوى'], 'قَوِي']
+  ];
+  var DIALECT_RE = DIALECT.map(function (r) {
+    var alt = r[0].map(function (w) { return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|');
+    // (و|ف|ب|ل)؟ قبل الكلمة — بنحافظ عليها زي ما هي
+    return [new RegExp(BEFORE + '([وف]?)(' + alt + ')' + AFTER, 'g'), r[1]];
+  });
+
+  function applyDialect(text) {
+    var out = text;
+    for (var i = 0; i < DIALECT_RE.length; i++) {
+      out = out.replace(DIALECT_RE[i][0], function (m, lead, pre) { return lead + pre + DIALECT_RE[i][1]; });
+    }
+    return out;
+  }
+
+  /* ---------- الأرقام بالحروف ---------- */
+  var ONES = ['', 'واحد', 'اثنين', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة',
+              'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+  var TENS = ['', '', 'عشرين', 'ثلاثين', 'أربعين', 'خمسين', 'ستين', 'سبعين', 'ثمانين', 'تسعين'];   // صيغة النصب/الجر = اللي بتتقال في الكلام
+  var HUND = ['', 'مائة', 'مائتين', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+
+  function below1000(n) {
+    var parts = [];
+    var h = Math.floor(n / 100), r = n % 100;
+    if (h) parts.push(HUND[h]);
+    if (r) {
+      if (r < 20) parts.push(ONES[r]);
+      else {
+        var o = r % 10, t = Math.floor(r / 10);
+        parts.push(o ? (ONES[o] + ' و' + TENS[t]) : TENS[t]);
+      }
+    }
+    return parts.join(' و');
+  }
+  function numToWords(n) {
+    if (n === 0) return 'صفر';
+    if (n > 999999999) return null;
+    var parts = [];
+    var m = Math.floor(n / 1000000), th = Math.floor((n % 1000000) / 1000), r = n % 1000;
+    if (m) parts.push(m === 1 ? 'مليون' : m === 2 ? 'مليونين' : (m <= 10 ? below1000(m) + ' ملايين' : below1000(m) + ' مليون'));
+    if (th) parts.push(th === 1 ? 'ألف' : th === 2 ? 'ألفين' : (th <= 10 ? below1000(th) + ' آلاف' : below1000(th) + ' ألف'));
+    if (r) parts.push(below1000(r));
+    return parts.join(' و');
+  }
+  function toWesternDigits(s) {
+    return s.replace(/[٠-٩]/g, function (d) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); });
+  }
+  function speakNumbers(text) {
+    var t = toWesternDigits(text);
+    t = t.replace(/(\d+)\s*%/g, function (m, d) { var w = numToWords(parseInt(d, 10)); return w ? w + ' في المية' : m; });
+    t = t.replace(/(\d+)[.,](\d+)/g, function (m, a, b) {
+      var wa = numToWords(parseInt(a, 10)), wb = numToWords(parseInt(b, 10));
+      return (wa && wb && b.length <= 2) ? wa + ' فاصلة ' + wb : m;
+    });
+    t = t.replace(/\d{1,9}/g, function (d) {
+      var w = numToWords(parseInt(d, 10));
+      return w || d;
+    });
+    return t;
+  }
+
+  /* ---------- تنظيف عام ---------- */
+  function cleanup(t) {
+    return String(t || '')
+      .replace(/\u0640/g, '')                          // تطويل
+      .replace(/[«»"“”‹›*_~#|\\\u200e\u200f]/g, ' ')    // رموز مش بتتنطق
+      .replace(/^\s*[-–—]+\s*/, '')                    // شرطة الحوار
+      .replace(/\s[-–—]+\s/g, '، ')                    // شرطة وسط الجملة = وقفة
+      .replace(/([!؟?]){2,}/g, '$1')                   // علامات متكررة
+      .replace(/\.{2,}|…/g, '،')                       // نقط الحذف = وقفة
+      .replace(/\s+([،,.!؟?؛:])/g, '$1')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /* ---------- الواجهة الرئيسية لتجهيز النص ---------- */
+  function process(text) {
+    var t = cleanup(text);
+    if (OPT.numbers) t = speakNumbers(t);
+    if (OPT.dialect) t = applyDialect(t);
+    return t;
+  }
+
+  /* ---------- اختيار أفضل صوت متاح على الجهاز ---------- */
+  function voiceScore(v) {
+    var name = String(v.name || ''), lang = String(v.lang || '');
+    var s = 0;
+    if (/^ar[-_]EG/i.test(lang) || /egypt|مصر|salma|shakir|hoda/i.test(name)) s += 100;
+    else if (/^ar/i.test(lang)) s += 40;
+    if (/natural|neural|online|enhanced|premium|wavenet/i.test(name)) s += 50;   // الأصوات الطبيعية
+    if (/google|microsoft|apple/i.test(name)) s += 5;
+    if (v.localService === false) s += 3;
+    return s;
+  }
+  function isNatural(v) { return /natural|neural|online|enhanced|premium|wavenet/i.test(String(v.name || '')); }
+
+  /* ---------- أسلوب القراءة: سرد / حوار / عنوان ---------- */
+  function styleFor(kind, text) {
+    var st = { rate: 1, pitch: 1 };
+    if (!OPT.expressive) return st;
+    if (kind === 'title')         { st.rate = 0.92; st.pitch = 0.97; }
+    else if (kind === 'dialogue') { st.rate = 1.02; st.pitch = 1.06; }
+    else                          { st.rate = 0.97; st.pitch = 0.98; }
+    if (/[!]\s*$/.test(text))     { st.rate *= 1.03; st.pitch += 0.03; }
+    if (/[؟?]\s*$/.test(text))    { st.pitch += 0.04; }
+    return st;
+  }
+  function pauseFor(chunk, nextChunk) {
+    if (!OPT.expressive) return 0;
+    if (chunk.pause) return chunk.pause;                       // فاصل مشهد / عنوان
+    var endsPara = !nextChunk || nextChunk.el !== chunk.el;
+    if (endsPara) return (chunk.kind === 'dialogue' && nextChunk && nextChunk.kind === 'dialogue') ? 260 : 420;
+    return /[.!؟?]\s*$/.test(chunk.text) ? 170 : 60;
+  }
+
+  /* ---------- لوحة الإعدادات (بتتبني من جديد لأن الشريط بيتعاد بناؤه) ---------- */
+  var BOXSTYLE = 'display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.12);padding:4px 10px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);cursor:pointer;';
+  function addToggle(row, id, label, key) {
+    var lab = document.createElement('label');
+    lab.setAttribute('data-ttsx', '1');
+    lab.style.cssText = BOXSTYLE;
+    var cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.id = id; cb.checked = !!OPT[key];
+    cb.addEventListener('change', function () {
+      OPT[key] = cb.checked;
+      lsSet(key === 'dialect' ? 'tts_egyptian_mode' : 'tts_' + key, cb.checked ? '1' : '0');
+    });
+    var sp = document.createElement('span'); sp.textContent = label;
+    lab.appendChild(cb); lab.appendChild(sp);
+    var hint = document.getElementById('tts-hint');
+    if (hint && hint.parentNode === row) row.insertBefore(lab, hint); else row.appendChild(lab);
+  }
+  function ensureSettings() {
+    var row = document.getElementById('tts-settings');
+    if (!row) return;
+    // شيل أي نسخة قديمة اتحفظت في الملف بدون أحداث
+    row.querySelectorAll('label').forEach(function (l) {
+      if (!l.hasAttribute('data-ttsx') && l.querySelector('#tts-egyptian-toggle')) l.remove();
+    });
+    if (document.getElementById('tts-egyptian-toggle')) return;
+    addToggle(row, 'tts-egyptian-toggle', '🇪🇬 تحسين نطق العامية المصرية', 'dialect');
+    addToggle(row, 'tts-expressive-toggle', '🎙️ قراءة معبّرة (حوار/سرد + وقفات)', 'expressive');
+    addToggle(row, 'tts-numbers-toggle', '🔢 الأرقام بالحروف', 'numbers');
+  }
+  setInterval(ensureSettings, 700);
+
+  window.SpeechPrep = { process: process, voiceScore: voiceScore, isNatural: isNatural, styleFor: styleFor, pauseFor: pauseFor, numToWords: numToWords, _opt: OPT };
+})();
+</script>
+
 <!-- ==================== الإضافة الخارجية الآمنة (روابط السوشيال ميديا + الترتيب + المشغل الصوتي) ==================== -->
 <script id="safe-standalone-novel-extension">
 (function() {
@@ -9386,152 +9666,6 @@
             }
         }
     };
-
-
-    // =========================================================================
-    // 2. دعم العامية المصرية في القارئ الصوتي (Egyptian Arabic TTS Normalizer)
-    // =========================================================================
-    let egyptianModeEnabled = localStorage.getItem('tts_egyptian_mode') !== '0';
-
-    // قاموس تحويل الكلمات العامية المصرية لنطق صوتي مضبوط لمحركات النطق العربي
-    const EGYPTIAN_PHONETIC_RULES = [
-        [/\bإزيك\b|\bازيك\b/g, 'إِزَّيَّك'],
-        [/\bإزاي\b|\bازاي\b/g, 'إِزَّاي'],
-        [/\bإيه\b|\bايه\b/g, 'إِيه'],
-        [/\bليه\b/g, 'لِيه'],
-        [/\bفين\b/g, 'فِين'],
-        [/\bامتى\b|\bإمتى\b/g, 'إِمْتَى'],
-        [/\bدلوقتي\b|\bدلوقتى\b/g, 'دِلْوَقْتِي'],
-        [/\bكدا\b|\bكده\b/g, 'كِدَه'],
-        [/\bأوي\b|\bاوي\b|\bأوى\b/g, 'أَوِي'],
-        [/\bعلشان\b|\bعشان\b/g, 'عَلَشَان'],
-        [/\bعايز\b/g, 'عَايِز'],
-        [/\bعايزة\b/g, 'عَايْزَة'],
-        [/\bعايزين\b/g, 'عَايْزِين'],
-        [/\bمفيش\b|\bمافيش\b/g, 'مَفِيش'],
-        [/\bمعرفش\b|\bماعرفش\b/g, 'مَعْرَفْش'],
-        [/\bمقدرش\b|\bماقدرش\b/g, 'مَقْدَرْش'],
-        [/\bملوش\b|\bمالهوش\b|\bملهوش\b/g, 'مَالُوش'],
-        [/\bمتخافش\b|\bماتخافش\b/g, 'مَتْخَافْش'],
-        [/\bمتخافيش\b|\bماتخافيش\b/g, 'مَتْخَافِيش'],
-        [/\bمتقلقش\b|\bماتقلقش\b/g, 'مَتِقْلَقْش'],
-        [/\bمتقلقيش\b|\bماتقلقيش\b/g, 'مَتِقْلَقِيش'],
-        [/\bمنامتش\b|\bمانمتش\b/g, 'مَنِمْتِش'],
-        [/\bمجاش\b|\bماجاش\b/g, 'مَجَاش'],
-        [/\bمحدش\b|\bماحدش\b/g, 'مَحَدِّش'],
-        [/\bمش\b/g, 'مِش'],
-        [/\bأهو\b|\bاهو\b/g, 'أَهُو'],
-        [/\bأهي\b|\bاهي\b|\bأهيه\b/g, 'أَهِي'],
-        [/\bأيوة\b|\bايوة\b|\bأيوه\b/g, 'أَيْوَه'],
-        [/\bلأ\b/g, 'لَأْ'],
-        [/\bيلا\b/g, 'يَلَّا'],
-        [/\bبقالي\b|\bبقالى\b/g, 'بَقَالِي'],
-        [/\bبقالك\b/g, 'بَقَالَك'],
-        [/\bلغاية\b/g, 'لِغَايِة'],
-        [/\bأومال\b|\bاومال\b|\bأمال\b/g, 'أُمَّال'],
-        [/\bبتاع\b/g, 'بِتَاع'],
-        [/\bبتاعتك\b/g, 'بِتَاعْتَك'],
-        [/\bبتاعتي\b|\bبتاعتى\b/g, 'بِتَاعْتِي'],
-        [/\bبرضه\b|\bبرضو\b|\bبردو\b/g, 'بَرْضُه'],
-        [/\bشوية\b/g, 'شِوَيَّة'],
-        [/\bخالص\b/g, 'خَالِص'],
-        [/\bفعلا\b/g, 'فِعْلًا'],
-        [/\bطبعا\b/g, 'طَبْعًا'],
-        [/\bمعلش\b/g, 'مَعْلِشّ'],
-        [/\bطيب\b|\bطب\b/g, 'طَيِّب'],
-        [/\bالنهارده\b|\bالنهاردة\b/g, 'النَّهَارْدَه'],
-        [/\bامبارح\b|\bإمبارح\b/g, 'إِمْبَارِح'],
-        [/\bبكرا\b|\bبكرة\b/g, 'بُكْرَه'],
-        [/\bأوضة\b|\bاوضة\b/g, 'أُوضَة'],
-        [/\bأوضتي\b|\bاوضتي\b/g, 'أُوضْتِي'],
-        [/\bترابيزة\b/g, 'تَرَابِيزَة'],
-        [/\bبلكونة\b/g, 'بَلَكُونَة'],
-        [/\bإزازة\b|\bازازة\b/g, 'إِزَازَة'],
-        [/\bكوباية\b/g, 'كُبَّايَة'],
-        [/\bفلوس\b/g, 'فُلُوس'],
-        [/\bهدوم\b/g, 'هُدُوم'],
-        [/\bجواز\b/g, 'جَوَاز'],
-        [/\bجوازة\b/g, 'جَوَازَة'],
-        [/\bعريس\b/g, 'عَرِيس'],
-        [/\bعروسة\b/g, 'عَرُوسَة'],
-        [/\bياختي\b|\bيااختي\b/g, 'يَا خْتِي'],
-        [/\bيخربيتك\b/g, 'يِخْرِب بَيْتَك'],
-        [/\bيالهوي\b|\bيا لهوي\b/g, 'يَا لَهْوِي'],
-        [/\bحاجة\b/g, 'حَاجَة'],
-        [/\bحاجات\b/g, 'حَاجَات'],
-        [/\bواحد\b/g, 'وَاحِد'],
-        [/\bواحدة\b/g, 'وَاحْدَة'],
-        [/\bاتنين\b/g, 'اِتْنِين'],
-        [/\bتلاتة\b/g, 'تَلَاتَة'],
-        [/\bعشانك\b|\bعلشانك\b/g, 'عَلَشَانَك'],
-        [/\bكويس\b/g, 'كُوَيِّس'],
-        [/\bكويسة\b/g, 'كُوَيِّسَة'],
-        [/\bكويسين\b/g, 'كُوَيِّسِين']
-    ];
-
-    function normalizeEgyptianDialect(text) {
-        if (!egyptianModeEnabled || !text) return text;
-        let out = String(text);
-        for (let i = 0; i < EGYPTIAN_PHONETIC_RULES.length; i++) {
-            out = out.replace(EGYPTIAN_PHONETIC_RULES[i][0], EGYPTIAN_PHONETIC_RULES[i][1]);
-        }
-        return out;
-    }
-
-    // اعتراض نطق المتصفح لتحويل النص للعامية المصرية واختيار الصوت المصري تلقائياً
-    if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
-        const origSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
-        window.speechSynthesis.speak = function(utterance) {
-            if (utterance && utterance.text) {
-                utterance.text = normalizeEgyptianDialect(utterance.text);
-
-                // محاولة اختيار صوت مصري (ar-EG) إن وجد ولم يقم المستخدم بتغيير الصوت يدوياً لغيره
-                const voices = window.speechSynthesis.getVoices() || [];
-                const egVoice = voices.find(v => /^ar[-_]EG/i.test(v.lang) || /egypt|مصر|hoda|salma|shakir/i.test(v.name));
-                if (egVoice && (!utterance.voice || !/^ar/i.test(utterance.voice.lang))) {
-                    utterance.voice = egVoice;
-                    utterance.lang = 'ar-EG';
-                } else if (!utterance.lang || utterance.lang === 'ar') {
-                    utterance.lang = 'ar-EG';
-                }
-            }
-            return origSpeak(utterance);
-        };
-    }
-
-    // إضافة زر تفعيل/إيقاف تحسين العامية المصرية داخل إعدادات شريط الصوت
-    function injectEgyptianDialectToggle() {
-        const settingsRow = document.getElementById('tts-settings');
-        if (settingsRow && !document.getElementById('tts-egyptian-toggle')) {
-            const label = document.createElement('label');
-            label.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.12);padding:4px 10px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);cursor:pointer;';
-            label.innerHTML = `
-                <input type="checkbox" id="tts-egyptian-toggle" ${egyptianModeEnabled ? 'checked' : ''}>
-                <span>🇪🇬 تحسين نطق العامية المصرية</span>
-            `;
-            const hint = document.getElementById('tts-hint');
-            if (hint) {
-                settingsRow.insertBefore(label, hint);
-            } else {
-                settingsRow.appendChild(label);
-            }
-
-            const checkbox = document.getElementById('tts-egyptian-toggle');
-            checkbox.addEventListener('change', function() {
-                egyptianModeEnabled = Boolean(this.checked);
-                localStorage.setItem('tts_egyptian_mode', egyptianModeEnabled ? '1' : '0');
-                if (typeof showToast === 'function') {
-                    showToast(egyptianModeEnabled ? 'تم تفعيل تحسين نطق العامية المصرية 🇪🇬' : 'تم التبديل إلى القراءة القياسية');
-                }
-            });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(injectEgyptianDialectToggle, 500));
-    } else {
-        setTimeout(injectEgyptianDialectToggle, 500);
-    }
 })();
 </script>
 <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
