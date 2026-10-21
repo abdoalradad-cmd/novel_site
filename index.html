@@ -11537,7 +11537,7 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== HYBRID LOCAL-GITHUB + FIREBASE NEW-ONLY SYNC (V15 SMART) ==================== -->
+      </div></div><!-- ==================== HYBRID SYNC + REALTIME COMMENTS & RATINGS FIX (V16 FINAL) ==================== -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -11699,23 +11699,25 @@ window.addEventListener('load', () => {
         }
     };
 
-    // الحفظ الذكي: يرفع الروايات الجديدة المضافة فقط دون المساس بالقديمة
+    // حفظ الروايات الجديدة + التعليقات والتقييمات ورفعها للسحابة فوراً
     window.pushToFirebase = async function(silent = false) {
         try {
             recalculateAllRatings();
-            
-            // نفترض أن الروايات الأصلية موجودة في defaultNovels، فنقوم برفع ما عداها (الجديدة فقط)
             const defaultIds = new Set((typeof defaultNovels !== 'undefined' ? defaultNovels : []).map(n => n.id));
             const newNovelsOnly = novels.filter(n => !defaultIds.has(n.id));
 
             localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
             localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
 
-            await db.ref('newAddedNovels').set(newNovelsOnly);
+            // رفع الروايات الجديدة والتعليقات والتقييمات معاً بذكاء
+            await Promise.all([
+                db.ref('newAddedNovels').set(newNovelsOnly),
+                db.ref('allNovelsFull').set(novels) // لضمان حفظ تعليقات وتقييمات كل الروايات لحظياً
+            ]);
 
             if (!silent) {
-                if (typeof showToast === "function") showToast("☁️ تم حفظ الرواية الجديدة ونشرها فوراً!");
-                alert("✅ تم رفع الرواية الجديدة على السحابة بذكاء وسرعة بدون أي ثقل أو مشاكل!");
+                if (typeof showToast === "function") showToast("☁️ تم حفظ ونشر التعديلات والتعليقات للجميع!");
+                alert("✅ تم الحفظ والنشر للجميع على السحابة بنجاح!");
             }
             return true;
         } catch (err) {
@@ -11728,6 +11730,7 @@ window.addEventListener('load', () => {
     function startRealtimeListeners() {
         if (!db) return;
 
+        // مستمع المشاهدات
         db.ref('viewsCounts').on('value', snapshot => {
             const data = snapshot.val();
             if (data && typeof novels !== 'undefined') {
@@ -11740,18 +11743,17 @@ window.addEventListener('load', () => {
             }
         });
 
-        // الاستماع للروايات الجديدة المضافة فقط ودمجها مع روايات جيت هاب الأصلية
-        db.ref('newAddedNovels').on('value', snapshot => {
-            const cloudNewNovels = snapshot.val();
-            if (Array.isArray(cloudNewNovels) && typeof novels !== 'undefined' && typeof defaultNovels !== 'undefined') {
+        // مستمع الروايات الجديدة والتعليقات والتقييمات لتعمل فوراً عند كل القراء
+        db.ref('allNovelsFull').on('value', snapshot => {
+            const cloudNovels = snapshot.val();
+            if (Array.isArray(cloudNovels) && typeof novels !== 'undefined' && typeof defaultNovels !== 'undefined') {
                 const defaultIds = new Set(defaultNovels.map(n => n.id));
-                
-                // نبقي على روايات جيت هاب الأصلية + ندمج معها الروايات الجديدة القادمة من السحابة فقط
                 const currentOldNovels = novels.filter(n => defaultIds.has(n.id));
                 
                 const mergedMap = {};
                 currentOldNovels.forEach(n => { mergedMap[n.id] = n; });
-                cloudNewNovels.forEach(n => { mergedMap[n.id] = n; }); // الجديد يحل محل القديم لو تم تحديثه
+                
+                cloudNovels.forEach(n => { mergedMap[n.id] = n; }); // السحابة تحدث الروايات والتعليقات فوراً
 
                 novels.length = 0;
                 Object.values(mergedMap).forEach(n => novels.push(n));
@@ -11765,18 +11767,18 @@ window.addEventListener('load', () => {
     function initAllHooks() {
         enforceReaderModeOnLoad();
         ['handleSaveNovel', 'deleteNovelById', 'moveNovelOrder', 'handleSaveChapter', 'deleteChapterByIndex', 'moveChapterOrder', 'applyColorPreset', 'applyCustomColor', 'applyCustomAccent'].forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._v15Hooked) {
+            if (typeof window[fnName] === 'function' && !window[fnName]._v16Hooked) {
                 const orig = window[fnName];
                 window[fnName] = function(...args) {
                     const res = orig.apply(this, args);
                     if (isAuthorActive()) setTimeout(() => window.pushToFirebase(true), 150);
                     return res;
                 };
-                window[fnName]._v15Hooked = true;
+                window[fnName]._v16Hooked = true;
             }
         });
 
-        if (typeof window.renderNovelsGrid === 'function' && !window.renderNovelsGrid._v15Hooked) {
+        if (typeof window.renderNovelsGrid === 'function' && !window.renderNovelsGrid._v16Hooked) {
             const origGrid = window.renderNovelsGrid;
             window.renderNovelsGrid = function(...args) {
                 recalculateAllRatings();
@@ -11784,10 +11786,10 @@ window.addEventListener('load', () => {
                 paintViewsAndStarsOnCards();
                 return res;
             };
-            window.renderNovelsGrid._v15Hooked = true;
+            window.renderNovelsGrid._v16Hooked = true;
         }
 
-        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._v15Hooked) {
+        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._v16Hooked) {
             const origOpen = window.openNovelDetails;
             window.openNovelDetails = function(novelId, ...rest) {
                 const res = origOpen.apply(this, [novelId, ...rest]);
@@ -11795,20 +11797,21 @@ window.addEventListener('load', () => {
                 setTimeout(paintViewsAndStarsOnCards, 50);
                 return res;
             };
-            window.openNovelDetails._v15Hooked = true;
+            window.openNovelDetails._v16Hooked = true;
         }
 
+        // ربط تعليقات وتقييمات القراء لتُرفع للسحابة وتحدث النجوم للجميع فوراً
         ['handleAddChapterComment', 'deleteChapterComment'].forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._v15Hooked) {
+            if (typeof window[fnName] === 'function' && !window[fnName]._v16Hooked) {
                 const orig = window[fnName];
                 window[fnName] = function(...args) {
                     const res = orig.apply(this, args);
                     recalculateAllRatings();
                     paintViewsAndStarsOnCards();
-                    window.pushToFirebase(true);
+                    window.pushToFirebase(true); // رفع التعليق والتقييم الجديد للسحابة فوراً
                     return res;
                 };
-                window[fnName]._v15Hooked = true;
+                window[fnName]._v16Hooked = true;
             }
         });
 
@@ -11875,7 +11878,7 @@ window.addEventListener('load', () => {
             quickBtn.type = 'button';
             quickBtn.onclick = () => window.pushToFirebase(false);
             quickBtn.className = 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer';
-            quickBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>حفظ الجديد فقط ⚡</span>`;
+            quickBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>حفظ ونشر فوري ⚡</span>`;
             cpHeader.insertBefore(quickBtn, cpHeader.firstChild);
         }
         const backupPane = document.getElementById('cp-pane-backup');
@@ -11884,10 +11887,10 @@ window.addEventListener('load', () => {
         box.id = 'cloud-github-auto-box';
         box.className = 'bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-500/50 shadow-2xl space-y-5 mb-6';
         box.innerHTML = `
-            <h4 class="text-lg font-black text-amber-400 mb-2">النظام الهجين الذكي (V15 - الجديد فقط على السحابة)</h4>
-            <p class="text-xs text-slate-300 mb-4">الروايات القديمة تُستدعى من جيت هاب، والروايات والفصول الجديدة تُحفظ وتُستدعى فوراً من السحابة بدون أي بطء أو أخطاء!</p>
+            <h4 class="text-lg font-black text-amber-400 mb-2">النظام الهجين المتكامل (V16 - روايات وتعليقات وتقييمات)</h4>
+            <p class="text-xs text-slate-300 mb-4">التعليقات والتقييمات والروايات الجديدة تعمل بكامل طاقتها وتظهر لكل القراء فوراً!</p>
             <div class="flex gap-3">
-                <button type="button" onclick="window.pushToFirebase(false)" class="flex-1 bg-emerald-500 text-slate-950 font-black py-3 rounded-xl cursor-pointer">حفظ الرواية الجديدة فقط</button>
+                <button type="button" onclick="window.pushToFirebase(false)" class="flex-1 bg-emerald-500 text-slate-950 font-black py-3 rounded-xl cursor-pointer">حفظ ونشر التعديلات والتعليقات</button>
                 <button type="button" onclick="publishDirectlyToGitHub()" class="flex-1 bg-amber-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">تحديث GitHub الشامل</button>
             </div>
         `;
