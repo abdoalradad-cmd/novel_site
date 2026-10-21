@@ -11537,26 +11537,28 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== SOCIAL SYNC + FIXED COMMENTS & RATINGS (V18 FINAL) ==================== -->
+      </div></div><!-- ==================== SUPABASE COMPLETE SOCIAL SYNC + GITHUB PUBLISHER (V21 FINAL) ==================== -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script id="alradad-social-github-sync">
+<script id="alradad-supabase-complete-sync">
 (function() {
-    const FIREBASE_DB_URL = "https://alradad-site-default-rtdb.firebaseio.com";
+    const SUPABASE_URL = "https://iesbycgumomeabfiomjy.supabase.co";
+    const SUPABASE_ANON_KEY = "Sb_publishable_H-OhYbwINiJ99SBSJB81dg_q8KIr8Pi";
+
     const GITHUB_OWNER = "abdoalradad-cmd";
     const GITHUB_REPO = "novel_site";
     const GITHUB_FILE_PATH = "index.html";
     const GITHUB_BRANCH = "main";
 
-    let db = null;
+    let supabaseClient = null;
     try {
-        if (!firebase.apps.length) {
-            firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
+        if (typeof window.supabase !== 'undefined' && SUPABASE_URL.startsWith('http')) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
-        db = firebase.database();
-    } catch (e) {}
+    } catch (e) {
+        console.warn("Supabase Init Notice:", e);
+    }
 
     let liveViewsMap = {};
     let lastViewTime = 0;
@@ -11584,8 +11586,8 @@ window.addEventListener('load', () => {
         return Number(num || 0).toLocaleString('en-US');
     }
 
-    // حساب التقييمات وتحديث الواجهة
-    function updateRatingsUI() {
+    // حساب التقييمات وتحديث واجهة الكروت بره وجوا
+    function updateRatingsAndUI() {
         if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
         novels.forEach(novel => {
             let totalStars = 0;
@@ -11648,8 +11650,8 @@ window.addEventListener('load', () => {
         });
     }
 
-    // رفع المشاهدات
-    window.incrementNovelViewLive = function(novelId) {
+    // زيادة المشاهدات عبر Supabase
+    window.incrementNovelViewLive = async function(novelId) {
         const now = Date.now();
         if (now - lastViewTime < 1500) return;
         lastViewTime = now;
@@ -11661,79 +11663,73 @@ window.addEventListener('load', () => {
         const next = base + 1;
         liveViewsMap[novelId] = next;
         novel.views = formatNum(next);
-        updateRatingsUI();
+        updateRatingsAndUI();
 
-        if (db) {
-            db.ref('socialStats/views/' + novelId).transaction(cur => {
-                return Math.max(parseNum(cur), base) + 1;
-            });
+        if (supabaseClient) {
+            try {
+                await supabaseClient.from('novel_views').upsert({ novel_id: novelId, views_count: next }, { onConflict: 'novel_id' });
+            } catch (e) {}
         }
     };
 
-    // رفع وتعليقات وتقييمات الفصول بشكل مباشر وآمن للسحابة
-    window.syncReaderCommentsToCloud = function() {
-        if (!db || typeof novels === 'undefined') return;
-        
-        // تجهيز كائن يحتوي على تعليقات كل رواية وكل فصل
-        const allCommentsPayload = {};
-        novels.forEach(novel => {
-            const chCommentsData = {};
-            if (Array.isArray(novel.chapters)) {
-                novel.chapters.forEach((ch, idx) => {
-                    if (Array.isArray(ch.comments) && ch.comments.length > 0) {
-                        chCommentsData[idx] = ch.comments;
-                    }
-                });
-            }
-            if (Object.keys(chCommentsData).length > 0) {
-                allCommentsPayload[novel.id] = chCommentsData;
-            }
-        });
+    // مزامنة التعليقات والتقييمات مع Supabase فوراً عند كتابتها
+    window.syncReaderCommentsToSupabase = async function() {
+        if (!supabaseClient || typeof novels === 'undefined') return;
+        const targetId = window.currentNovelId;
+        const novel = novels.find(n => n.id === targetId);
+        if (!novel) return;
 
-        db.ref('socialStats/comments').set(allCommentsPayload).catch(err => {
-            console.error("Comments Sync Error:", err);
-        });
+        try {
+            const chaptersCommentsData = {};
+            (novel.chapters || []).forEach((ch, idx) => {
+                if (Array.isArray(ch.comments) && ch.comments.length > 0) {
+                    chaptersCommentsData[idx] = ch.comments;
+                }
+            });
+
+            await supabaseClient.from('novel_comments').upsert({
+                novel_id: targetId,
+                comments_json: chaptersCommentsData
+            }, { onConflict: 'novel_id' });
+        } catch (e) {
+            console.error("Comments Supabase Sync Error:", e);
+        }
     };
 
-    // الاستماع اللحظي للمشاهدات والتعليقات
-    function startSocialListeners() {
-        if (!db) return;
-
-        db.ref('socialStats/views').on('value', snapshot => {
-            const data = snapshot.val();
-            if (data && typeof novels !== 'undefined') {
-                Object.keys(data).forEach(nId => {
-                    liveViewsMap[nId] = parseNum(data[nId]);
-                    const n = novels.find(item => item.id === nId);
-                    if (n) n.views = formatNum(liveViewsMap[nId]);
+    // جلب المشاهدات والتعليقات والتقييمات عند فتح الموقع
+    async function fetchSupabaseData() {
+        if (!supabaseClient) return;
+        try {
+            const viewsRes = await supabaseClient.from('novel_views').select('*');
+            if (viewsRes.data && Array.isArray(viewsRes.data)) {
+                viewsRes.data.forEach(row => {
+                    liveViewsMap[row.novel_id] = parseNum(row.views_count);
                 });
-                updateRatingsUI();
             }
-        });
 
-        db.ref('socialStats/comments').on('value', snapshot => {
-            const data = snapshot.val();
-            if (data && typeof novels !== 'undefined') {
-                Object.keys(data).forEach(nId => {
-                    const novel = novels.find(item => item.id === nId);
-                    if (novel && Array.isArray(novel.chapters)) {
-                        const chCommentsMap = data[nId];
-                        Object.keys(chCommentsMap).forEach(chIdx => {
+            const commentsRes = await supabaseClient.from('novel_comments').select('*');
+            if (commentsRes.data && Array.isArray(commentsRes.data) && typeof novels !== 'undefined') {
+                commentsRes.data.forEach(row => {
+                    const novel = novels.find(n => n.id === row.novel_id);
+                    if (novel && row.comments_json) {
+                        Object.keys(row.comments_json).forEach(chIdx => {
                             if (novel.chapters[chIdx]) {
-                                novel.chapters[chIdx].comments = chCommentsMap[chIdx] || [];
+                                novel.chapters[chIdx].comments = row.comments_json[chIdx] || [];
                             }
                         });
                     }
                 });
                 localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-                updateRatingsUI();
-                if (typeof renderNovelsGrid === "function") renderNovelsGrid();
             }
-        });
+
+            updateRatingsAndUI();
+            if (typeof renderNovelsGrid === "function") renderNovelsGrid();
+        } catch (e) {}
     }
 
+    // بناء ملف HTML نظيف للرفع على جيت هب بالتوكن
     function generateCleanReaderHtmlString() {
-        updateRatingsUI();
+        updateRatingsAndUI();
         const cloneDoc = document.documentElement.cloneNode(true);
         const tokenEl = cloneDoc.querySelector('#gh-personal-token');
         if (tokenEl) tokenEl.setAttribute('value', '');
@@ -11755,6 +11751,7 @@ window.addEventListener('load', () => {
         return fullHtml;
     }
 
+    // زر الرفع المباشر على GitHub بالتوكن
     window.publishDirectlyToGitHub = async function() {
         const tokenInput = document.getElementById('gh-personal-token');
         const branchInput = document.getElementById('gh-branch-name');
@@ -11880,32 +11877,31 @@ window.addEventListener('load', () => {
     function initHooks() {
         enforceReaderMode();
 
-        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._socialHooked) {
+        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._supaHooked) {
             const orig = window.openNovelDetails;
             window.openNovelDetails = function(novelId, ...rest) {
                 const res = orig.apply(this, [novelId, ...rest]);
                 window.incrementNovelViewLive(novelId);
                 return res;
             };
-            window.openNovelDetails._socialHooked = true;
+            window.openNovelDetails._supaHooked = true;
         }
 
-        // ربط دالة إضافة أو حذف تعليق لتقوم بالرفع الفوري للسحابة
         ['handleAddChapterComment', 'deleteChapterComment'].forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._socialHooked) {
+            if (typeof window[fnName] === 'function' && !window[fnName]._supaHooked) {
                 const orig = window[fnName];
                 window[fnName] = function(...args) {
                     const res = orig.apply(this, args);
-                    updateRatingsUI();
-                    setTimeout(() => window.syncReaderCommentsToCloud(), 150);
+                    updateRatingsAndUI();
+                    setTimeout(() => window.syncReaderCommentsToSupabase(), 150);
                     return res;
                 };
-                window[fnName]._socialHooked = true;
+                window[fnName]._supaHooked = true;
             }
         });
 
         injectCloudControlBox();
-        startSocialListeners();
+        fetchSupabaseData();
     }
 
     if (document.readyState === 'loading') {
