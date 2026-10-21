@@ -121,7 +121,7 @@
             <!-- Search Bar (Desktop) -->
             <div class="hidden lg:flex flex-1 max-w-md mx-6">
                 <div class="relative w-full">
-                    <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="ابحث عن رواية، تصنيف، أو فصل..." class="w-full bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-xl py-2.5 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all" fdprocessedid="o05tja">
+                    <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="ابحث عن رواية، تصنيف، أو فصل..." class="w-full bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-xl py-2.5 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
                     <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-slate-400"></i>
                 </div>
             </div>
@@ -129,25 +129,25 @@
             <!-- Right Actions -->
             <div class="flex items-center gap-2 sm:gap-2.5">
                 <!-- Preview Reader Mode Toggle (Admin UI Element) -->
-                <button onclick="toggleReaderPreviewMode(true)" class="admin-only-ui hidden md:flex bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-bold py-2.5 px-3.5 rounded-xl text-xs transition-all items-center gap-1.5" title="شاهد الموقع كما سيظهر للزوار بدون أزرار التعديل" style="" fdprocessedid="1lquh">
+                <button onclick="toggleReaderPreviewMode(true)" class="admin-only-ui hidden md:flex bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-bold py-2.5 px-3.5 rounded-xl text-xs transition-all items-center gap-1.5" title="شاهد الموقع كما سيظهر للزوار بدون أزرار التعديل" style="">
                     <i class="fa-solid fa-eye"></i>
                     <span>معاينة وضع القارئ</span>
                 </button>
 
                 <!-- Comprehensive Admin & Customizer Button -->
-                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-bg-gradient text-white font-bold py-2.5 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2 border border-white/15" style="" fdprocessedid="dfcv79">
+                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-bg-gradient text-white font-bold py-2.5 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2 border border-white/15" style="">
                     <i class="fa-solid fa-sliders theme-text-accent"></i>
                     <span>لوحة التحكم</span>
                 </button>
 
                 <!-- Quick Export Ready HTML Button -->
-                <button onclick="openControlPanel('backup')" class="admin-only-ui hidden sm:flex bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 font-bold py-2.5 px-3.5 rounded-xl text-xs sm:text-sm transition-all items-center gap-1.5" title="تحميل ملف index.html النهائي للنشر بدون لوحة تحكم" style="" fdprocessedid="8gj9hj">
+                <button onclick="openControlPanel('backup')" class="admin-only-ui hidden sm:flex bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 font-bold py-2.5 px-3.5 rounded-xl text-xs sm:text-sm transition-all items-center gap-1.5" title="تحميل ملف index.html النهائي للنشر بدون لوحة تحكم" style="">
                     <i class="fa-solid fa-cloud-arrow-down"></i>
                     <span>تصدير الموقع للنشر</span>
                 </button>
 
                 <!-- Dark Mode Toggle -->
-                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors shrink-0" title="تبديل الوضع الليلي / النهاري" fdprocessedid="vi8y0w">
+                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors shrink-0" title="تبديل الوضع الليلي / النهاري">
                     <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
                 </button>
             </div>
@@ -252,7 +252,7 @@
                     </a>
                 </div></div>
                 </div>
-                <button onclick="openControlPanel('identity')" class="admin-only-ui shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-2" style="" fdprocessedid="uhxtre">
+                <button onclick="openControlPanel('identity')" class="admin-only-ui shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-2" style="">
                     <i class="fa-solid fa-pen-to-square"></i>
                     <span>تعديل النبذة والهوية</span>
                 </button>
@@ -271,11 +271,11 @@
 
                     <!-- Category Filter Pills -->
                     <div id="category-filters" class="flex items-center gap-2 overflow-x-auto pb-1">
-                        <button onclick="filterCategory('all')" data-cat="all" class="cat-btn theme-bg-primary text-white px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="pr32x">الكل</button>
-                        <button onclick="filterCategory('غموض')" data-cat="غموض" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="cv9dnq">غموض وتشويق</button>
-                        <button onclick="filterCategory('دراما')" data-cat="دراما" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="nd33mj">دراما</button>
-                        <button onclick="filterCategory('خيال')" data-cat="خيال" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="qmduql">خيال وفلسفة</button>
-                        <button onclick="filterCategory('تاريخي')" data-cat="تاريخي" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="puiaxp">تاريخي</button>
+                        <button onclick="filterCategory('all')" data-cat="all" class="cat-btn theme-bg-primary text-white px-4 py-1.5 rounded-xl text-xs font-bold transition-all">الكل</button>
+                        <button onclick="filterCategory('غموض')" data-cat="غموض" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">غموض وتشويق</button>
+                        <button onclick="filterCategory('دراما')" data-cat="دراما" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">دراما</button>
+                        <button onclick="filterCategory('خيال')" data-cat="خيال" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">خيال وفلسفة</button>
+                        <button onclick="filterCategory('تاريخي')" data-cat="تاريخي" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">تاريخي</button>
                     </div>
                 </div>
 
@@ -899,7 +899,7 @@
         <section id="view-novel-details" class="space-y-8 hidden">
             <!-- Back Navigation & Admin Quick Edit -->
             <div class="flex items-center justify-between flex-wrap gap-3">
-                <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 text-sm font-bold theme-text-primary hover:underline" fdprocessedid="o5qsri">
+                <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 text-sm font-bold theme-text-primary hover:underline">
                     <i class="fa-solid fa-arrow-right"></i>
                     <span>العودة إلى المكتبة الرئيسية</span>
                 </button>
@@ -1309,13 +1309,13 @@
             <!-- Top Reader Controls Bar -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-md border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                    <button onclick="backToNovelFromReader()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-colors" fdprocessedid="si4cf">
+                    <button onclick="backToNovelFromReader()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-colors">
                         <i class="fa-solid fa-arrow-right"></i>
                         <span>صفحة الرواية</span>
                     </button>
 
                     <!-- Chapter Selector Dropdown -->
-                    <select id="reader-chapter-select-top" onchange="changeChapterFromDropdown(this.value)" class="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-amber-400 font-bold text-xs sm:text-sm rounded-xl px-3.5 py-2 border theme-border-primary focus:outline-none" fdprocessedid="ewfo3o">
+                    <select id="reader-chapter-select-top" onchange="changeChapterFromDropdown(this.value)" class="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-amber-400 font-bold text-xs sm:text-sm rounded-xl px-3.5 py-2 border theme-border-primary focus:outline-none">
                     <option value="0" selected="">
                         الفصل الأول
                     </option>
@@ -1450,21 +1450,21 @@
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                     <!-- Font Size -->
                     <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
-                        <button onclick="adjustFontSize(2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تكبير الخط" fdprocessedid="igz0vj">A+</button>
+                        <button onclick="adjustFontSize(2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تكبير الخط">A+</button>
                         <span class="text-slate-400 text-xs px-1">|</span>
-                        <button onclick="adjustFontSize(-2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تصغير الخط" fdprocessedid="llrx0k">A-</button>
+                        <button onclick="adjustFontSize(-2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تصغير الخط">A-</button>
                     </div>
 
                     <!-- Line Height -->
-                    <button onclick="toggleLineHeight()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition-colors" title="تباعد الأسطر" fdprocessedid="qog0sr">
+                    <button onclick="toggleLineHeight()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition-colors" title="تباعد الأسطر">
                         <i class="fa-solid fa-arrows-up-down"></i>
                     </button>
 
                     <!-- Paper Theme Swatches -->
                     <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl">
-                        <button onclick="setReaderTheme('sepia')" class="w-6 h-6 rounded-lg bg-[#f4ecd8] border border-amber-700/30 shadow-inner" title="ورق دافئ مريح للعين" fdprocessedid="8hbku"></button>
-                        <button onclick="setReaderTheme('white')" class="w-6 h-6 rounded-lg bg-white border border-slate-300 shadow-inner" title="أبيض ناصع" fdprocessedid="j858dl"></button>
-                        <button onclick="setReaderTheme('dark')" class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 shadow-inner" title="وضع ليلي" fdprocessedid="nasd7e"></button>
+                        <button onclick="setReaderTheme('sepia')" class="w-6 h-6 rounded-lg bg-[#f4ecd8] border border-amber-700/30 shadow-inner" title="ورق دافئ مريح للعين"></button>
+                        <button onclick="setReaderTheme('white')" class="w-6 h-6 rounded-lg bg-white border border-slate-300 shadow-inner" title="أبيض ناصع"></button>
+                        <button onclick="setReaderTheme('dark')" class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 shadow-inner" title="وضع ليلي"></button>
                     </div>
                 </div>
             </div>
@@ -1489,12 +1489,12 @@
 
                 <!-- Bottom Chapter Navigation -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-current/15">
-                    <button id="btn-prev-chapter" onclick="navigateAdjacentChapter(-1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-black/10 hover:bg-black/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none" fdprocessedid="ovr7cc" disabled="">
+                    <button id="btn-prev-chapter" onclick="navigateAdjacentChapter(-1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-black/10 hover:bg-black/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none" disabled="">
                         <i class="fa-solid fa-chevron-right"></i>
                         <span>الفصل السابق</span>
                     </button>
 
-                    <select id="reader-chapter-select-bottom" onchange="changeChapterFromDropdown(this.value)" class="w-full sm:w-auto bg-black/5 font-bold text-sm rounded-xl px-4 py-3 border border-current/20 focus:outline-none" fdprocessedid="8t768p">
+                    <select id="reader-chapter-select-bottom" onchange="changeChapterFromDropdown(this.value)" class="w-full sm:w-auto bg-black/5 font-bold text-sm rounded-xl px-4 py-3 border border-current/20 focus:outline-none">
                     <option value="0" selected="">
                         الفصل الأول
                     </option>
@@ -1620,7 +1620,7 @@
                     </option>
                 </select>
 
-                    <button id="btn-next-chapter" onclick="navigateAdjacentChapter(1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm theme-bg-primary text-white hover:opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none" fdprocessedid="lmdj4">
+                    <button id="btn-next-chapter" onclick="navigateAdjacentChapter(1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm theme-bg-primary text-white hover:opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none">
                         <span>الفصل التالي</span>
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
@@ -1644,7 +1644,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex-1">
                             <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اسم القارئ *</label>
-                            <input type="text" id="comment-reader-name" required="" placeholder="اكتب اسمك هنا..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-emerald-600" fdprocessedid="q2yow">
+                            <input type="text" id="comment-reader-name" required="" placeholder="اكتب اسمك هنا..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-emerald-600">
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">تقييمك للفصل (من نجمة إلى 5 نجوم):</label>
@@ -1663,7 +1663,7 @@
                         <textarea id="comment-reader-text" required="" rows="3" placeholder="اكتب رأيك في أحداث الفصل..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm leading-relaxed focus:outline-none focus:border-emerald-600"></textarea>
                     </div>
                     <div class="flex justify-end">
-                        <button type="submit" class="theme-bg-gradient text-white font-black px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2" fdprocessedid="fqez4m">
+                        <button type="submit" class="theme-bg-gradient text-white font-black px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2">
                             <i class="fa-solid fa-paper-plane"></i>
                             <span>نشر وتثبيت التعليق</span>
                         </button>
@@ -1749,17 +1749,17 @@
             </div>
 
             <div class="space-y-3">
-                <input type="password" id="content-password-input" onkeydown="if(event.key === 'Enter') verifyContentPassword()" placeholder="اكتب الباسورد / رمز الدخول هنا..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-emerald-600 px-4 py-3 text-center font-bold text-sm focus:outline-none transition-colors" fdprocessedid="n389ev">
+                <input type="password" id="content-password-input" onkeydown="if(event.key === 'Enter') verifyContentPassword()" placeholder="اكتب الباسورد / رمز الدخول هنا..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-emerald-600 px-4 py-3 text-center font-bold text-sm focus:outline-none transition-colors">
                 <p id="content-password-error" class="hidden text-xs font-bold text-red-600 dark:text-red-400">
                     <i class="fa-solid fa-circle-exclamation ml-1"></i> رمز الدخول غير صحيح، يرجى التأكد والمحاولة مجدداً
                 </p>
 
                 <div class="flex items-center gap-2 pt-1">
-                    <button onclick="verifyContentPassword()" class="flex-1 theme-bg-gradient text-white font-black py-3 rounded-xl text-sm shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2" fdprocessedid="jy5mc9">
+                    <button onclick="verifyContentPassword()" class="flex-1 theme-bg-gradient text-white font-black py-3 rounded-xl text-sm shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2">
                         <i class="fa-solid fa-unlock-keyhole"></i>
                         <span>فتح ودخول الآن</span>
                     </button>
-                    <button onclick="closeContentPasswordModal()" class="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors" fdprocessedid="ykiopo">
+                    <button onclick="closeContentPasswordModal()" class="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors">
                         إلغاء
                     </button>
                 </div>
@@ -1792,11 +1792,11 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="switchControlTab('backup')" class="hidden sm:flex bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs items-center gap-2 shadow-md transition-all" fdprocessedid="0bv4vl">
+                    <button onclick="switchControlTab('backup')" class="hidden sm:flex bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs items-center gap-2 shadow-md transition-all">
                         <i class="fa-solid fa-file-code"></i>
                         <span>تحميل index.html للنشر</span>
                     </button>
-                    <button onclick="closeControlPanel()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors" fdprocessedid="kgfjh7">
+                    <button onclick="closeControlPanel()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
@@ -1804,23 +1804,23 @@
 
             <!-- Navigation Tabs -->
             <div class="bg-slate-100 dark:bg-slate-800/90 px-4 pt-3 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto shrink-0">
-                <button onclick="switchControlTab('identity')" id="cp-tab-identity" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="y8pieh">
+                <button onclick="switchControlTab('identity')" id="cp-tab-identity" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
                     <i class="fa-solid fa-id-card"></i>
                     <span>1. هوية وأجزاء الموقع</span>
                 </button>
-                <button onclick="switchControlTab('appearance')" id="cp-tab-appearance" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="sqye9">
+                <button onclick="switchControlTab('appearance')" id="cp-tab-appearance" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
                     <i class="fa-solid fa-palette"></i>
                     <span>2. المظهر والألوان والخطوط</span>
                 </button>
-                <button onclick="switchControlTab('novels')" id="cp-tab-novels" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="ei8e7r">
+                <button onclick="switchControlTab('novels')" id="cp-tab-novels" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
                     <i class="fa-solid fa-book"></i>
                     <span>3. إدارة وتعديل الروايات</span>
                 </button>
-                <button onclick="switchControlTab('chapters')" id="cp-tab-chapters" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="ye5gz8">
+                <button onclick="switchControlTab('chapters')" id="cp-tab-chapters" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
                     <i class="fa-solid fa-list-ol"></i>
                     <span>4. إدارة وتعديل الفصول</span>
                 </button>
-                <button onclick="switchControlTab('backup')" id="cp-tab-backup" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-black text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap bg-white dark:bg-slate-900 theme-text-primary shadow-sm border-t-2 border-emerald-600" fdprocessedid="75ln3i">
+                <button onclick="switchControlTab('backup')" id="cp-tab-backup" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-black text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap bg-white dark:bg-slate-900 theme-text-primary shadow-sm border-t-2 border-emerald-600">
                     <i class="fa-solid fa-rocket text-amber-500"></i>
                     <span>5. نشر الموقع وتصدير index.html</span>
                 </button>
@@ -1840,15 +1840,15 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اسم الموقع الرئيسي</label>
-                                <input type="text" id="cfg-site-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="22yiw">
+                                <input type="text" id="cfg-site-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">الوصف الفرعي تحت الاسم</label>
-                                <input type="text" id="cfg-site-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="55aots">
+                                <input type="text" id="cfg-site-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">أيقونة شعار الموقع</label>
-                                <select id="cfg-logo-icon" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="5jtxbj">
+                                <select id="cfg-logo-icon" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
                                     <option value="fa-feather-pointed">ريشة كاتب كلاسيكية</option>
                                     <option value="fa-book-open">كتاب مفتوح</option>
                                     <option value="fa-pen-nib">سن قلم ذهبي</option>
@@ -1861,11 +1861,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اسم الكاتب الأساسي</label>
-                                <input type="text" id="cfg-author-name" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="v2v9c">
+                                <input type="text" id="cfg-author-name" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">نبذة تعريفية عن الكاتب</label>
-                                <input type="text" id="cfg-author-bio" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="11rjv">
+                                <input type="text" id="cfg-author-bio" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
                             </div>
                         </div>
                     </div>
@@ -1879,11 +1879,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">رقم الواتساب (يظهر للقارئ عند طلب الباسورد)</label>
-                                <input type="text" id="cfg-whatsapp-number" oninput="updateIdentityLive()" placeholder="مثال: 01012345678 أو +201012345678" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm font-mono" dir="ltr" fdprocessedid="ujak0d">
+                                <input type="text" id="cfg-whatsapp-number" oninput="updateIdentityLive()" placeholder="مثال: 01012345678 أو +201012345678" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm font-mono" dir="ltr">
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">الجملة التوضيحية التي تظهر فوق رقم الواتساب</label>
-                                <input type="text" id="cfg-whatsapp-message" oninput="updateIdentityLive()" placeholder="لشراء الرواية والحصول على رمز الدخول الرجاء التواصل مع هذا الرقم من خلال واتس آب" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="18ym8q">
+                                <input type="text" id="cfg-whatsapp-message" oninput="updateIdentityLive()" placeholder="لشراء الرواية والحصول على رمز الدخول الرجاء التواصل مع هذا الرقم من خلال واتس آب" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
                             </div>
                         </div>
                     </div>
@@ -1902,7 +1902,7 @@
                                 <span class="text-xs sm:text-sm font-bold">إظهار شريط الإعلانات العلوي</span>
                             </label>
                             <div class="sm:col-span-2">
-                                <input type="text" id="cfg-announcement-text" oninput="updateIdentityLive()" placeholder="نص الإعلان العلوي..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="qnh6y">
+                                <input type="text" id="cfg-announcement-text" oninput="updateIdentityLive()" placeholder="نص الإعلان العلوي..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                         </div>
 
@@ -1920,7 +1920,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اختر الرواية المتصدرة في الواجهة</label>
-                                <select id="cfg-featured-novel-id" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="qlpib">
+                                <select id="cfg-featured-novel-id" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                 <option value="novel-1792008424515" selected="">قريبًا: معرض القاهرة الدولي للكتاب 2027</option>
             
                 <option value="corrupt-antidote">الترياق الفاسد: هباءً منثورا</option>
@@ -1946,7 +1946,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">نص الشارة الترحيبية للرواية المتصدرة</label>
-                                <input type="text" id="cfg-hero-badge" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="mp4fk">
+                                <input type="text" id="cfg-hero-badge" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                         </div>
                     </div>
@@ -1960,15 +1960,15 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">عنوان قسم المكتبة</label>
-                                <input type="text" id="cfg-library-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="97r6s">
+                                <input type="text" id="cfg-library-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">وصف قسم المكتبة</label>
-                                <input type="text" id="cfg-library-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="qtighc">
+                                <input type="text" id="cfg-library-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">نص الحقوق في أسفل الموقع</label>
-                                <input type="text" id="cfg-footer-text" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="y7x92c">
+                                <input type="text" id="cfg-footer-text" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                         </div>
                     </div>
@@ -2118,7 +2118,7 @@
                             <h4 id="novel-form-heading" class="font-black text-base theme-text-primary">إضافة رواية جديدة للمكتبة</h4>
                             <p class="text-xs text-slate-500">اختر رواية من القائمة بالأسفل لتعديلها، أو املأ النموذج لإضافة رواية جديدة</p>
                         </div>
-                        <button onclick="resetNovelFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0" fdprocessedid="gmo41d">
+                        <button onclick="resetNovelFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0">
                             + تفريغ النموذج لرواية جديدة
                         </button>
                     </div>
@@ -2428,22 +2428,22 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1">اسم الرواية *</label>
-                                <input type="text" id="form-novel-title" required="" placeholder="مثال: الترياق الفاسد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="6pxbw">
+                                <input type="text" id="form-novel-title" required="" placeholder="مثال: الترياق الفاسد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">العنوان الفرعي على الغلاف</label>
-                                <input type="text" id="form-novel-subtitle" placeholder="مثال: حين يصبح الدواء هو الداء" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="saj70n">
+                                <input type="text" id="form-novel-subtitle" placeholder="مثال: حين يصبح الدواء هو الداء" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">اسم المؤلف على الغلاف</label>
-                                <input type="text" id="form-novel-author" required="" value="عبدالرحمن الرداد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="kxb9fb">
+                                <input type="text" id="form-novel-author" required="" value="عبدالرحمن الرداد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1">التصنيف الأدبي</label>
-                                <select id="form-novel-genre" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="ygt19g">
+                                <select id="form-novel-genre" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                                     <option value="غموض">غموض وتشويق</option>
                                     <option value="دراما">دراما اجتماعية</option>
                                     <option value="خيال">خيال وفلسفة</option>
@@ -2452,14 +2452,14 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">حالة الرواية</label>
-                                <select id="form-novel-status" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="n5l8g9">
+                                <select id="form-novel-status" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                                     <option value="مكتملة">مكتملة</option>
                                     <option value="مستمرة">مستمرة (تُنشر تباعاً)</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">لون وتصميم الغلاف</label>
-                                <select id="form-novel-gradient" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="idb5m2">
+                                <select id="form-novel-gradient" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                                     <option value="from-emerald-900 via-slate-950 to-black">أخضر زمردي غامق</option>
                                     <option value="from-slate-900 via-blue-950 to-slate-950">أزرق ليلي كلاسيكي</option>
                                     <option value="from-amber-950 via-stone-900 to-black">ذهبي صحراوي عتيق</option>
@@ -2469,7 +2469,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">أيقونة الغلاف</label>
-                                <select id="form-novel-icon" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="uzg605">
+                                <select id="form-novel-icon" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                                     <option value="fa-flask-vial">قارورة الترياق (مختبر)</option>
                                     <option value="fa-feather-pointed">ريشة أدبية</option>
                                     <option value="fa-anchor">مرساة سفينة</option>
@@ -2480,7 +2480,7 @@
                             </div>
                         <div>
                 <label class="block text-xs font-bold mb-1 text-amber-600 dark:text-amber-400"><i class="fa-solid fa-star ml-1"></i> تقييم الرواية (عدد النجوم)</label>
-                <select id="form-novel-rating" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-amber-500/40 px-3.5 py-2 text-sm font-bold text-amber-600 dark:text-amber-400" fdprocessedid="qvn9i">
+                <select id="form-novel-rating" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-amber-500/40 px-3.5 py-2 text-sm font-bold text-amber-600 dark:text-amber-400">
                     <option value="5.0">⭐⭐⭐⭐⭐ (5.0 نجوم)</option>
                     <option value="4.9">⭐⭐⭐⭐⭐ (4.9 نجوم)</option>
                     <option value="4.8">⭐⭐⭐⭐⭐ (4.8 نجوم)</option>
@@ -2547,7 +2547,7 @@
                 </label>
                 <div id="novel-pdf-password-input-wrapper" class="space-y-1 hidden">
                     <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300">اكتب باسورد تحميل الـ PDF لهذه الرواية:</label>
-                    <input type="text" id="form-novel-pdf-password" placeholder="اكتب رمز فتح الـ PDF..." class="w-full sm:w-80 rounded-xl bg-white dark:bg-slate-900 border border-red-500/40 px-3.5 py-2 text-sm font-mono" fdprocessedid="b52rec">
+                    <input type="text" id="form-novel-pdf-password" placeholder="اكتب رمز فتح الـ PDF..." class="w-full sm:w-80 rounded-xl bg-white dark:bg-slate-900 border border-red-500/40 px-3.5 py-2 text-sm font-mono">
                 </div>
             </div><div class="bg-amber-500/5 dark:bg-amber-950/30 p-4 rounded-2xl border border-amber-500/30 space-y-2 md:col-span-2">
                 <label class="flex items-center gap-2.5 cursor-pointer">
@@ -2566,7 +2566,7 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-2">
-                            <button type="submit" id="btn-submit-novel" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:opacity-95 transition-all" fdprocessedid="sblwhc">إضافة ونشر الرواية الجديدة</button>
+                            <button type="submit" id="btn-submit-novel" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:opacity-95 transition-all">إضافة ونشر الرواية الجديدة</button>
                         </div>
                     </form>
                 </div>
@@ -2577,7 +2577,7 @@
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex-1">
                             <label class="block text-xs font-bold mb-1.5 theme-text-primary">اختر الرواية لإدارة أو تعديل فصولها:</label>
-                            <select id="admin-chapters-novel-select" onchange="renderAdminChaptersList()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold" fdprocessedid="24gcl">
+                            <select id="admin-chapters-novel-select" onchange="renderAdminChaptersList()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold">
                 <option value="novel-1792008424515">قريبًا: معرض القاهرة الدولي للكتاب 2027</option>
             
                 <option value="corrupt-antidote" selected="">الترياق الفاسد: هباءً منثورا</option>
@@ -2601,7 +2601,7 @@
                 <option value="novel-1792476265246">شركة المنقذين المحدودة</option>
             </select>
                         </div>
-                        <button onclick="resetChapterFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 self-end" fdprocessedid="wyv2sm">
+                        <button onclick="resetChapterFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 self-end">
                             + كتابة فصل جديد
                         </button>
                     </div>
@@ -2881,11 +2881,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold mb-1">عنوان الفصل *</label>
-                                <input type="text" id="form-chapter-title" required="" placeholder="مثال: الفصل الأول: العينة رقم سبعة" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="h51av8">
+                                <input type="text" id="form-chapter-title" required="" placeholder="مثال: الفصل الأول: العينة رقم سبعة" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">وقت القراءة التقريبي</label>
-                                <input type="text" id="form-chapter-time" value="6 دقائق" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="festy">
+                                <input type="text" id="form-chapter-time" value="6 دقائق" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
                             </div>
                         </div>
 
@@ -2911,7 +2911,7 @@
                         </div>
 
                         <div class="flex justify-end">
-                            <button type="submit" id="btn-submit-chapter" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg" fdprocessedid="ehv7o">إضافة الفصل الجديد</button>
+                            <button type="submit" id="btn-submit-chapter" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg">إضافة الفصل الجديد</button>
                         </div>
                     </form>
                 </div>
@@ -3039,10 +3039,10 @@
             </div>
             <h3 class="text-lg font-black text-slate-900 dark:text-white">دخول الكاتب السري</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400">أدخل كلمة السر الخاصة بالكاتب لإظهار لوحة التحكم وتعديل الموقع:</p>
-            <input type="password" id="secret-pin-input" placeholder="كلمة السر..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-center font-bold text-sm focus:outline-none" fdprocessedid="0ynlxf">
+            <input type="password" id="secret-pin-input" placeholder="كلمة السر..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-center font-bold text-sm focus:outline-none">
             <div class="flex items-center gap-2 pt-2">
-                <button onclick="verifySecretAuthorPin()" class="flex-1 theme-bg-gradient text-white font-bold py-2.5 rounded-xl text-xs" fdprocessedid="gyt6yv">فتح اللوحة</button>
-                <button onclick="closeSecretPinModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs" fdprocessedid="zp3dld">إلغاء</button>
+                <button onclick="verifySecretAuthorPin()" class="flex-1 theme-bg-gradient text-white font-bold py-2.5 rounded-xl text-xs">فتح اللوحة</button>
+                <button onclick="closeSecretPinModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs">إلغاء</button>
             </div>
         </div>
     </div>
@@ -3072,11 +3072,11 @@
                 <p id="footer-copyright-text" class="text-xs text-slate-500 dark:text-slate-400 mt-1">جميع الحقوق محفوظة للكاتب عبدالرحمن الرداد © 2026</p>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
-                <button onclick="navigateTo('home')" class="hover:underline" fdprocessedid="1sokea">الرئيسية</button>
+                <button onclick="navigateTo('home')" class="hover:underline">الرئيسية</button>
                 <span>•</span>
-                <button onclick="requestNovelAccess(siteConfig.featuredNovelId || novels[0]?.id, 'details')" class="hover:underline" fdprocessedid="wxkmlq">الرواية المتصدرة</button>
+                <button onclick="requestNovelAccess(siteConfig.featuredNovelId || novels[0]?.id, 'details')" class="hover:underline">الرواية المتصدرة</button>
                 <span class="admin-only-ui" style="">•</span>
-                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-text-primary hover:underline" style="" fdprocessedid="40b5jar">لوحة التحكم وتخصيص الموقع</button>
+                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-text-primary hover:underline" style="">لوحة التحكم وتخصيص الموقع</button>
             </div>
         <div id="footer-social-links" class="flex items-center justify-center gap-2.5">
                 <a id="ftr-fb-link" href="https://www.facebook.com/AbdelrahmanAhmedAlradad/" target="_blank" rel="noopener noreferrer" class="social-glass-btn w-9 h-9 rounded-xl bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center justify-center transition-all" title="فيسبوك" style="display: inline-flex;">
@@ -6963,236 +6963,7 @@
             setupSecretAuthorUnlock();
         };
     </script>
-
-
-      <script>
-        (function() {
-          // The root element's background fills the whole page. As in CSS,
-          // the body's background is used when the root element has none.
-          function getPageBackgroundColor() {
-            var docStyle = window.getComputedStyle(document.documentElement);
-            var color = docStyle.backgroundColor;
-            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
-                docStyle.backgroundImage === 'none' && document.body) {
-              color = window.getComputedStyle(document.body).backgroundColor;
-            }
-            return color || '';
-          }
-
-          var lastReportedColor = '';
-          function reportBackgroundColor() {
-            try {
-              var color = getPageBackgroundColor();
-              if (color === lastReportedColor) return;
-              lastReportedColor = color;
-              window.parent.postMessage({
-                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
-                backgroundColor: color
-              }, '*');
-            } catch (e) {}
-          }
-
-          // The page background usually changes through an attribute on html
-          // or body (for example a theme class), a style sheet in head, or the
-          // system color scheme.
-          if (typeof MutationObserver !== 'undefined') {
-            var observer = new MutationObserver(reportBackgroundColor);
-            observer.observe(document.documentElement, {attributes: true});
-            if (document.body) {
-              observer.observe(document.body, {attributes: true});
-            }
-            if (document.head) {
-              observer.observe(document.head, {
-                attributes: true,
-                childList: true,
-                subtree: true,
-                characterData: true
-              });
-            }
-          }
-          var colorSchemeQuery =
-              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
-            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
-          }
-          window.addEventListener('load', reportBackgroundColor);
-          window.addEventListener('transitionend', reportBackgroundColor);
-          window.addEventListener('animationend', reportBackgroundColor);
-          reportBackgroundColor();
-        })();
-      </script>
     
-      <script>
-        (function() {
-          // The root element's background fills the whole page. As in CSS,
-          // the body's background is used when the root element has none.
-          function getPageBackgroundColor() {
-            var docStyle = window.getComputedStyle(document.documentElement);
-            var color = docStyle.backgroundColor;
-            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
-                docStyle.backgroundImage === 'none' && document.body) {
-              color = window.getComputedStyle(document.body).backgroundColor;
-            }
-            return color || '';
-          }
-
-          var lastReportedColor = '';
-          function reportBackgroundColor() {
-            try {
-              var color = getPageBackgroundColor();
-              if (color === lastReportedColor) return;
-              lastReportedColor = color;
-              window.parent.postMessage({
-                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
-                backgroundColor: color
-              }, '*');
-            } catch (e) {}
-          }
-
-          // The page background usually changes through an attribute on html
-          // or body (for example a theme class), a style sheet in head, or the
-          // system color scheme.
-          if (typeof MutationObserver !== 'undefined') {
-            var observer = new MutationObserver(reportBackgroundColor);
-            observer.observe(document.documentElement, {attributes: true});
-            if (document.body) {
-              observer.observe(document.body, {attributes: true});
-            }
-            if (document.head) {
-              observer.observe(document.head, {
-                attributes: true,
-                childList: true,
-                subtree: true,
-                characterData: true
-              });
-            }
-          }
-          var colorSchemeQuery =
-              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
-            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
-          }
-          window.addEventListener('load', reportBackgroundColor);
-          window.addEventListener('transitionend', reportBackgroundColor);
-          window.addEventListener('animationend', reportBackgroundColor);
-          reportBackgroundColor();
-        })();
-      </script>
-    
-      <script>
-        (function() {
-          // The root element's background fills the whole page. As in CSS,
-          // the body's background is used when the root element has none.
-          function getPageBackgroundColor() {
-            var docStyle = window.getComputedStyle(document.documentElement);
-            var color = docStyle.backgroundColor;
-            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
-                docStyle.backgroundImage === 'none' && document.body) {
-              color = window.getComputedStyle(document.body).backgroundColor;
-            }
-            return color || '';
-          }
-
-          var lastReportedColor = '';
-          function reportBackgroundColor() {
-            try {
-              var color = getPageBackgroundColor();
-              if (color === lastReportedColor) return;
-              lastReportedColor = color;
-              window.parent.postMessage({
-                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
-                backgroundColor: color
-              }, '*');
-            } catch (e) {}
-          }
-
-          // The page background usually changes through an attribute on html
-          // or body (for example a theme class), a style sheet in head, or the
-          // system color scheme.
-          if (typeof MutationObserver !== 'undefined') {
-            var observer = new MutationObserver(reportBackgroundColor);
-            observer.observe(document.documentElement, {attributes: true});
-            if (document.body) {
-              observer.observe(document.body, {attributes: true});
-            }
-            if (document.head) {
-              observer.observe(document.head, {
-                attributes: true,
-                childList: true,
-                subtree: true,
-                characterData: true
-              });
-            }
-          }
-          var colorSchemeQuery =
-              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
-            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
-          }
-          window.addEventListener('load', reportBackgroundColor);
-          window.addEventListener('transitionend', reportBackgroundColor);
-          window.addEventListener('animationend', reportBackgroundColor);
-          reportBackgroundColor();
-        })();
-      </script>
-    
-      <script>
-        (function() {
-          // The root element's background fills the whole page. As in CSS,
-          // the body's background is used when the root element has none.
-          function getPageBackgroundColor() {
-            var docStyle = window.getComputedStyle(document.documentElement);
-            var color = docStyle.backgroundColor;
-            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
-                docStyle.backgroundImage === 'none' && document.body) {
-              color = window.getComputedStyle(document.body).backgroundColor;
-            }
-            return color || '';
-          }
-
-          var lastReportedColor = '';
-          function reportBackgroundColor() {
-            try {
-              var color = getPageBackgroundColor();
-              if (color === lastReportedColor) return;
-              lastReportedColor = color;
-              window.parent.postMessage({
-                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
-                backgroundColor: color
-              }, '*');
-            } catch (e) {}
-          }
-
-          // The page background usually changes through an attribute on html
-          // or body (for example a theme class), a style sheet in head, or the
-          // system color scheme.
-          if (typeof MutationObserver !== 'undefined') {
-            var observer = new MutationObserver(reportBackgroundColor);
-            observer.observe(document.documentElement, {attributes: true});
-            if (document.body) {
-              observer.observe(document.body, {attributes: true});
-            }
-            if (document.head) {
-              observer.observe(document.head, {
-                attributes: true,
-                childList: true,
-                subtree: true,
-                characterData: true
-              });
-            }
-          }
-          var colorSchemeQuery =
-              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
-            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
-          }
-          window.addEventListener('load', reportBackgroundColor);
-          window.addEventListener('transitionend', reportBackgroundColor);
-          window.addEventListener('animationend', reportBackgroundColor);
-          reportBackgroundColor();
-        })();
-      </script>
-    <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
 <!-- ==================== التحديث الشامل: الزجاج السائل الفاخر + التعليقات السحابية الثابتة ==================== -->
 <style id="liquid-glass-pro-styles">
     /* خلفية الإضاءة الديناميكية خلف الزجاج السائل */
@@ -7452,6 +7223,12 @@
         });
     }
 
+    function escHtml(v) {
+        return String(v == null ? '' : v).replace(/[&<>"']/g, function(ch) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+        });
+    }
+
     // مزامنة التعليقات سحابياً ليراها كل من يدخل الموقع من أي جهاز
     async function fetchCloudComments() {
         try {
@@ -7482,6 +7259,7 @@
 
     async function pushCloudComments() {
         try {
+            await fetchCloudComments(); // ادمج تعليقات الآخرين أولاً قبل الكتابة
             await fetch(CLOUD_COMMENTS_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -7960,11 +7738,11 @@
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div class="flex items-center gap-2.5">
                         <div class="w-9 h-9 rounded-xl theme-bg-gradient text-amber-300 font-black flex items-center justify-center text-sm shadow-sm">
-                            ${(c.name || 'ق')[0]}
+                            ${escHtml((c.name || 'ق')[0])}
                         </div>
                         <div>
-                            <h5 class="font-black text-sm text-slate-900 dark:text-white">${c.name}</h5>
-                            <span class="text-[11px] text-slate-400">${c.date || ''}</span>
+                            <h5 class="font-black text-sm text-slate-900 dark:text-white">${escHtml(c.name)}</h5>
+                            <span class="text-[11px] text-slate-400">${escHtml(c.date || '')}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -7972,13 +7750,13 @@
                             ${renderStarsHtml(c.rating || 5)}
                         </div>
                         ${!isReaderOnlyMode ? `
-                            <button onclick="deleteChapterComment('${c.id}')" class="text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg text-xs" title="حذف التعليق">
+                            <button onclick="deleteChapterComment('${escHtml(c.id)}')" class="text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg text-xs" title="حذف التعليق">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         ` : ''}
                     </div>
                 </div>
-                <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed pr-1">${c.text}</p>
+                <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed pr-1">${escHtml(c.text)}</p>
             </div>
         `).join('');
     };
@@ -7990,6 +7768,10 @@
         const name = nameInput.value.trim();
         const text = textInput.value.trim();
         if (!name || !text) return;
+        if (name.length > 40 || text.length > 1000) {
+            showToast('الاسم أو التعليق طويل جداً');
+            return;
+        }
 
         localStorage.setItem('reader_saved_author_name', name);
 
@@ -8467,62 +8249,6 @@ document.addEventListener('click', function (e) {
     }
 });
 </script>
-      <script>
-        (function() {
-          // The root element's background fills the whole page. As in CSS,
-          // the body's background is used when the root element has none.
-          function getPageBackgroundColor() {
-            var docStyle = window.getComputedStyle(document.documentElement);
-            var color = docStyle.backgroundColor;
-            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
-                docStyle.backgroundImage === 'none' && document.body) {
-              color = window.getComputedStyle(document.body).backgroundColor;
-            }
-            return color || '';
-          }
-
-          var lastReportedColor = '';
-          function reportBackgroundColor() {
-            try {
-              var color = getPageBackgroundColor();
-              if (color === lastReportedColor) return;
-              lastReportedColor = color;
-              window.parent.postMessage({
-                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
-                backgroundColor: color
-              }, '*');
-            } catch (e) {}
-          }
-
-          // The page background usually changes through an attribute on html
-          // or body (for example a theme class), a style sheet in head, or the
-          // system color scheme.
-          if (typeof MutationObserver !== 'undefined') {
-            var observer = new MutationObserver(reportBackgroundColor);
-            observer.observe(document.documentElement, {attributes: true});
-            if (document.body) {
-              observer.observe(document.body, {attributes: true});
-            }
-            if (document.head) {
-              observer.observe(document.head, {
-                attributes: true,
-                childList: true,
-                subtree: true,
-                characterData: true
-              });
-            }
-          }
-          var colorSchemeQuery =
-              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
-            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
-          }
-          window.addEventListener('load', reportBackgroundColor);
-          window.addEventListener('transitionend', reportBackgroundColor);
-          window.addEventListener('animationend', reportBackgroundColor);
-          reportBackgroundColor();
-        })();
-      </script>
     <!-- ==========================================================
      إضافات الموقع:
      1) ترتيب الروايات من لوحة التحكم
@@ -9066,7 +8792,7 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+
 <!-- ==================== محسّن القراءة الصوتية (سرد + عامية مصرية + وقفات) — داخل الملف بدون أي خدمة خارجية ==================== -->
 <script id="speech-prep-module">
 (function () {
@@ -11162,7 +10888,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     }, 1000);
 })();
 </script>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+
 <script id="safe-social-links-fixer-complete">
 (function() {
     function injectSocialManager() {
@@ -11245,9 +10971,9 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     }, 1000);
 })();
 </script>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><!-- ============================================================================
+
+
+<!-- ============================================================================
      تحديث الأداء الشامل (إصلاح الـ PDF + إنهاء لاج الزجاج السائل + دعم العامية المصرية)
      يوضع قبل </body> مباشرة دون حذف أي شيء من الكود الأصلي
      ============================================================================ -->
@@ -11479,8 +11205,8 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     };
 })();
 </script>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><!-- ==================== كود إصلاح وتخفيف حجم التصدير فقط ==================== -->
+
+<!-- ==================== كود إصلاح وتخفيف حجم التصدير فقط ==================== -->
 <script>
 window.addEventListener('load', () => {
     const originalExport = window.exportProductionIndexHtml;
@@ -11506,10 +11232,10 @@ window.addEventListener('load', () => {
     }
 });
 </script>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+
+
+
+
 <div id="tts-bar">
       <div class="tts-row">
         <input id="tts-seek" type="range" min="0" max="0" value="0" step="1" aria-label="موضع القراءة">
@@ -11885,7 +11611,7 @@ window.addEventListener('load', () => {
         db.ref('siteData').on('value', snapshot => {
             const cloudData = snapshot.val();
             if (!cloudData || !Array.isArray(cloudData.novels) || cloudData.novels.length === 0) {
-                window.pushToFirebase(true);
+                if (isAuthorActive()) window.pushToFirebase(true);
                 return;
             }
 
@@ -11913,8 +11639,18 @@ window.addEventListener('load', () => {
     }
 
     // 7. دفع التعديلات للسحابة (يرسل الفهرس الخفيف أولاً في 0.1 ثانية ليظهر للناس فوراً، ثم يرسل النصوص الكاملة)
+    const CHAPTER_PLACEHOLDER = "جاري تحميل نص الفصل من السحابة...";
     window.pushToFirebase = async function(silent = false) {
         if (isApplyingCloudData) return;
+        // حماية: القارئ العادي ممنوع يكتب فوق قاعدة البيانات كلها
+        if (!isAuthorActive()) return;
+        // حماية: لو أي فصل لسه نصه "جاري التحميل" نوقف الرفع عشان ما نمسح النصوص الحقيقية
+        const stillLoading = novels.some(n => (n.chapters || []).some(ch => ch.content === CHAPTER_PLACEHOLDER));
+        if (stillLoading) {
+            updateSyncStatusBadge("انتظر تحميل نصوص الفصول ثم أعد المحاولة ⏳", "amber");
+            if (!silent) alert("⏳ نصوص بعض الفصول لسه بتتحمل من السحابة. استنى ثواني وجرّب تاني حتى لا تضيع النصوص.");
+            return false;
+        }
         try {
             updateSyncStatusBadge("جاري النشر الفوري... ⚡", "amber");
             recalculateAllRatings();
@@ -12033,7 +11769,7 @@ window.addEventListener('load', () => {
                     const res = orig.apply(this, args);
                     recalculateAllRatings();
                     paintViewsAndStarsOnCards();
-                    window.pushToFirebase(true);
+                    if (isAuthorActive()) window.pushToFirebase(true);
                     return res;
                 };
                 window[fnName]._v11Hooked = true;
@@ -12097,9 +11833,11 @@ window.addEventListener('load', () => {
         const defaultNovels = ${JSON.stringify(novels, null, 4)};`;
 
         const endRegex = /\/\*__START_DEFAULT_DATA__\*\/[\s\S]*?const defaultNovels\s*=\s*\[[\s\S]*?\n\];/;
-        if (endRegex.test(fullHtml)) {
-            fullHtml = fullHtml.replace(endRegex, newDefaultBlock);
+        if (!endRegex.test(fullHtml)) {
+            throw new Error("لم يتم العثور على كتلة البيانات الافتراضية داخل الملف - تم إلغاء الرفع حتى لا يُرفع ملف قديم.");
         }
+        // دالة بدلاً من نص: لمنع تفسير رموز مثل $& و $' الموجودة داخل نصوص الفصول
+        fullHtml = fullHtml.replace(endRegex, () => newDefaultBlock);
         return fullHtml;
     }
 
