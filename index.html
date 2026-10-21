@@ -11537,9 +11537,10 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== CLOUD SYNC & GITHUB AUTO-PUBLISHER (FIXED & SECURED) ==================== -->
+      </div></div><!-- ==================== CLOUD SYNC & GITHUB AUTO-PUBLISHER (V3 ULTRA STABLE) ==================== -->
 <script id="alradad-cloud-sync-script">
 (function() {
+    // رابط قاعدة البيانات بدون شرطة مائلة في النهاية لمنع أخطاء الرابط المزدوج
     const FIREBASE_DB_URL = "https://alradad-site-default-rtdb.firebaseio.com";
     const GITHUB_OWNER = "abdoalradad-cmd";
     const GITHUB_REPO = "novel_site";
@@ -11549,30 +11550,12 @@ window.addEventListener('load', () => {
     let isApplyingCloudData = false;
     let syncDebounceTimer = null;
 
-    // التحقق مما إذا كان المستخدم الحالي هو الكاتب (الأدمن) وفاتح لوحة التحكم فعلياً
-    function isAuthorActive() {
-        const cpModal = document.getElementById('control-panel-modal');
-        const isModalOpen = cpModal && !cpModal.classList.contains('hidden');
-        const adminBtns = document.querySelectorAll('.admin-only-ui');
-        let isAdminVisible = false;
-        adminBtns.forEach(el => {
-            if (!el.classList.contains('hidden') && el.style.display !== 'none') {
-                isAdminVisible = true;
-            }
-        });
-        return isModalOpen || isAdminVisible;
-    }
-
-    // إجبار الموقع على البدء في وضع القارئ دائماً عند عمل ريفريش وإخفاء لوحة التحكم تماماً
+    // 1. إخفاء لوحة التحكم والأزرار تماماً عند فتح الموقع للقارئ العادي
     function enforceReaderModeOnLoad() {
         localStorage.removeItem('author_unlocked');
-        if (typeof isAdminUnlocked !== 'undefined') {
-            window.isAdminUnlocked = false;
-        }
+        if (typeof isAdminUnlocked !== 'undefined') window.isAdminUnlocked = false;
 
-        // إغلاق نافذة لوحة التحكم ونوافذ الباسورد فوراً
-        const modalsToHide = ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'];
-        modalsToHide.forEach(id => {
+        ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
             const modal = document.getElementById(id);
             if (modal) {
                 modal.classList.add('hidden');
@@ -11581,58 +11564,89 @@ window.addEventListener('load', () => {
             }
         });
 
-        // إخفاء جميع أزرار لوحة التحكم عن القراء
         document.querySelectorAll('.admin-only-ui').forEach(el => {
             el.classList.add('hidden');
             el.style.display = 'none';
         });
 
-        // إخفاء شريط معاينة القارئ وإشعار التوست القديم
         const exitPill = document.getElementById('exit-preview-pill');
         if (exitPill) exitPill.classList.add('hidden');
 
         const toast = document.getElementById('toast');
-        if (toast) {
-            toast.classList.add('translate-y-24', 'opacity-0');
-        }
+        if (toast) toast.classList.add('translate-y-24', 'opacity-0');
     }
 
-    // تشغيل الحماية فوراً بمجرد قراءة السكريبت
     enforceReaderModeOnLoad();
 
+    function isAuthorActive() {
+        const cpModal = document.getElementById('control-panel-modal');
+        if (cpModal && !cpModal.classList.contains('hidden')) return true;
+        const adminBtns = document.querySelectorAll('.admin-only-ui');
+        for (let i = 0; i < adminBtns.length; i++) {
+            if (!adminBtns[i].classList.contains('hidden') && adminBtns[i].style.display !== 'none') {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function notifyCloud(msg) {
-        // لا تظهر إشعارات السحابة إلا للكاتب فقط!
         if (!isAuthorActive()) return;
         if (typeof showToast === "function") showToast(msg);
     }
 
-    // جلب أحدث الروايات والتعديلات من Firebase عند فتح الموقع
-    async function pullFromFirebase() {
+    function updateSyncStatusBadge(text, color) {
+        const badge = document.getElementById('cloud-sync-status-badge');
+        if (!badge) return;
+        badge.textContent = text;
+        badge.className = `text-xs font-extrabold px-3 py-1 rounded-full border border-${color}-500/40 bg-${color}-500/15 text-${color}-400`;
+    }
+
+    // 2. جلب البيانات من Firebase وتطبيقها على الموقع فوراً
+    window.pullFromFirebase = async function(showSuccessAlert = false) {
         try {
-            const response = await fetch(`${FIREBASE_DB_URL}/siteData.json`);
-            if (!response.ok) return;
+            updateSyncStatusBadge("جاري جلب البيانات... ⏳", "amber");
+            const response = await fetch(`${FIREBASE_DB_URL}/siteData.json?t=${Date.now()}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errText}`);
+            }
+
             const cloudData = await response.json();
 
+            // لو القاعدة فاضية خالص أول مرة، نرفع الداتا الحالية ليها
             if (!cloudData || !Array.isArray(cloudData.novels) || cloudData.novels.length === 0) {
+                updateSyncStatusBadge("القاعدة فارغة - جاري التهيئة لأول مرة ⚡", "amber");
+                await window.pushToFirebase(true);
                 return;
             }
 
             isApplyingCloudData = true;
-            novels = cloudData.novels;
+
+            // تحديث المتغيرات العامة في الموقع
+            novels.length = 0;
+            cloudData.novels.forEach(n => novels.push(n));
+
             if (cloudData.siteConfig) {
-                siteConfig = Object.assign({}, defaultSiteConfig, cloudData.siteConfig);
+                Object.assign(siteConfig, cloudData.siteConfig);
             }
 
             localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
             localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
 
+            // إعادة رسم كل أجزاء الموقع بالبيانات الجديدة
             if (typeof applyConfigToDOM === "function") applyConfigToDOM();
             if (typeof renderHeroBanner === "function") renderHeroBanner();
             if (typeof renderNovelsGrid === "function") renderNovelsGrid();
             if (typeof renderAdminNovelsList === "function") renderAdminNovelsList();
+            if (typeof renderAdminChaptersList === "function") renderAdminChaptersList();
             if (typeof populateFeaturedSelect === "function") populateFeaturedSelect();
 
-            // التأكد من بقاء أزرار الأدمن مخفية للقارئ بعد تحديث الواجهة
             if (!isAuthorActive()) {
                 document.querySelectorAll('.admin-only-ui').forEach(el => {
                     el.classList.add('hidden');
@@ -11642,21 +11656,25 @@ window.addEventListener('load', () => {
 
             isApplyingCloudData = false;
             updateSyncStatusBadge("متصل ومُحدّث لحظياً ✅", "emerald");
+            if (showSuccessAlert) alert("✅ تم جلب أحدث البيانات من السحابة بنجاح!");
         } catch (err) {
             console.error("Firebase Pull Error:", err);
             isApplyingCloudData = false;
-            updateSyncStatusBadge("خطأ في الاتصال بالسحابة ⚠️", "red");
+            updateSyncStatusBadge("خطأ في الاتصال بالسحابة ⚠️ (تأكد من Rules)", "red");
+            if (showSuccessAlert) {
+                alert("❌ تعذر الاتصال بـ Firebase:\n" + err.message + "\n\nتأكد من فتح تبويب Rules في Firebase وجعل .read و .write بقيمة true ثم الضغط على Publish.");
+            }
         }
-    }
+    };
 
-    // رفع التعديلات إلى Firebase (فقط عند تعديل الكاتب أو إضافة تعليق)
-    async function pushToFirebase(silent = false) {
+    // 3. رفع التعديلات إلى Firebase
+    window.pushToFirebase = async function(silent = false) {
         if (isApplyingCloudData) return;
         try {
-            updateSyncStatusBadge("جاري المزامنة السحابية... ⏳", "amber");
+            updateSyncStatusBadge("جاري رفع التعديلات للسحابة... ⏳", "amber");
             const payload = {
-                siteConfig: typeof siteConfig !== "undefined" ? siteConfig : defaultSiteConfig,
-                novels: typeof novels !== "undefined" ? novels : defaultNovels,
+                siteConfig: siteConfig,
+                novels: novels,
                 lastUpdated: Date.now()
             };
 
@@ -11666,28 +11684,35 @@ window.addEventListener('load', () => {
                 body: JSON.stringify(payload)
             });
 
-            if (res.ok) {
-                updateSyncStatusBadge("تم الحفظ والنشر للجميع على Firebase ✅", "emerald");
-                if (!silent && isAuthorActive()) {
-                    notifyCloud("☁️ تم نشر التعديلات فوراً لجميع القراء عبر السحابة!");
-                }
-            } else {
-                updateSyncStatusBadge("فشل الحفظ في Firebase ❌", "red");
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`HTTP ${res.status}: ${errText}`);
             }
+
+            updateSyncStatusBadge("تم الحفظ والنشر للجميع على Firebase ✅", "emerald");
+            if (!silent) {
+                notifyCloud("☁️ تم حفظ ونشر التعديلات فوراً لجميع القراء!");
+            }
+            return true;
         } catch (err) {
             console.error("Firebase Push Error:", err);
-            updateSyncStatusBadge("تعذر الاتصال بـ Firebase ❌", "red");
+            updateSyncStatusBadge("فشل الحفظ في Firebase ❌", "red");
+            if (!silent && isAuthorActive()) {
+                alert("❌ لم يتم حفظ التعديلات على Firebase!\nالسبب: " + err.message + "\n\nالرجاء التأكد من إعدادات Rules في حسابك على Firebase (اجعل .read و .write = true).");
+            }
+            return false;
         }
-    }
+    };
 
     function scheduleCloudPush(silent = false) {
         if (isApplyingCloudData) return;
         clearTimeout(syncDebounceTimer);
-        syncDebounceTimer = setTimeout(() => pushToFirebase(silent), 600);
+        syncDebounceTimer = setTimeout(() => window.pushToFirebase(silent), 500);
     }
 
-    // ربط دوال لوحة التحكم الخاصة بالكاتب فقط
+    // 4. ربط جميع دوال الحفظ والتعديل في لوحة التحكم
     const adminFunctionsToHook = [
+        'saveAllData', 'saveToLocalStorage',
         'handleSaveNovel', 'deleteNovelById', 'moveNovelOrder',
         'handleSaveChapter', 'deleteChapterByIndex', 'moveChapterOrder',
         'updateIdentityLive', 'updateAppearanceLive', 'applyColorPreset',
@@ -11703,8 +11728,8 @@ window.addEventListener('load', () => {
                 const wrapped = function(...args) {
                     const result = origFn.apply(this, args);
                     if (isAuthorActive()) {
-                        const isLiveInput = (fnName === 'updateIdentityLive' || fnName === 'updateAppearanceLive');
-                        scheduleCloudPush(isLiveInput);
+                        const isSilent = (fnName === 'updateIdentityLive' || fnName === 'updateAppearanceLive');
+                        scheduleCloudPush(isSilent);
                     }
                     return result;
                 };
@@ -11713,12 +11738,22 @@ window.addEventListener('load', () => {
             }
         });
 
-        // ربط دالة تعليقات القراء لترفع التعليق في صمت بدون إظهار رسائل مزعجة للقارئ
+        // التقاط أي إرسال لنموذج إضافة رواية أو فصل مباشرة
+        const novelForm = document.getElementById('form-save-novel');
+        if (novelForm) {
+            novelForm.addEventListener('submit', () => setTimeout(() => window.pushToFirebase(false), 300));
+        }
+        const chapterForm = document.getElementById('form-save-chapter');
+        if (chapterForm) {
+            chapterForm.addEventListener('submit', () => setTimeout(() => window.pushToFirebase(false), 300));
+        }
+
+        // حفظ تعليقات القراء في صمت
         if (typeof window.handleAddChapterComment === 'function' && !window.handleAddChapterComment._cloudHooked) {
             const origCommentFn = window.handleAddChapterComment;
             const wrappedComment = function(...args) {
                 const result = origCommentFn.apply(this, args);
-                scheduleCloudPush(true); // true = صامت تماماً للقارئ
+                scheduleCloudPush(true);
                 return result;
             };
             wrappedComment._cloudHooked = true;
@@ -11726,7 +11761,7 @@ window.addEventListener('load', () => {
         }
 
         injectCloudControlBox();
-        pullFromFirebase();
+        window.pullFromFirebase(false);
     }
 
     if (document.readyState === 'loading') {
@@ -11735,20 +11770,18 @@ window.addEventListener('load', () => {
         initCloudHooks();
     }
 
-    // تجهيز كود نظيف ومغلق اللوحة تماماً عند الرفع على GitHub
+    // 5. توليد كود HTML نظيف ومغلق اللوحة للرفع على GitHub
     function generateCleanReaderHtmlString() {
         const lockModeRadio = document.querySelector('input[name="export-lock-mode"]:checked');
         const allowSecret = lockModeRadio ? (lockModeRadio.value === 'secret') : true;
         const pinInput = document.getElementById('export-secret-pin');
         const secretPin = pinInput && pinInput.value.trim() ? pinInput.value.trim() : SECRET_AUTHOR_PIN;
 
-        // استنساخ الصفحة وتنظيفها من أي نوافذ مفتوحة أو توكن قبل التصدير
         const cloneDoc = document.documentElement.cloneNode(true);
 
         const tokenEl = cloneDoc.querySelector('#gh-personal-token');
         if (tokenEl) tokenEl.setAttribute('value', '');
 
-        // إغلاق لوحة التحكم في النسخة المرفوعة
         ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
             const m = cloneDoc.querySelector('#' + id);
             if (m) {
@@ -11758,13 +11791,11 @@ window.addEventListener('load', () => {
             }
         });
 
-        // إخفاء جميع أزرار الأدمن في النسخة المرفوعة
         cloneDoc.querySelectorAll('.admin-only-ui').forEach(el => {
             el.classList.add('hidden');
             el.style.display = 'none';
         });
 
-        // التأكد من فتح الصفحة الرئيسية وليس صفحة داخلية
         const homeView = cloneDoc.querySelector('#view-home');
         const detailsView = cloneDoc.querySelector('#view-novel-details');
         const readerView = cloneDoc.querySelector('#view-reader');
@@ -11793,6 +11824,7 @@ window.addEventListener('load', () => {
         return fullHtml;
     }
 
+    // 6. الرفع المباشر على GitHub
     window.publishDirectlyToGitHub = async function() {
         const tokenInput = document.getElementById('gh-personal-token');
         const branchInput = document.getElementById('gh-branch-name');
@@ -11812,10 +11844,10 @@ window.addEventListener('load', () => {
 
         const originalBtnHtml = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري رفع التعديلات على GitHub و Firebase...</span>`;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الرفع على Firebase و GitHub...</span>`;
 
         try {
-            await pushToFirebase(true);
+            await window.pushToFirebase(true);
 
             const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
             const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
@@ -11865,8 +11897,9 @@ window.addEventListener('load', () => {
                 throw new Error(errJson.message || "فشل رفع الملف على GitHub");
             }
 
-            notifyCloud("🚀 تم تحديث ملف index.html على GitHub ومزامنة Firebase بنجاح!");
+            notifyCloud("🚀 تم تحديث الموقع على GitHub و Firebase بنجاح!");
             updateSyncStatusBadge("تم التحديث على GitHub + Firebase بنجاح 🚀", "emerald");
+            alert("✅ تم رفع التعديلات بنجاح على كلٍ من Firebase و GitHub!");
         } catch (error) {
             console.error("GitHub Push Error:", error);
             alert("❌ حدث خطأ أثناء الرفع على GitHub:\n" + error.message);
@@ -11877,14 +11910,20 @@ window.addEventListener('load', () => {
         }
     };
 
-    function updateSyncStatusBadge(text, color) {
-        const badge = document.getElementById('cloud-sync-status-badge');
-        if (!badge) return;
-        badge.textContent = text;
-        badge.className = `text-xs font-extrabold px-3 py-1 rounded-full border border-${color}-500/40 bg-${color}-500/15 text-${color}-400`;
-    }
-
+    // 7. إضافة أزرار التحكم السحابية في أعلى لوحة التحكم وفي التبويب الخامس
     function injectCloudControlBox() {
+        // إضافة زر حفظ سحابي سريع في شريط عنوان لوحة التحكم ليكون أمامك في كل التبويبات
+        const cpHeader = document.querySelector('#control-panel-modal > div > div:first-child > div:last-child');
+        if (cpHeader && !document.getElementById('quick-cloud-save-btn')) {
+            const quickBtn = document.createElement('button');
+            quickBtn.id = 'quick-cloud-save-btn';
+            quickBtn.type = 'button';
+            quickBtn.onclick = () => window.pushToFirebase(false);
+            quickBtn.className = 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer';
+            quickBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span>حفظ ونشر للسحابة الآن</span>`;
+            cpHeader.insertBefore(quickBtn, cpHeader.firstChild);
+        }
+
         const backupPane = document.getElementById('cp-pane-backup');
         if (!backupPane) return;
         const oldBox = document.getElementById('cloud-github-auto-box');
@@ -11904,18 +11943,18 @@ window.addEventListener('load', () => {
                     </div>
                     <div>
                         <h4 class="text-lg sm:text-xl font-black text-amber-400">النشر التلقائي المباشر (Firebase + GitHub)</h4>
-                        <p class="text-xs text-slate-300">أي تعديل تقوم به يُنشر لحظياً على Firebase، ويمكنك تحديث كود GitHub بضغطة زر بدون تنزيل ملفات!</p>
+                        <p class="text-xs text-slate-300">اضغط على زر الحفظ السحابي لنشر التعديلات في ثانية واحدة، أو حدّث ملف GitHub مباشرة!</p>
                     </div>
                 </div>
                 <span id="cloud-sync-status-badge" class="text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
-                    متصل بـ Firebase ✅
+                    جاري الفحص...
                 </span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold mb-1.5 text-slate-300">
-                        <i class="fa-brands fa-github ml-1"></i> كود GitHub Personal Access Token (يُحفظ في متصفحك أنت فقط ولا يظهر للقراء):
+                        <i class="fa-brands fa-github ml-1"></i> كود GitHub Personal Access Token:
                     </label>
                     <input type="password" id="gh-personal-token" value="${savedToken}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" dir="ltr"
                         class="w-full rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-400 px-4 py-2.5 text-xs font-mono text-amber-300 focus:outline-none">
@@ -11928,10 +11967,16 @@ window.addEventListener('load', () => {
             </div>
 
             <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button type="button" onclick="window.pushToFirebase(false)"
+                    class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                    <span>1. حفظ ونشر فوري على السحابة (Firebase)</span>
+                </button>
+
                 <button type="button" id="btn-gh-direct-push" onclick="publishDirectlyToGitHub()"
-                    class="flex-1 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2.5 text-sm sm:text-base cursor-pointer">
-                    <i class="fa-brands fa-github text-xl"></i>
-                    <span>نشر وتحديث ملف index.html على GitHub مباشرة الآن</span>
+                    class="flex-1 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
+                    <i class="fa-brands fa-github text-lg"></i>
+                    <span>2. تحديث ملف index.html على GitHub مباشرة</span>
                 </button>
             </div>
         `;
