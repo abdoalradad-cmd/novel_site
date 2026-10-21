@@ -11537,14 +11537,18 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== CLEAN LIGHTWEIGHT SOCIAL SYNC (VIEWS, COMMENTS & RATINGS ONLY) ==================== -->
+      </div></div><!-- ==================== SOCIAL SYNC (VIEWS/COMMENTS) + GITHUB DIRECT TOKEN PUBLISHER (V17 FINAL) ==================== -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<script id="alradad-social-sync">
+<script id="alradad-social-github-sync">
 (function() {
     const FIREBASE_DB_URL = "https://alradad-site-default-rtdb.firebaseio.com";
+    const GITHUB_OWNER = "abdoalradad-cmd";
+    const GITHUB_REPO = "novel_site";
+    const GITHUB_FILE_PATH = "index.html";
+    const GITHUB_BRANCH = "main";
 
     let db = null;
     try {
@@ -11552,9 +11556,7 @@ window.addEventListener('load', () => {
             firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
         }
         db = firebase.database();
-    } catch (e) {
-        console.warn("Firebase Init Error:", e);
-    }
+    } catch (e) {}
 
     let liveViewsMap = {};
     let lastViewTime = 0;
@@ -11582,7 +11584,6 @@ window.addEventListener('load', () => {
         return Number(num || 0).toLocaleString('en-US');
     }
 
-    // حساب التقييمات الحقيقية من التعليقات وعرضها للكل
     function updateRatingsUI() {
         if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
         novels.forEach(novel => {
@@ -11609,7 +11610,6 @@ window.addEventListener('load', () => {
             }
         });
 
-        // تحديث الكروت بره والمشاهدات
         novels.forEach(novel => {
             const vCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseNum(novel.views);
             const vFormatted = formatNum(vCount);
@@ -11619,7 +11619,6 @@ window.addEventListener('load', () => {
                 const card = btn.closest('.group');
                 if (!card) return;
 
-                // النجوم
                 const ratingBadge = card.querySelector('.text-xs.font-bold.text-amber-500.flex.items-center.gap-1');
                 if (ratingBadge) {
                     const countTxt = novel.ratingsCount > 0 ? ` (${novel.ratingsCount})` : '';
@@ -11634,7 +11633,6 @@ window.addEventListener('load', () => {
                     ratingBadge.innerHTML = `${starsHtml} <span class="mr-1">${novel.rating}${countTxt}</span>`;
                 }
 
-                // المشاهدات
                 const metaRow = card.querySelector('.flex.items-center.gap-3.text-xs');
                 if (metaRow) {
                     let viewSpan = metaRow.querySelector('.live-views-counter');
@@ -11649,7 +11647,6 @@ window.addEventListener('load', () => {
         });
     }
 
-    // زيادة المشاهدات (+1) وحفظها في المسار الخفيف جداً
     window.incrementNovelViewLive = function(novelId) {
         const now = Date.now();
         if (now - lastViewTime < 1500) return;
@@ -11671,7 +11668,6 @@ window.addEventListener('load', () => {
         }
     };
 
-    // مزامنة التعليقات وتقييمات القراء في مسار خفيف مستقل
     window.syncReaderCommentsToCloud = function(novelId) {
         if (!db || typeof novels === 'undefined') return;
         const novel = novels.find(n => n.id === novelId);
@@ -11685,11 +11681,9 @@ window.addEventListener('load', () => {
         db.ref('socialStats/comments/' + novelId).set(chaptersCommentsData).catch(() => {});
     };
 
-    // الاستماع اللحظي للتعليقات والمشاهدات والتقييمات (سريع ولا يستهلك كوتا)
     function startSocialListeners() {
         if (!db) return;
 
-        // 1. الاستماع للمشاهدات
         db.ref('socialStats/views').on('value', snapshot => {
             const data = snapshot.val();
             if (data && typeof novels !== 'undefined') {
@@ -11702,7 +11696,6 @@ window.addEventListener('load', () => {
             }
         });
 
-        // 2. الاستماع للتعليقات والتقييمات وتحديثها فوراً عند كل الزوار
         db.ref('socialStats/comments').on('value', snapshot => {
             const data = snapshot.val();
             if (data && typeof novels !== 'undefined') {
@@ -11724,6 +11717,153 @@ window.addEventListener('load', () => {
         });
     }
 
+    // بناء ملف HTML نظيف ومحدث للرفع على GitHub
+    function generateCleanReaderHtmlString() {
+        updateRatingsUI();
+        const cloneDoc = document.documentElement.cloneNode(true);
+        const tokenEl = cloneDoc.querySelector('#gh-personal-token');
+        if (tokenEl) tokenEl.setAttribute('value', '');
+        ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
+            const m = cloneDoc.querySelector('#' + id);
+            if (m) { m.classList.add('hidden'); m.classList.remove('flex'); m.removeAttribute('style'); }
+        });
+        cloneDoc.querySelectorAll('.admin-only-ui').forEach(el => { el.classList.add('hidden'); el.style.display = 'none'; });
+        let fullHtml = "<!DOCTYPE html>\n" + cloneDoc.outerHTML;
+        const newDefaultBlock = `/*__START_DEFAULT_DATA__*/
+        const PUBLISHED_READER_MODE = true;
+        const ALLOW_SECRET_AUTHOR_UNLOCK = true;
+        const SECRET_AUTHOR_PIN = "49102206";
+        const EXPORT_BUILD_VERSION = "published_${Date.now()}";
+        const defaultSiteConfig = ${JSON.stringify(siteConfig, null, 4)};
+        const defaultNovels = ${JSON.stringify(novels, null, 4)};`;
+        const endRegex = /\/\*__START_DEFAULT_DATA__\*\/[\s\S]*?const defaultNovels\s*=\s*\[[\s\S]*?\n\];/;
+        if (endRegex.test(fullHtml)) fullHtml = fullHtml.replace(endRegex, newDefaultBlock);
+        return fullHtml;
+    }
+
+    // زرار الرفع المباشر على GitHub بالتوكن
+    window.publishDirectlyToGitHub = async function() {
+        const tokenInput = document.getElementById('gh-personal-token');
+        const branchInput = document.getElementById('gh-branch-name');
+        const btn = document.getElementById('btn-gh-direct-push');
+
+        const token = tokenInput && tokenInput.value.trim() ? tokenInput.value.trim() : localStorage.getItem('alradad_gh_token');
+        const branch = (branchInput && branchInput.value.trim()) ? branchInput.value.trim() : GITHUB_BRANCH;
+
+        if (!token) {
+            alert("⚠️ الرجاء إدخال كود GitHub Personal Access Token أولاً!");
+            if (tokenInput) tokenInput.focus();
+            return;
+        }
+
+        localStorage.setItem('alradad_gh_token', token);
+        localStorage.setItem('alradad_gh_branch', branch);
+
+        const originalBtnHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الرفع على GitHub...</span>`;
+        }
+
+        try {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+            const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}&_t=${Date.now()}`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' },
+                cache: 'no-store'
+            });
+
+            let fileSha = null;
+            if (getRes.ok) {
+                const fileInfo = await getRes.json();
+                fileSha = fileInfo.sha;
+            } else if (getRes.status !== 404) {
+                const errData = await getRes.json();
+                throw new Error(errData.message || "تأكد من صحة الـ Token واسم الفرع");
+            }
+
+            const updatedHtml = generateCleanReaderHtmlString();
+            const utf8Bytes = new TextEncoder().encode(updatedHtml);
+            let binaryStr = "";
+            const chunkSize = 0x8000;
+            for (let i = 0; i < utf8Bytes.length; i += chunkSize) {
+                binaryStr += String.fromCharCode.apply(null, utf8Bytes.subarray(i, i + chunkSize));
+            }
+            const base64Content = btoa(binaryStr);
+
+            const putRes = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `تحديث تلقائي من لوحة التحكم - ${new Date().toLocaleString('ar-EG')}`,
+                    content: base64Content,
+                    branch: branch,
+                    sha: fileSha
+                })
+            });
+
+            if (!putRes.ok) {
+                const errJson = await putRes.json();
+                throw new Error(errJson.message || "فشل رفع الملف على GitHub");
+            }
+
+            alert("✅ تم رفع وتحديث ملف index.html على GitHub بنجاح!");
+        } catch (error) {
+            console.error("GitHub Push Error:", error);
+            alert("❌ حدث خطأ أثناء الرفع على GitHub:\n" + error.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
+        }
+    };
+
+    function injectCloudControlBox() {
+        const backupPane = document.getElementById('cp-pane-backup');
+        if (!backupPane || document.getElementById('cloud-github-auto-box')) return;
+
+        const savedToken = localStorage.getItem('alradad_gh_token') || '';
+        const savedBranch = localStorage.getItem('alradad_gh_branch') || 'main';
+
+        const box = document.createElement('div');
+        box.id = 'cloud-github-auto-box';
+        box.className = 'bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-500/50 shadow-2xl space-y-5 mb-6';
+        box.innerHTML = `
+            <div class="flex items-center gap-3 border-b border-white/10 pb-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
+                    <i class="fa-brands fa-github"></i>
+                </div>
+                <div>
+                    <h4 class="text-lg font-black text-amber-400">النشر المباشر على GitHub بالتوكن</h4>
+                    <p class="text-xs text-slate-300">حدّث موقعك على جيت هب بضغطة زر واحدة بدون تنزيل ملفات!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold mb-1.5 text-slate-300">كود GitHub Personal Token:</label>
+                    <input type="password" id="gh-personal-token" value="${savedToken}" placeholder="ghp_..." dir="ltr"
+                        class="w-full rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-400 px-4 py-2.5 text-xs font-mono text-amber-300 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1.5 text-slate-300">فرع النشر (Branch):</label>
+                    <input type="text" id="gh-branch-name" value="${savedBranch}" placeholder="main" dir="ltr"
+                        class="w-full rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-400 px-4 py-2.5 text-xs font-mono text-white focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <button type="button" id="btn-gh-direct-push" onclick="publishDirectlyToGitHub()"
+                    class="w-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2.5 text-sm cursor-pointer">
+                    <i class="fa-brands fa-github text-xl"></i>
+                    <span>تحديث ورفع ملف index.html على GitHub مباشرة الآن</span>
+                </button>
+            </div>
+        `;
+
+        backupPane.insertBefore(box, backupPane.firstChild);
+    }
+
     function initHooks() {
         enforceReaderMode();
 
@@ -11737,7 +11877,6 @@ window.addEventListener('load', () => {
             window.openNovelDetails._socialHooked = true;
         }
 
-        // ربط إضافة أو حذف تعليق
         ['handleAddChapterComment', 'deleteChapterComment'].forEach(fnName => {
             if (typeof window[fnName] === 'function' && !window[fnName]._socialHooked) {
                 const orig = window[fnName];
@@ -11755,6 +11894,7 @@ window.addEventListener('load', () => {
             }
         });
 
+        injectCloudControlBox();
         startSocialListeners();
     }
 
