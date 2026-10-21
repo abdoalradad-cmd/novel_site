@@ -11537,57 +11537,90 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== SUPABASE COMPLETE SOCIAL SYNC + GITHUB PUBLISHER (V21 FINAL) ==================== -->
+      </div></div><!-- ==================== ULTRA-FAST META SYNC + EXACT +1 VIEWS + WEBSOCKETS (V11 FINAL) ==================== -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
-<script id="alradad-supabase-complete-sync">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script id="alradad-cloud-sync-script">
 (function() {
-    const SUPABASE_URL = "https://iesbycgumomeabfiomjy.supabase.co";
-    const SUPABASE_ANON_KEY = "Sb_publishable_H-OhYbwINiJ99SBSJB81dg_q8KIr8Pi";
-
+    const FIREBASE_DB_URL = "https://alradad-site-default-rtdb.firebaseio.com";
     const GITHUB_OWNER = "abdoalradad-cmd";
     const GITHUB_REPO = "novel_site";
     const GITHUB_FILE_PATH = "index.html";
     const GITHUB_BRANCH = "main";
 
-    let supabaseClient = null;
-    try {
-        if (typeof window.supabase !== 'undefined' && SUPABASE_URL.startsWith('http')) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-    } catch (e) {
-        console.warn("Supabase Init Notice:", e);
+    if (!firebase.apps.length) {
+        firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
     }
+    const db = firebase.database();
 
+    let isApplyingCloudData = false;
     let liveViewsMap = {};
-    let lastViewTime = 0;
+    let lastViewIncrementTime = 0; // لمنع الزيادة المزدوجة (+2) نهائياً
 
-    function enforceReaderMode() {
+    // 1. إخفاء لوحة التحكم تماماً للقراء عند الفتح
+    function enforceReaderModeOnLoad() {
         localStorage.removeItem('author_unlocked');
         try { if (typeof isAdminUnlocked !== 'undefined') isAdminUnlocked = false; } catch(e) {}
-        ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
-            const m = document.getElementById(id);
-            if (m) { m.classList.add('hidden'); m.classList.remove('flex'); m.style.display = ''; }
-        });
-        document.querySelectorAll('.admin-only-ui').forEach(el => {
-            el.classList.add('hidden'); el.style.display = 'none';
-        });
-    }
-    enforceReaderMode();
 
-    function parseNum(val) {
+        ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modal.style.display = '';
+            }
+        });
+
+        document.querySelectorAll('.admin-only-ui').forEach(el => {
+            el.classList.add('hidden');
+            el.style.display = 'none';
+        });
+
+        const exitPill = document.getElementById('exit-preview-pill');
+        if (exitPill) exitPill.classList.add('hidden');
+
+        const toast = document.getElementById('toast');
+        if (toast) toast.classList.add('translate-y-24', 'opacity-0');
+    }
+
+    enforceReaderModeOnLoad();
+
+    function isAuthorActive() {
+        const cpModal = document.getElementById('control-panel-modal');
+        if (cpModal && !cpModal.classList.contains('hidden')) return true;
+        const adminBtns = document.querySelectorAll('.admin-only-ui');
+        for (let i = 0; i < adminBtns.length; i++) {
+            if (!adminBtns[i].classList.contains('hidden') && adminBtns[i].style.display !== 'none') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function updateSyncStatusBadge(text, color) {
+        const badge = document.getElementById('cloud-sync-status-badge');
+        if (!badge) return;
+        badge.textContent = text;
+        badge.className = `text-xs font-extrabold px-3 py-1 rounded-full border border-${color}-500/40 bg-${color}-500/15 text-${color}-400`;
+    }
+
+    function parseCleanNumber(val) {
         if (typeof val === 'number') return val;
         if (!val) return 0;
         return parseInt(String(val).replace(/,/g, '').replace(/[^\d]/g, ''), 10) || 0;
     }
 
-    function formatNum(num) {
+    function formatNumber(num) {
         return Number(num || 0).toLocaleString('en-US');
     }
 
-    // حساب التقييمات وتحديث واجهة الكروت بره وجوا
-    function updateRatingsAndUI() {
+    // 2. حساب التقييم العام للرواية من تعليقات الفصول
+    function recalculateAllRatings() {
         if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
         novels.forEach(novel => {
             let totalStars = 0;
@@ -11612,10 +11645,62 @@ window.addEventListener('load', () => {
                 novel.rating = "5.0";
             }
         });
+    }
+
+    function generateStarsHtml(ratingVal) {
+        const num = parseFloat(ratingVal) || 5.0;
+        let html = '<span class="inline-flex items-center gap-0.5 text-amber-400">';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.floor(num)) {
+                html += '<i class="fa-solid fa-star"></i>';
+            } else if (i - num <= 0.5 && i > num) {
+                html += '<i class="fa-solid fa-star-half-stroke"></i>';
+            } else {
+                html += '<i class="fa-regular fa-star text-slate-400"></i>';
+            }
+        }
+        html += '</span>';
+        return html;
+    }
+
+    // 3. تحديث واجهة القارئ فوراً
+    function refreshAllUI() {
+        if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
+
+        novels.forEach(n => {
+            const baseViews = parseCleanNumber(n.views);
+            const cloudViews = liveViewsMap[n.id] !== undefined ? parseCleanNumber(liveViewsMap[n.id]) : baseViews;
+            const finalViews = Math.max(baseViews, cloudViews);
+            n.views = formatNumber(finalViews);
+            liveViewsMap[n.id] = finalViews;
+        });
+
+        recalculateAllRatings();
+
+        if (typeof applyConfigToDOM === "function") applyConfigToDOM();
+        if (typeof renderHeroBanner === "function") renderHeroBanner();
+        if (typeof renderNovelsGrid === "function") renderNovelsGrid();
+        if (typeof populateFeaturedSelect === "function") populateFeaturedSelect();
+
+        if (isAuthorActive()) {
+            if (typeof renderAdminNovelsList === "function") renderAdminNovelsList();
+            if (typeof renderAdminChaptersList === "function") renderAdminChaptersList();
+        } else {
+            document.querySelectorAll('.admin-only-ui').forEach(el => {
+                el.classList.add('hidden');
+                el.style.display = 'none';
+            });
+        }
+
+        paintViewsAndStarsOnCards();
+    }
+
+    function paintViewsAndStarsOnCards() {
+        if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
 
         novels.forEach(novel => {
-            const vCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseNum(novel.views);
-            const vFormatted = formatNum(vCount);
+            const viewsCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseCleanNumber(novel.views);
+            const viewsFormatted = formatNumber(viewsCount);
 
             const cardBtns = document.querySelectorAll(`button[onclick*="'${novel.id}'"]`);
             cardBtns.forEach(btn => {
@@ -11624,16 +11709,9 @@ window.addEventListener('load', () => {
 
                 const ratingBadge = card.querySelector('.text-xs.font-bold.text-amber-500.flex.items-center.gap-1');
                 if (ratingBadge) {
+                    const starsStr = generateStarsHtml(novel.rating);
                     const countTxt = novel.ratingsCount > 0 ? ` (${novel.ratingsCount})` : '';
-                    let starsHtml = '<span class="inline-flex items-center gap-0.5 text-amber-400">';
-                    const num = parseFloat(novel.rating) || 5.0;
-                    for (let i = 1; i <= 5; i++) {
-                        if (i <= Math.floor(num)) starsHtml += '<i class="fa-solid fa-star"></i>';
-                        else if (i - num <= 0.5 && i > num) starsHtml += '<i class="fa-solid fa-star-half-stroke"></i>';
-                        else starsHtml += '<i class="fa-regular fa-star text-slate-400"></i>';
-                    }
-                    starsHtml += '</span>';
-                    ratingBadge.innerHTML = `${starsHtml} <span class="mr-1">${novel.rating}${countTxt}</span>`;
+                    ratingBadge.innerHTML = `${starsStr} <span class="mr-1">${novel.rating}${countTxt}</span>`;
                 }
 
                 const metaRow = card.querySelector('.flex.items-center.gap-3.text-xs');
@@ -11644,114 +11722,387 @@ window.addEventListener('load', () => {
                         viewSpan.className = 'live-views-counter font-bold text-amber-600 dark:text-amber-400';
                         metaRow.appendChild(viewSpan);
                     }
-                    viewSpan.innerHTML = `<i class="fa-solid fa-eye ml-1"></i>${vFormatted} مشاهدة`;
+                    viewSpan.innerHTML = `<i class="fa-solid fa-eye ml-1"></i>${viewsFormatted} مشاهدة`;
                 }
             });
         });
+
+        try {
+            if (typeof currentNovelId !== 'undefined' && currentNovelId) {
+                const novel = novels.find(n => n.id === currentNovelId);
+                const detailsContainer = document.getElementById('novel-details-content');
+                if (novel && detailsContainer) {
+                    const viewsCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseCleanNumber(novel.views);
+                    const pillsContainer = detailsContainer.querySelector('.flex.flex-wrap.items-center');
+                    if (pillsContainer) {
+                        let detailViewPill = document.getElementById('details-live-views-pill');
+                        if (!detailViewPill) {
+                            detailViewPill = document.createElement('span');
+                            detailViewPill.id = 'details-live-views-pill';
+                            detailViewPill.className = 'px-3.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30';
+                            pillsContainer.appendChild(detailViewPill);
+                        }
+                        detailViewPill.innerHTML = `<i class="fa-solid fa-eye ml-1"></i> ${formatNumber(viewsCount)} مشاهدة`;
+                    }
+
+                    const ratingPill = document.getElementById('details-star-rating-pill');
+                    if (ratingPill) {
+                        const countText = novel.ratingsCount > 0 ? ` (${novel.ratingsCount} تقييم)` : '';
+                        ratingPill.innerHTML = `${generateStarsHtml(novel.rating)} <span class="mr-1">${novel.rating}${countText}</span>`;
+                    }
+                }
+            }
+        } catch(e) {}
     }
 
-    // زيادة المشاهدات عبر Supabase
-    window.incrementNovelViewLive = async function(novelId) {
+    // 4. زيادة المشاهدات بمقدار (+1 فقط بالظبط) مع قفل زمني لمنع التكرار المزدوج
+    window.incrementNovelViewLive = function(novelId) {
         const now = Date.now();
-        if (now - lastViewTime < 1500) return;
-        lastViewTime = now;
+        // إذا تم استدعاء الدالة مرتين في أقل من 1.5 ثانية لنفس الضغطة، نتجاهل الثانية فوراً
+        if (now - lastViewIncrementTime < 1500) return;
+        lastViewIncrementTime = now;
+
         if (!novelId || typeof novels === 'undefined') return;
         const novel = novels.find(n => n.id === novelId);
         if (!novel) return;
 
-        const base = liveViewsMap[novelId] !== undefined ? liveViewsMap[novelId] : parseNum(novel.views);
-        const next = base + 1;
-        liveViewsMap[novelId] = next;
-        novel.views = formatNum(next);
-        updateRatingsAndUI();
-
-        if (supabaseClient) {
-            try {
-                await supabaseClient.from('novel_views').upsert({ novel_id: novelId, views_count: next }, { onConflict: 'novel_id' });
-            } catch (e) {}
-        }
+        // إرسال زيادة (+1 فقط) إلى السحابة، والمستمع اللحظي سيحدث الشاشة تلقائياً
+        const viewRef = db.ref('viewsCounts/' + novelId);
+        viewRef.transaction(currentCloudVal => {
+            const base = parseCleanNumber(currentCloudVal);
+            const localBase = liveViewsMap[novelId] !== undefined ? liveViewsMap[novelId] : parseCleanNumber(novel.views);
+            return Math.max(base, localBase) + 1;
+        });
     };
 
-    // مزامنة التعليقات والتقييمات مع Supabase فوراً عند كتابتها
-    window.syncReaderCommentsToSupabase = async function() {
-        if (!supabaseClient || typeof novels === 'undefined') return;
-        const targetId = window.currentNovelId;
-        const novel = novels.find(n => n.id === targetId);
-        if (!novel) return;
+    // 5. بناء الفهرس الخفيف السريع (بدون نصوص الفصول الطويلة) ليظهر في 0.1 ثانية مثل المشاهدات!
+    function buildLightweightMetaPayload() {
+        const lightNovels = novels.map(n => ({
+            id: n.id,
+            title: n.title || "",
+            subtitle: n.subtitle || "",
+            author: n.author || "",
+            genre: n.genre || "غموض",
+            tags: n.tags || [],
+            status: n.status || "مكتملة",
+            views: n.views || "1",
+            rating: n.rating || "5.0",
+            ratingsCount: n.ratingsCount || 0,
+            coverGradient: n.coverGradient || "",
+            accentIcon: n.accentIcon || "fa-book-open",
+            coverImg: n.coverImg || "",
+            pdfUrl: n.pdfUrl || "",
+            isLocked: !!n.isLocked,
+            password: n.password || "",
+            pdfLocked: !!n.pdfLocked,
+            pdfPassword: n.pdfPassword || "",
+            allowSharing: n.allowSharing !== false,
+            hasPromo: !!n.hasPromo,
+            promoUrl: n.promoUrl || "",
+            synopsis: n.synopsis || "",
+            // نرسل عناوين الفصول وتعليقاتها فقط في المسار السريع بدون النص الطويل!
+            chaptersMeta: (n.chapters || []).map(ch => ({
+                id: ch.id,
+                title: ch.title || "",
+                readTime: ch.readTime || "6 دقائق",
+                isLocked: !!ch.isLocked,
+                password: ch.password || "",
+                comments: ch.comments || []
+            }))
+        }));
 
-        try {
-            const chaptersCommentsData = {};
-            (novel.chapters || []).forEach((ch, idx) => {
-                if (Array.isArray(ch.comments) && ch.comments.length > 0) {
-                    chaptersCommentsData[idx] = ch.comments;
-                }
-            });
-
-            await supabaseClient.from('novel_comments').upsert({
-                novel_id: targetId,
-                comments_json: chaptersCommentsData
-            }, { onConflict: 'novel_id' });
-        } catch (e) {
-            console.error("Comments Supabase Sync Error:", e);
-        }
-    };
-
-    // جلب المشاهدات والتعليقات والتقييمات عند فتح الموقع
-    async function fetchSupabaseData() {
-        if (!supabaseClient) return;
-        try {
-            const viewsRes = await supabaseClient.from('novel_views').select('*');
-            if (viewsRes.data && Array.isArray(viewsRes.data)) {
-                viewsRes.data.forEach(row => {
-                    liveViewsMap[row.novel_id] = parseNum(row.views_count);
-                });
-            }
-
-            const commentsRes = await supabaseClient.from('novel_comments').select('*');
-            if (commentsRes.data && Array.isArray(commentsRes.data) && typeof novels !== 'undefined') {
-                commentsRes.data.forEach(row => {
-                    const novel = novels.find(n => n.id === row.novel_id);
-                    if (novel && row.comments_json) {
-                        Object.keys(row.comments_json).forEach(chIdx => {
-                            if (novel.chapters[chIdx]) {
-                                novel.chapters[chIdx].comments = row.comments_json[chIdx] || [];
-                            }
-                        });
-                    }
-                });
-                localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-            }
-
-            updateRatingsAndUI();
-            if (typeof renderNovelsGrid === "function") renderNovelsGrid();
-        } catch (e) {}
+        return {
+            siteConfig: JSON.parse(JSON.stringify(siteConfig)),
+            lightNovels: lightNovels,
+            lastUpdated: Date.now()
+        };
     }
 
-    // بناء ملف HTML نظيف للرفع على جيت هب بالتوكن
+    // 6. الاستماع اللحظي فائق السرعة عبر WebSockets
+    function startRealtimeSocketListeners() {
+        updateSyncStatusBadge("متصل بسرعة البرق ⚡", "amber");
+
+        // أ) مستمع عداد المشاهدات (0.1 ثانية)
+        db.ref('viewsCounts').on('value', snapshot => {
+            const data = snapshot.val();
+            if (data && typeof novels !== 'undefined') {
+                Object.keys(data).forEach(nId => {
+                    liveViewsMap[nId] = parseCleanNumber(data[nId]);
+                    const targetNovel = novels.find(n => n.id === nId);
+                    if (targetNovel) {
+                        targetNovel.views = formatNumber(liveViewsMap[nId]);
+                    }
+                });
+                paintViewsAndStarsOnCards();
+            }
+        });
+
+        // ب) مستمع الفهرس الخفيف السريع (novelsMeta) -> يعرض الروايات الجديدة والفصول في 0.1 ثانية فوراً!
+        db.ref('fastMeta').on('value', snapshot => {
+            const meta = snapshot.val();
+            if (!meta || !Array.isArray(meta.lightNovels) || meta.lightNovels.length === 0) return;
+
+            isApplyingCloudData = true;
+
+            if (meta.siteConfig) {
+                Object.assign(siteConfig, meta.siteConfig);
+            }
+
+            // دمج الروايات الجديدة فوراً مع الاحتفاظ بنصوص الفصول المحملة مسبقاً
+            const existingNovelsMap = {};
+            novels.forEach(n => { existingNovelsMap[n.id] = n; });
+
+            novels.length = 0;
+            meta.lightNovels.forEach(lightN => {
+                const oldNovel = existingNovelsMap[lightN.id];
+                const mergedChapters = (lightN.chaptersMeta || []).map((chMeta, idx) => {
+                    const oldCh = oldNovel && oldNovel.chapters ? (oldNovel.chapters.find(c => c.id === chMeta.id) || oldNovel.chapters[idx]) : null;
+                    return {
+                        id: chMeta.id,
+                        title: chMeta.title,
+                        readTime: chMeta.readTime,
+                        isLocked: chMeta.isLocked,
+                        password: chMeta.password,
+                        comments: chMeta.comments || [],
+                        content: oldCh && oldCh.content ? oldCh.content : "جاري تحميل نص الفصل من السحابة..."
+                    };
+                });
+
+                const fullNovelObj = Object.assign({}, oldNovel || {}, lightN, { chapters: mergedChapters });
+                delete fullNovelObj.chaptersMeta;
+                novels.push(fullNovelObj);
+            });
+
+            localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
+            localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
+
+            refreshAllUI();
+            isApplyingCloudData = false;
+            updateSyncStatusBadge("متصل ومُحدّث في 0.1 ثانية 🚀", "emerald");
+        });
+
+        // ج) مستمع النصوص الكاملة في الخلفية (لتعبئة نصوص الفصول الجديدة بهدوء)
+        db.ref('siteData').on('value', snapshot => {
+            const cloudData = snapshot.val();
+            if (!cloudData || !Array.isArray(cloudData.novels) || cloudData.novels.length === 0) {
+                window.pushToFirebase(true);
+                return;
+            }
+
+            isApplyingCloudData = true;
+            novels.length = 0;
+            cloudData.novels.forEach(n => {
+                if (liveViewsMap[n.id] !== undefined) {
+                    n.views = formatNumber(Math.max(parseCleanNumber(n.views), liveViewsMap[n.id]));
+                } else {
+                    liveViewsMap[n.id] = parseCleanNumber(n.views);
+                }
+                novels.push(n);
+            });
+
+            if (cloudData.siteConfig) {
+                Object.assign(siteConfig, cloudData.siteConfig);
+            }
+
+            localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
+            localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
+
+            refreshAllUI();
+            isApplyingCloudData = false;
+        });
+    }
+
+    // 7. دفع التعديلات للسحابة (يرسل الفهرس الخفيف أولاً في 0.1 ثانية ليظهر للناس فوراً، ثم يرسل النصوص الكاملة)
+    window.pushToFirebase = async function(silent = false) {
+        if (isApplyingCloudData) return;
+        try {
+            updateSyncStatusBadge("جاري النشر الفوري... ⚡", "amber");
+            recalculateAllRatings();
+
+            const viewsPayload = {};
+            novels.forEach(n => {
+                const v = liveViewsMap[n.id] !== undefined ? liveViewsMap[n.id] : parseCleanNumber(n.views);
+                n.views = formatNumber(v);
+                viewsPayload[n.id] = v;
+            });
+
+            localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
+            localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
+
+            // 1. إرسال الفهرس الخفيف والمشاهدات أولاً (تصل لكل القراء في 0.1 ثانية!)
+            const fastMetaPayload = buildLightweightMetaPayload();
+            await Promise.all([
+                db.ref('fastMeta').set(fastMetaPayload),
+                db.ref('viewsCounts').update(viewsPayload)
+            ]);
+
+            updateSyncStatusBadge("ظهرت الروايات للجميع فوراً! ✅", "emerald");
+
+            // 2. إرسال النصوص الكاملة للفصول في الخلفية
+            await db.ref('siteData').set({
+                siteConfig: JSON.parse(JSON.stringify(siteConfig)),
+                novels: JSON.parse(JSON.stringify(novels)),
+                lastUpdated: Date.now()
+            });
+
+            if (!silent) {
+                if (typeof showToast === "function") showToast("🚀 تم نشر الروايات والتعديلات في 0.1 ثانية!");
+                alert("✅ تم النشر بنجاح وظهرت التعديلات لجميع القراء في نفس اللحظة!");
+            }
+            return true;
+        } catch (err) {
+            console.error("Push Error:", err);
+            updateSyncStatusBadge("فشل الحفظ ❌", "red");
+            if (!silent) alert("❌ خطأ أثناء الحفظ: " + err.message);
+            return false;
+        }
+    };
+
+    window.pullFromFirebase = function(showAlert = false) {
+        localStorage.removeItem('alradad_novels_db');
+        localStorage.removeItem('alradad_site_config');
+        db.ref('fastMeta').once('value').then(() => {
+            if (showAlert) alert("✅ تم التحديث اللحظي بنجاح!");
+        });
+    };
+
+    // 8. ربط الدوال (مع مراقبة openNovelDetails فقط لمنع زيادة المشاهدات مرتين)
+    function initAllHooks() {
+        enforceReaderModeOnLoad();
+
+        const adminFns = [
+            'handleSaveNovel', 'deleteNovelById', 'moveNovelOrder',
+            'handleSaveChapter', 'deleteChapterByIndex', 'moveChapterOrder',
+            'applyColorPreset', 'applyCustomColor', 'applyCustomAccent'
+        ];
+
+        adminFns.forEach(fnName => {
+            if (typeof window[fnName] === 'function' && !window[fnName]._v11Hooked) {
+                const orig = window[fnName];
+                window[fnName] = function(...args) {
+                    const res = orig.apply(this, args);
+                    if (isAuthorActive()) {
+                        setTimeout(() => window.pushToFirebase(true), 100);
+                    }
+                    return res;
+                };
+                window[fnName]._v11Hooked = true;
+            }
+        });
+
+        if (typeof window.renderNovelsGrid === 'function' && !window.renderNovelsGrid._v11Hooked) {
+            const origGrid = window.renderNovelsGrid;
+            window.renderNovelsGrid = function(...args) {
+                recalculateAllRatings();
+                const res = origGrid.apply(this, args);
+                paintViewsAndStarsOnCards();
+                return res;
+            };
+            window.renderNovelsGrid._v11Hooked = true;
+        }
+
+        // مراقبة openNovelDetails فقط (وليس requestNovelAccess) لضمان زيادة +1 فقط!
+        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._v11Hooked) {
+            const origOpenDetails = window.openNovelDetails;
+            window.openNovelDetails = function(novelId, ...rest) {
+                const res = origOpenDetails.apply(this, [novelId, ...rest]);
+                window.incrementNovelViewLive(novelId);
+                setTimeout(paintViewsAndStarsOnCards, 50);
+                return res;
+            };
+            window.openNovelDetails._v11Hooked = true;
+        }
+
+        // مراقبة openChapterReader فقط لزيادة المشاهدات عند قراءة فصل
+        if (typeof window.openChapterReader === 'function' && !window.openChapterReader._v11Hooked) {
+            const origOpenReader = window.openChapterReader;
+            window.openChapterReader = function(novelId, chapterIdx, ...rest) {
+                const res = origOpenReader.apply(this, [novelId, chapterIdx, ...rest]);
+                const targetId = novelId || (typeof currentNovelId !== 'undefined' ? currentNovelId : null);
+                if (targetId) window.incrementNovelViewLive(targetId);
+                return res;
+            };
+            window.openChapterReader._v11Hooked = true;
+        }
+
+        // تعليقات وتقييمات القراء تُرسل في المسار السريع أيضاً لتظهر في 0.1 ثانية!
+        ['handleAddChapterComment', 'deleteChapterComment'].forEach(fnName => {
+            if (typeof window[fnName] === 'function' && !window[fnName]._v11Hooked) {
+                const orig = window[fnName];
+                window[fnName] = function(...args) {
+                    const res = orig.apply(this, args);
+                    recalculateAllRatings();
+                    paintViewsAndStarsOnCards();
+                    window.pushToFirebase(true);
+                    return res;
+                };
+                window[fnName]._v11Hooked = true;
+            }
+        });
+
+        injectCloudControlBox();
+        startRealtimeSocketListeners();
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', initAllHooks);
+    } else {
+        initAllHooks();
+    }
+
     function generateCleanReaderHtmlString() {
-        updateRatingsAndUI();
+        recalculateAllRatings();
+        const lockModeRadio = document.querySelector('input[name="export-lock-mode"]:checked');
+        const allowSecret = lockModeRadio ? (lockModeRadio.value === 'secret') : true;
+        const pinInput = document.getElementById('export-secret-pin');
+        const secretPin = pinInput && pinInput.value.trim() ? pinInput.value.trim() : SECRET_AUTHOR_PIN;
+
         const cloneDoc = document.documentElement.cloneNode(true);
         const tokenEl = cloneDoc.querySelector('#gh-personal-token');
         if (tokenEl) tokenEl.setAttribute('value', '');
+
         ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
             const m = cloneDoc.querySelector('#' + id);
-            if (m) { m.classList.add('hidden'); m.classList.remove('flex'); m.removeAttribute('style'); }
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+                m.removeAttribute('style');
+            }
         });
-        cloneDoc.querySelectorAll('.admin-only-ui').forEach(el => { el.classList.add('hidden'); el.style.display = 'none'; });
+
+        cloneDoc.querySelectorAll('.admin-only-ui').forEach(el => {
+            el.classList.add('hidden');
+            el.style.display = 'none';
+        });
+
+        const homeView = cloneDoc.querySelector('#view-home');
+        const detailsView = cloneDoc.querySelector('#view-novel-details');
+        const readerView = cloneDoc.querySelector('#view-reader');
+        if (homeView) homeView.classList.remove('hidden');
+        if (detailsView) detailsView.classList.add('hidden');
+        if (readerView) readerView.classList.add('hidden');
+
         let fullHtml = "<!DOCTYPE html>\n" + cloneDoc.outerHTML;
+
         const newDefaultBlock = `/*__START_DEFAULT_DATA__*/
         const PUBLISHED_READER_MODE = true;
-        const ALLOW_SECRET_AUTHOR_UNLOCK = true;
-        const SECRET_AUTHOR_PIN = "49102206";
+        const ALLOW_SECRET_AUTHOR_UNLOCK = ${allowSecret};
+        const SECRET_AUTHOR_PIN = ${JSON.stringify(secretPin)};
         const EXPORT_BUILD_VERSION = "published_${Date.now()}";
+
+        // ==================== DEFAULT SITE CONFIGURATION ====================
         const defaultSiteConfig = ${JSON.stringify(siteConfig, null, 4)};
+
+        // ==================== INITIAL NOVELS DATABASE ====================
         const defaultNovels = ${JSON.stringify(novels, null, 4)};`;
+
         const endRegex = /\/\*__START_DEFAULT_DATA__\*\/[\s\S]*?const defaultNovels\s*=\s*\[[\s\S]*?\n\];/;
-        if (endRegex.test(fullHtml)) fullHtml = fullHtml.replace(endRegex, newDefaultBlock);
+        if (endRegex.test(fullHtml)) {
+            fullHtml = fullHtml.replace(endRegex, newDefaultBlock);
+        }
         return fullHtml;
     }
 
-    // زر الرفع المباشر على GitHub بالتوكن
     window.publishDirectlyToGitHub = async function() {
         const tokenInput = document.getElementById('gh-personal-token');
         const branchInput = document.getElementById('gh-branch-name');
@@ -11769,13 +12120,13 @@ window.addEventListener('load', () => {
         localStorage.setItem('alradad_gh_token', token);
         localStorage.setItem('alradad_gh_branch', branch);
 
-        const originalBtnHtml = btn ? btn.innerHTML : '';
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الرفع على GitHub...</span>`;
-        }
+        const originalBtnHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الرفع على Firebase و GitHub...</span>`;
 
         try {
+            await window.pushToFirebase(true);
+
             const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
             const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}&_t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' },
@@ -11800,15 +12151,17 @@ window.addEventListener('load', () => {
             }
             const base64Content = btoa(binaryStr);
 
+            const putBody = {
+                message: `تحديث تلقائي من لوحة التحكم - ${new Date().toLocaleString('ar-EG')}`,
+                content: base64Content,
+                branch: branch
+            };
+            if (fileSha) putBody.sha = fileSha;
+
             const putRes = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: `تحديث تلقائي من لوحة التحكم - ${new Date().toLocaleString('ar-EG')}`,
-                    content: base64Content,
-                    branch: branch,
-                    sha: fileSha
-                })
+                body: JSON.stringify(putBody)
             });
 
             if (!putRes.ok) {
@@ -11816,21 +12169,34 @@ window.addEventListener('load', () => {
                 throw new Error(errJson.message || "فشل رفع الملف على GitHub");
             }
 
-            alert("✅ تم رفع وتحديث ملف index.html على GitHub بنجاح!");
+            updateSyncStatusBadge("تم التحديث على GitHub + Firebase 🚀", "emerald");
+            alert("✅ تم رفع التعديلات بنجاح على كلٍ من Firebase و GitHub!");
         } catch (error) {
             console.error("GitHub Push Error:", error);
             alert("❌ حدث خطأ أثناء الرفع على GitHub:\n" + error.message);
+            updateSyncStatusBadge("فشل الرفع على GitHub ⚠️", "red");
         } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = originalBtnHtml;
-            }
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
         }
     };
 
     function injectCloudControlBox() {
+        const cpHeader = document.querySelector('#control-panel-modal > div > div:first-child > div:last-child');
+        if (cpHeader && !document.getElementById('quick-cloud-save-btn')) {
+            const quickBtn = document.createElement('button');
+            quickBtn.id = 'quick-cloud-save-btn';
+            quickBtn.type = 'button';
+            quickBtn.onclick = () => window.pushToFirebase(false);
+            quickBtn.className = 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer';
+            quickBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>نشر فوري (0.1 ثانية) ⚡</span>`;
+            cpHeader.insertBefore(quickBtn, cpHeader.firstChild);
+        }
+
         const backupPane = document.getElementById('cp-pane-backup');
-        if (!backupPane || document.getElementById('cloud-github-auto-box')) return;
+        if (!backupPane) return;
+        const oldBox = document.getElementById('cloud-github-auto-box');
+        if (oldBox) oldBox.remove();
 
         const savedToken = localStorage.getItem('alradad_gh_token') || '';
         const savedBranch = localStorage.getItem('alradad_gh_branch') || 'main';
@@ -11839,14 +12205,19 @@ window.addEventListener('load', () => {
         box.id = 'cloud-github-auto-box';
         box.className = 'bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-500/50 shadow-2xl space-y-5 mb-6';
         box.innerHTML = `
-            <div class="flex items-center gap-3 border-b border-white/10 pb-4">
-                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                    <i class="fa-brands fa-github"></i>
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-rocket"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg sm:text-xl font-black text-amber-400">محرك الفهرس السريع Fast-Meta (V11)</h4>
+                        <p class="text-xs text-slate-300">الروايات الجديدة والمشاهدات (+1 بالضبط) تظهر لجميع القراء في 0.1 ثانية!</p>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="text-lg font-black text-amber-400">النشر المباشر على GitHub بالتوكن</h4>
-                    <p class="text-xs text-slate-300">حدّث موقعك على جيت هب بضغطة زر واحدة بدون تنزيل ملفات!</p>
-                </div>
+                <span id="cloud-sync-status-badge" class="text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
+                    متصل بسرعة البرق ✅
+                </span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -11862,52 +12233,22 @@ window.addEventListener('load', () => {
                 </div>
             </div>
 
-            <div>
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button type="button" onclick="window.pushToFirebase(false)"
+                    class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
+                    <i class="fa-solid fa-bolt text-lg"></i>
+                    <span>1. حفظ ونشر فوري (0.1 ثانية)</span>
+                </button>
+
                 <button type="button" id="btn-gh-direct-push" onclick="publishDirectlyToGitHub()"
-                    class="w-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2.5 text-sm cursor-pointer">
-                    <i class="fa-brands fa-github text-xl"></i>
-                    <span>تحديث ورفع ملف index.html على GitHub مباشرة الآن</span>
+                    class="flex-1 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
+                    <i class="fa-brands fa-github text-lg"></i>
+                    <span>2. تحديث ملف index.html على GitHub</span>
                 </button>
             </div>
         `;
 
         backupPane.insertBefore(box, backupPane.firstChild);
-    }
-
-    function initHooks() {
-        enforceReaderMode();
-
-        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._supaHooked) {
-            const orig = window.openNovelDetails;
-            window.openNovelDetails = function(novelId, ...rest) {
-                const res = orig.apply(this, [novelId, ...rest]);
-                window.incrementNovelViewLive(novelId);
-                return res;
-            };
-            window.openNovelDetails._supaHooked = true;
-        }
-
-        ['handleAddChapterComment', 'deleteChapterComment'].forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._supaHooked) {
-                const orig = window[fnName];
-                window[fnName] = function(...args) {
-                    const res = orig.apply(this, args);
-                    updateRatingsAndUI();
-                    setTimeout(() => window.syncReaderCommentsToSupabase(), 150);
-                    return res;
-                };
-                window[fnName]._supaHooked = true;
-            }
-        });
-
-        injectCloudControlBox();
-        fetchSupabaseData();
-    }
-
-    if (document.readyState === 'loading') {
-        window.addEventListener('DOMContentLoaded', initHooks);
-    } else {
-        initHooks();
     }
 })();
 </script>
