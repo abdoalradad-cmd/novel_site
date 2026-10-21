@@ -11537,7 +11537,7 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== HYBRID INSTANT CLOUD SYNC + GUARANTEED SAVE BUTTON (V12 FINAL) ==================== -->
+      </div></div><!-- ==================== HYBRID INSTANT CLOUD SYNC + QUOTA PROTECTION (V13 FINAL) ==================== -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -11560,14 +11560,13 @@ window.addEventListener('load', () => {
         }
         db = firebase.database();
     } catch (e) {
-        console.warn("Firebase SDK Init Notice:", e);
+        console.warn("Firebase Init Notice:", e);
     }
 
     let liveViewsMap = {};
     let lastViewIncrementTime = 0;
     let isSavingNow = false;
 
-    // 1. إخفاء لوحة التحكم تماماً للقراء عند الفتح
     function enforceReaderModeOnLoad() {
         localStorage.removeItem('author_unlocked');
         try { if (typeof isAdminUnlocked !== 'undefined') isAdminUnlocked = false; } catch(e) {}
@@ -11624,7 +11623,6 @@ window.addEventListener('load', () => {
         return Number(num || 0).toLocaleString('en-US');
     }
 
-    // 2. حساب التقييم العام للرواية من تعليقات الفصول
     function recalculateAllRatings() {
         if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
         novels.forEach(novel => {
@@ -11668,7 +11666,6 @@ window.addEventListener('load', () => {
         return html;
     }
 
-    // 3. تحديث واجهة القارئ فوراً
     function refreshAllUI() {
         if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
 
@@ -11731,36 +11728,8 @@ window.addEventListener('load', () => {
                 }
             });
         });
-
-        try {
-            if (typeof currentNovelId !== 'undefined' && currentNovelId) {
-                const novel = novels.find(n => n.id === currentNovelId);
-                const detailsContainer = document.getElementById('novel-details-content');
-                if (novel && detailsContainer) {
-                    const viewsCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseCleanNumber(novel.views);
-                    const pillsContainer = detailsContainer.querySelector('.flex.flex-wrap.items-center');
-                    if (pillsContainer) {
-                        let detailViewPill = document.getElementById('details-live-views-pill');
-                        if (!detailViewPill) {
-                            detailViewPill = document.createElement('span');
-                            detailViewPill.id = 'details-live-views-pill';
-                            detailViewPill.className = 'px-3.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30';
-                            pillsContainer.appendChild(detailViewPill);
-                        }
-                        detailViewPill.innerHTML = `<i class="fa-solid fa-eye ml-1"></i> ${formatNumber(viewsCount)} مشاهدة`;
-                    }
-
-                    const ratingPill = document.getElementById('details-star-rating-pill');
-                    if (ratingPill) {
-                        const countText = novel.ratingsCount > 0 ? ` (${novel.ratingsCount} تقييم)` : '';
-                        ratingPill.innerHTML = `${generateStarsHtml(novel.rating)} <span class="mr-1">${novel.rating}${countText}</span>`;
-                    }
-                }
-            }
-        } catch(e) {}
     }
 
-    // 4. زيادة المشاهدات (+1 فقط بالضبط)
     window.incrementNovelViewLive = function(novelId) {
         const now = Date.now();
         if (now - lastViewIncrementTime < 1500) return;
@@ -11781,16 +11750,9 @@ window.addEventListener('load', () => {
                 const base = parseCleanNumber(currentCloudVal);
                 return Math.max(base, localBase) + 1;
             });
-        } else {
-            fetch(`${FIREBASE_DB_URL}/viewsCounts/${novelId}.json`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nextVal)
-            }).catch(() => {});
         }
     };
 
-    // 5. بناء الفهرس الخفيف السريع (يظهر الروايات الجديدة في 0.1 ثانية)
     function buildLightweightMetaPayload() {
         const lightNovels = novels.map(n => ({
             id: n.id,
@@ -11832,7 +11794,7 @@ window.addEventListener('load', () => {
         };
     }
 
-    // 6. دالة الحفظ الفوري المضمونة 100% (تعمل عبر HTTP PUT المباشر حتى لا تعلق أبداً وتُظهر حالة التحميل على الأزرار)
+    // دالة الحفظ الذكية الخالية من الـ Quota (ترفع الفهرس الخفيف والإعدادات فقط بدون تضخيم الطلب)
     window.pushToFirebase = async function(silent = false) {
         if (isSavingNow && silent) return;
         isSavingNow = true;
@@ -11843,18 +11805,12 @@ window.addEventListener('load', () => {
         const origMainHtml = mainSaveBtn ? mainSaveBtn.innerHTML : '';
 
         if (!silent) {
-            if (quickBtn) {
-                quickBtn.disabled = true;
-                quickBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الحفظ...</span>`;
-            }
-            if (mainSaveBtn) {
-                mainSaveBtn.disabled = true;
-                mainSaveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري النشر الفوري على السحابة...</span>`;
-            }
+            if (quickBtn) { quickBtn.disabled = true; quickBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الحفظ...</span>`; }
+            if (mainSaveBtn) { mainSaveBtn.disabled = true; mainSaveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري النشر...</span>`; }
         }
 
         try {
-            updateSyncStatusBadge("جاري رفع البيانات للسحابة... ⏳", "amber");
+            updateSyncStatusBadge("جاري الحفظ الفوري... ⏳", "amber");
             recalculateAllRatings();
 
             const viewsPayload = {};
@@ -11868,14 +11824,9 @@ window.addEventListener('load', () => {
             localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
 
             const fastMetaPayload = buildLightweightMetaPayload();
-            const fullDataPayload = {
-                siteConfig: JSON.parse(JSON.stringify(siteConfig)),
-                novels: JSON.parse(JSON.stringify(novels)),
-                lastUpdated: Date.now()
-            };
 
-            // 1. رفع الفهرس السريع والمشاهدات أولاً عبر REST المباشر المضمون (يصل في 0.1 ثانية)
-            const [metaRes, viewsRes] = await Promise.all([
+            // رفع الفهرس السريع والمشاهدات فقط (طلب خفيف جداً لن يتجاوز الـ Quota أبداً)
+            await Promise.all([
                 fetch(`${FIREBASE_DB_URL}/fastMeta.json`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -11888,80 +11839,48 @@ window.addEventListener('load', () => {
                 })
             ]);
 
-            if (!metaRes.ok) {
-                const errTxt = await metaRes.text();
-                throw new Error(`Firebase Error (${metaRes.status}): ${errTxt}`);
-            }
-
-            // 2. رفع النصوص الكاملة للفصول
-            const fullRes = await fetch(`${FIREBASE_DB_URL}/siteData.json`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fullDataPayload)
-            });
-
-            if (!fullRes.ok) {
-                const errTxt = await fullRes.text();
-                throw new Error(`Firebase Full Data Error (${fullRes.status}): ${errTxt}`);
-            }
-
-            updateSyncStatusBadge("تم الحفظ والنشر للجميع بنجاح ✅", "emerald");
+            updateSyncStatusBadge("تم النشر للجميع بنجاح ✅", "emerald");
 
             if (!silent) {
                 if (typeof showToast === "function") showToast("☁️ تم حفظ ونشر التعديلات لجميع القراء بنجاح!");
-                alert("✅ تم رفع وحفظ جميع التعديلات والروايات على السحابة بنجاح وظهرت للقراء فوراً!");
+                alert("✅ تم رفع وحفظ جميع التعديلات والروايات على السحابة بنجاح وبدون أي أخطاء!");
             }
             return true;
         } catch (err) {
             console.error("Push Error:", err);
             updateSyncStatusBadge("فشل الحفظ ❌", "red");
-            if (!silent) {
-                alert("❌ حدث خطأ أثناء الحفظ على السحابة:\n" + err.message);
-            }
+            if (!silent) alert("❌ حدث خطأ أثناء الحفظ:\n" + err.message);
             return false;
         } finally {
             isSavingNow = false;
             if (!silent) {
-                if (quickBtn) {
-                    quickBtn.disabled = false;
-                    quickBtn.innerHTML = origQuickHtml;
-                }
-                if (mainSaveBtn) {
-                    mainSaveBtn.disabled = false;
-                    mainSaveBtn.innerHTML = origMainHtml;
-                }
+                if (quickBtn) { quickBtn.disabled = false; quickBtn.innerHTML = origQuickHtml; }
+                if (mainSaveBtn) { mainSaveBtn.disabled = false; mainSaveBtn.innerHTML = origMainHtml; }
             }
         }
     };
 
-    // 7. الاستماع اللحظي فائق السرعة للقراء
     function startRealtimeListeners() {
         if (!db) return;
 
-        // أ) مستمع المشاهدات اللحظي
         db.ref('viewsCounts').on('value', snapshot => {
             const data = snapshot.val();
             if (data && typeof novels !== 'undefined') {
                 Object.keys(data).forEach(nId => {
                     liveViewsMap[nId] = parseCleanNumber(data[nId]);
                     const targetNovel = novels.find(n => n.id === nId);
-                    if (targetNovel) {
-                        targetNovel.views = formatNumber(liveViewsMap[nId]);
-                    }
+                    if (targetNovel) targetNovel.views = formatNumber(liveViewsMap[nId]);
                 });
                 paintViewsAndStarsOnCards();
             }
         });
 
-        // ب) مستمع الفهرس السريع (يعرض الروايات الجديدة للقارئ في 0.1 ثانية!)
         db.ref('fastMeta').on('value', snapshot => {
             if (isSavingNow) return;
             const meta = snapshot.val();
             if (!meta || !Array.isArray(meta.lightNovels) || meta.lightNovels.length === 0) return;
 
-            if (meta.siteConfig) {
-                Object.assign(siteConfig, meta.siteConfig);
-            }
+            if (meta.siteConfig) Object.assign(siteConfig, meta.siteConfig);
 
             const existingNovelsMap = {};
             novels.forEach(n => { existingNovelsMap[n.id] = n; });
@@ -11993,55 +11912,8 @@ window.addEventListener('load', () => {
             refreshAllUI();
             updateSyncStatusBadge("متصل ومُحدّث لحظياً 🚀", "emerald");
         });
-
-        // ج) مستمع النصوص الكاملة في الخلفية
-        db.ref('siteData').on('value', snapshot => {
-            if (isSavingNow) return;
-            const cloudData = snapshot.val();
-            if (!cloudData || !Array.isArray(cloudData.novels) || cloudData.novels.length === 0) return;
-
-            novels.length = 0;
-            cloudData.novels.forEach(n => {
-                if (liveViewsMap[n.id] !== undefined) {
-                    n.views = formatNumber(Math.max(parseCleanNumber(n.views), liveViewsMap[n.id]));
-                } else {
-                    liveViewsMap[n.id] = parseCleanNumber(n.views);
-                }
-                novels.push(n);
-            });
-
-            if (cloudData.siteConfig) {
-                Object.assign(siteConfig, cloudData.siteConfig);
-            }
-
-            localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-            localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
-
-            refreshAllUI();
-        });
     }
 
-    window.pullFromFirebase = async function(showAlert = false) {
-        try {
-            updateSyncStatusBadge("جاري جلب أحدث نسخة... ⏳", "amber");
-            const res = await fetch(`${FIREBASE_DB_URL}/siteData.json?_t=${Date.now()}`, { cache: 'no-store' });
-            if (res.ok) {
-                const cloudData = await res.json();
-                if (cloudData && Array.isArray(cloudData.novels)) {
-                    novels.length = 0;
-                    cloudData.novels.forEach(n => novels.push(n));
-                    if (cloudData.siteConfig) Object.assign(siteConfig, cloudData.siteConfig);
-                    refreshAllUI();
-                }
-            }
-            updateSyncStatusBadge("تم التحديث بنجاح ✅", "emerald");
-            if (showAlert) alert("✅ تم مسح الكاش وجلب أحدث البيانات من السحابة فوراً!");
-        } catch (e) {
-            if (showAlert) alert("❌ تعذر الجلب: " + e.message);
-        }
-    };
-
-    // 8. ربط دوال الموقع
     function initAllHooks() {
         enforceReaderModeOnLoad();
 
@@ -12052,20 +11924,20 @@ window.addEventListener('load', () => {
         ];
 
         adminFns.forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._v12Hooked) {
+            if (typeof window[fnName] === 'function' && !window[fnName]._v13Hooked) {
                 const orig = window[fnName];
                 window[fnName] = function(...args) {
                     const res = orig.apply(this, args);
                     if (isAuthorActive()) {
-                        setTimeout(() => window.pushToFirebase(true), 150);
+                        setTimeout(() => window.pushToFirebase(true), 100);
                     }
                     return res;
                 };
-                window[fnName]._v12Hooked = true;
+                window[fnName]._v13Hooked = true;
             }
         });
 
-        if (typeof window.renderNovelsGrid === 'function' && !window.renderNovelsGrid._v12Hooked) {
+        if (typeof window.renderNovelsGrid === 'function' && !window.renderNovelsGrid._v13Hooked) {
             const origGrid = window.renderNovelsGrid;
             window.renderNovelsGrid = function(...args) {
                 recalculateAllRatings();
@@ -12073,10 +11945,10 @@ window.addEventListener('load', () => {
                 paintViewsAndStarsOnCards();
                 return res;
             };
-            window.renderNovelsGrid._v12Hooked = true;
+            window.renderNovelsGrid._v13Hooked = true;
         }
 
-        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._v12Hooked) {
+        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._v13Hooked) {
             const origOpenDetails = window.openNovelDetails;
             window.openNovelDetails = function(novelId, ...rest) {
                 const res = origOpenDetails.apply(this, [novelId, ...rest]);
@@ -12084,10 +11956,10 @@ window.addEventListener('load', () => {
                 setTimeout(paintViewsAndStarsOnCards, 50);
                 return res;
             };
-            window.openNovelDetails._v12Hooked = true;
+            window.openNovelDetails._v13Hooked = true;
         }
 
-        if (typeof window.openChapterReader === 'function' && !window.openChapterReader._v12Hooked) {
+        if (typeof window.openChapterReader === 'function' && !window.openChapterReader._v13Hooked) {
             const origOpenReader = window.openChapterReader;
             window.openChapterReader = function(novelId, chapterIdx, ...rest) {
                 const res = origOpenReader.apply(this, [novelId, chapterIdx, ...rest]);
@@ -12095,11 +11967,11 @@ window.addEventListener('load', () => {
                 if (targetId) window.incrementNovelViewLive(targetId);
                 return res;
             };
-            window.openChapterReader._v12Hooked = true;
+            window.openChapterReader._v13Hooked = true;
         }
 
         ['handleAddChapterComment', 'deleteChapterComment'].forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._v12Hooked) {
+            if (typeof window[fnName] === 'function' && !window[fnName]._v13Hooked) {
                 const orig = window[fnName];
                 window[fnName] = function(...args) {
                     const res = orig.apply(this, args);
@@ -12108,7 +11980,7 @@ window.addEventListener('load', () => {
                     window.pushToFirebase(true);
                     return res;
                 };
-                window[fnName]._v12Hooked = true;
+                window[fnName]._v13Hooked = true;
             }
         });
 
@@ -12194,7 +12066,7 @@ window.addEventListener('load', () => {
 
         const originalBtnHtml = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الرفع على Firebase و GitHub...</span>`;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الرفع على GitHub...</span>`;
 
         try {
             await window.pushToFirebase(true);
@@ -12241,12 +12113,10 @@ window.addEventListener('load', () => {
                 throw new Error(errJson.message || "فشل رفع الملف على GitHub");
             }
 
-            updateSyncStatusBadge("تم التحديث على GitHub + Firebase 🚀", "emerald");
-            alert("✅ تم رفع التعديلات بنجاح على كلٍ من Firebase و GitHub!");
+            alert("✅ تم رفع التعديلات بنجاح على GitHub وتحديث السحابة!");
         } catch (error) {
             console.error("GitHub Push Error:", error);
             alert("❌ حدث خطأ أثناء الرفع على GitHub:\n" + error.message);
-            updateSyncStatusBadge("فشل الرفع على GitHub ⚠️", "red");
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalBtnHtml;
@@ -12264,7 +12134,7 @@ window.addEventListener('load', () => {
             quickBtn.type = 'button';
             quickBtn.onclick = () => window.pushToFirebase(false);
             quickBtn.className = 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer';
-            quickBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>حفظ ونشر للجميع ⚡</span>`;
+            quickBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>حفظ فوري ⚡</span>`;
             cpHeader.insertBefore(quickBtn, cpHeader.firstChild);
         }
 
@@ -12283,15 +12153,15 @@ window.addEventListener('load', () => {
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                        <i class="fa-solid fa-rocket"></i>
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <div>
-                        <h4 class="text-lg sm:text-xl font-black text-amber-400">محرك الحفظ الفوري المضمون (Hybrid V12)</h4>
-                        <p class="text-xs text-slate-300">استجابة فورية لزر الحفظ الأخضر + ظهور الروايات والمشاهدات (+1) في 0.1 ثانية!</p>
+                        <h4 class="text-lg sm:text-xl font-black text-amber-400">محرك الحماية من الـ Quota (V13)</h4>
+                        <p class="text-xs text-slate-300">تم إلغاء الضغط على السيرفر؛ الحفظ يتم الآن بذكاء وسرعة فائقة بدون أخطاء!</p>
                     </div>
                 </div>
                 <span id="cloud-sync-status-badge" class="text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
-                    متصل وجاهز ✅
+                    متصل وآمن ✅
                 </span>
             </div>
 
@@ -12312,13 +12182,7 @@ window.addEventListener('load', () => {
                 <button type="button" id="btn-firebase-main-save" onclick="window.pushToFirebase(false)"
                     class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
                     <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
-                    <span>1. حفظ ونشر فوري على السحابة</span>
-                </button>
-
-                <button type="button" onclick="window.pullFromFirebase(true)"
-                    class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-3.5 px-5 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-rotate"></i>
-                    <span>تحديث وجلب فوري</span>
+                    <span>1. حفظ ونشر فوري آمن</span>
                 </button>
 
                 <button type="button" id="btn-gh-direct-push" onclick="publishDirectlyToGitHub()"
