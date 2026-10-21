@@ -11537,7 +11537,7 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== CLOUD SYNC + STABLE REALTIME VIEWS & RATINGS (ULTRA FINAL V8) ==================== -->
+      </div></div><!-- ==================== CLOUD SYNC + LIVE READER UI SYNC (ULTRA FINAL V9) ==================== -->
 <script id="alradad-cloud-sync-script">
 (function() {
     const FIREBASE_DB_URL = "https://alradad-site-default-rtdb.firebaseio.com";
@@ -11658,11 +11658,27 @@ window.addEventListener('load', () => {
         return Number(num).toLocaleString('en-US');
     }
 
-    function injectViewsAndRatingsInDOM() {
+    // دالة شاملة لتحديث واجهة القارئ فوراً بالداتا الجديدة
+    function forceRefreshReaderUI() {
         if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
-
         recalculateAllNovelsRatings();
 
+        // 1. إعادة رسم شبكة الروايات الرئيسية للقارئ بره
+        if (typeof renderNovelsGrid === "function") {
+            renderNovelsGrid();
+        }
+
+        // 2. تحديث الواجهة الترحيبية والهيرو
+        if (typeof renderHeroBanner === "function") {
+            renderHeroBanner();
+        }
+
+        // 3. تحديث القوائم المنسدلة
+        if (typeof populateFeaturedSelect === "function") {
+            populateFeaturedSelect();
+        }
+
+        // 4. تحديث الكروت والمشاهدات والنجوم
         novels.forEach(novel => {
             const viewsFormatted = novel.views || "1";
             const cardBtns = document.querySelectorAll(`button[onclick*="'${novel.id}'"]`);
@@ -11690,71 +11706,19 @@ window.addEventListener('load', () => {
             });
         });
 
-        if (typeof currentNovelId !== 'undefined' && currentNovelId) {
-            const novel = novels.find(n => n.id === currentNovelId);
-            const detailsContainer = document.getElementById('novel-details-content');
-            if (novel && detailsContainer) {
-                const pillsContainer = detailsContainer.querySelector('.flex.flex-wrap.items-center');
-                if (pillsContainer) {
-                    let detailViewPill = document.getElementById('details-live-views-pill');
-                    if (!detailViewPill) {
-                        detailViewPill = document.createElement('span');
-                        detailViewPill.id = 'details-live-views-pill';
-                        detailViewPill.className = 'px-3.5 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300';
-                        pillsContainer.appendChild(detailViewPill);
-                    }
-                    detailViewPill.innerHTML = `<i class="fa-solid fa-eye ml-1 theme-text-primary"></i> ${novel.views || "1"} مشاهدة`;
-                }
-
-                const ratingPill = document.getElementById('details-star-rating-pill');
-                if (ratingPill) {
-                    const countText = novel.ratingsCount > 0 ? ` (${novel.ratingsCount} تقييم للقراء)` : '';
-                    const starsHtml = generateStarsHtml(novel.rating);
-                    ratingPill.innerHTML = `${starsHtml} <span class="mr-1">${novel.rating}${countText}</span>`;
-                }
-            }
-        }
+        // 5. تحديث لوحة التحكم لو الكاتب فاتحها
+        if (typeof renderAdminNovelsList === "function") renderAdminNovelsList();
+        if (typeof renderAdminChaptersList === "function") renderAdminChaptersList();
     }
 
-    // الدالة المُحسنة لزيادة المشاهدات وتحديثها في الذاكرة والسحابة معاً
-    async function incrementNovelView(novelId) {
-        if (!novelId || typeof novels === 'undefined') return;
-        const novelIndex = novels.findIndex(n => n.id === novelId);
-        if (novelIndex === -1) return;
-
-        const sessionKey = `viewed_novel_${novelId}`;
-        if (sessionStorage.getItem(sessionKey)) {
-            injectViewsAndRatingsInDOM();
-            return;
-        }
-        sessionStorage.setItem(sessionKey, '1');
-
-        let currentViews = parseViewsCount(novels[novelIndex].views);
-        const newViewsNum = currentViews + 1;
-        const newViewsStr = String(newViewsNum);
-
-        novels[novelIndex].views = newViewsStr;
-        localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-        injectViewsAndRatingsInDOM();
-
-        try {
-            // تحديث كامل للرواية في السحابة لضمان مزامنة المشاهدات بسلاسة
-            await fetch(`${FIREBASE_DB_URL}/siteData/novels/${novelIndex}.json`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(novels[novelIndex])
-            });
-        } catch (e) {
-            console.error("View Increment Error:", e);
-        }
-    }
-
+    // جلب البيانات الإجباري وتطبيقها على واجهة القارئ فوراً
     window.pullFromFirebase = async function(showSuccessAlert = false) {
         try {
-            updateSyncStatusBadge("جاري التحديث... ⚡", "amber");
+            updateSyncStatusBadge("جاري تحديث واجهة القارئ... ⚡", "amber");
             const response = await fetch(`${FIREBASE_DB_URL}/siteData.json?_t=${Date.now()}`, {
                 method: 'GET',
-                headers: { 'Accept': 'application/json' }
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store'
             });
 
             if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
@@ -11768,7 +11732,6 @@ window.addEventListener('load', () => {
             isApplyingCloudData = true;
             novels.length = 0;
             cloudData.novels.forEach(n => novels.push(n));
-            recalculateAllNovelsRatings();
 
             if (cloudData.siteConfig) {
                 Object.assign(siteConfig, cloudData.siteConfig);
@@ -11778,13 +11741,9 @@ window.addEventListener('load', () => {
             localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
 
             if (typeof applyConfigToDOM === "function") applyConfigToDOM();
-            if (typeof renderHeroBanner === "function") renderHeroBanner();
-            if (typeof renderNovelsGrid === "function") renderNovelsGrid();
-            if (typeof renderAdminNovelsList === "function") renderAdminNovelsList();
-            if (typeof renderAdminChaptersList === "function") renderAdminChaptersList();
-            if (typeof populateFeaturedSelect === "function") populateFeaturedSelect();
-
-            injectViewsAndRatingsInDOM();
+            
+            // تنفيذ إعادة الرسم الإجباري
+            forceRefreshReaderUI();
 
             if (!isAuthorActive()) {
                 document.querySelectorAll('.admin-only-ui').forEach(el => {
@@ -11794,8 +11753,8 @@ window.addEventListener('load', () => {
             }
 
             isApplyingCloudData = false;
-            updateSyncStatusBadge("متصل ومُحدّث فوراً 🚀", "emerald");
-            if (showSuccessAlert) alert("✅ تم جلب التعديلات بنجاح!");
+            updateSyncStatusBadge("متصل ومُحدّث للقراء 🚀", "emerald");
+            if (showSuccessAlert) alert("✅ تم تحديث وعرض الروايات الجديدة للقراء بنجاح!");
         } catch (err) {
             console.warn("Pull Notice:", err);
             isApplyingCloudData = false;
@@ -11807,7 +11766,7 @@ window.addEventListener('load', () => {
         if (isApplyingCloudData) return;
         try {
             recalculateAllNovelsRatings();
-            updateSyncStatusBadge("جاري الحفظ... ⏳", "amber");
+            updateSyncStatusBadge("جاري الحفظ ونشرها للقراء... ⏳", "amber");
             
             const localNovels = typeof novels !== 'undefined' ? novels : defaultNovels;
             const localConfig = typeof siteConfig !== 'undefined' ? siteConfig : defaultSiteConfig;
@@ -11824,10 +11783,10 @@ window.addEventListener('load', () => {
                 body: JSON.stringify(payload)
             });
 
-            updateSyncStatusBadge("تم الحفظ والنشر بنجاح ✅", "emerald");
+            updateSyncStatusBadge("تم النشر للجميع على السحابة ✅", "emerald");
             if (!silent) {
-                notifyCloud("☁️ تم حفظ ونشر التعديلات للجميع!");
-                alert("✅ تم الحفظ بنجاح!");
+                notifyCloud("☁️ تم نشر الروايات والتعديلات فوراً لجميع القراء في الموقع!");
+                alert("✅ تم الحفظ والنشر للجميع بنجاح!");
             }
             return true;
         } catch (err) {
@@ -11843,6 +11802,37 @@ window.addEventListener('load', () => {
         syncDebounceTimer = setTimeout(() => window.pushToFirebase(silent), 300);
     }
 
+    async function incrementNovelView(novelId) {
+        if (!novelId || typeof novels === 'undefined') return;
+        const novelIndex = novels.findIndex(n => n.id === novelId);
+        if (novelIndex === -1) return;
+
+        const sessionKey = `viewed_novel_${novelId}`;
+        if (sessionStorage.getItem(sessionKey)) {
+            forceRefreshReaderUI();
+            return;
+        }
+        sessionStorage.setItem(sessionKey, '1');
+
+        let currentViews = parseViewsCount(novels[novelIndex].views);
+        const newViewsNum = currentViews + 1;
+        const newViewsStr = String(newViewsNum);
+
+        novels[novelIndex].views = newViewsStr;
+        localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
+        forceRefreshReaderUI();
+
+        try {
+            await fetch(`${FIREBASE_DB_URL}/siteData/novels/${novelIndex}.json`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novels[novelIndex])
+            });
+        } catch (e) {
+            console.error("View Increment Error:", e);
+        }
+    }
+
     async function syncReaderCommentAndRating(novelId) {
         if (typeof novels === 'undefined') return;
         const targetId = novelId || window.currentNovelId;
@@ -11853,8 +11843,7 @@ window.addEventListener('load', () => {
         recalculateNovelRating(novel);
 
         localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-        if (typeof renderNovelsGrid === "function") renderNovelsGrid();
-        injectViewsAndRatingsInDOM();
+        forceRefreshReaderUI();
 
         try {
             await fetch(`${FIREBASE_DB_URL}/siteData/novels/${novelIndex}.json`, {
@@ -11895,17 +11884,6 @@ window.addEventListener('load', () => {
             }
         });
 
-        if (typeof window.renderNovelsGrid === 'function' && !window.renderNovelsGrid._viewsHooked) {
-            const origRenderGrid = window.renderNovelsGrid;
-            window.renderNovelsGrid = function(...args) {
-                recalculateAllNovelsRatings();
-                const res = origRenderGrid.apply(this, args);
-                injectViewsAndRatingsInDOM();
-                return res;
-            };
-            window.renderNovelsGrid._viewsHooked = true;
-        }
-
         ['openNovelDetails', 'requestNovelAccess'].forEach(fnName => {
             if (typeof window[fnName] === 'function' && !window[fnName]._viewsHooked) {
                 const origFn = window[fnName];
@@ -11913,7 +11891,7 @@ window.addEventListener('load', () => {
                     recalculateAllNovelsRatings();
                     const res = origFn.apply(this, [novelId, ...rest]);
                     incrementNovelView(novelId);
-                    setTimeout(injectViewsAndRatingsInDOM, 100);
+                    setTimeout(forceRefreshReaderUI, 100);
                     return res;
                 };
                 window[fnName]._viewsHooked = true;
@@ -12112,11 +12090,11 @@ window.addEventListener('load', () => {
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="fa-solid fa-bolt"></i>
                     </div>
                     <div>
-                        <h4 class="text-lg sm:text-xl font-black text-amber-400">النشر الفوري ومزامنة المشاهدات (V8)</h4>
-                        <p class="text-xs text-slate-300">تم إصلاح مشكلة عداد المشاهدات والتقييمات لتزيد وتتحدث فوراً لكل الزوار!</p>
+                        <h4 class="text-lg sm:text-xl font-black text-amber-400">مزامنة واجهة القارئ الحية (Live UI Sync)</h4>
+                        <p class="text-xs text-slate-300">الروايات والفصول الجديدة ستظهر للقراء بره في الموقع فوراً بدون الحاجة لرفع أي ملفات!</p>
                     </div>
                 </div>
                 <span id="cloud-sync-status-badge" class="text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
@@ -12150,7 +12128,7 @@ window.addEventListener('load', () => {
                     <span>تحديث البيانات يدوياً</span>
                 </button>
 
-                <button type="button" id="btn-gh-direct-push" onclick="publishDirectlyToGitHub()"
+                <button type="button" id="btn-gh-direct-push" publishDirectlyToGitHub()"
                     class="flex-1 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
                     <i class="fa-brands fa-github text-lg"></i>
                     <span>2. تحديث ملف index.html على GitHub</span>
