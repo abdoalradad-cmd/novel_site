@@ -121,7 +121,7 @@
             <!-- Search Bar (Desktop) -->
             <div class="hidden lg:flex flex-1 max-w-md mx-6">
                 <div class="relative w-full">
-                    <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="ابحث عن رواية، تصنيف، أو فصل..." class="w-full bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-xl py-2.5 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all">
+                    <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="ابحث عن رواية، تصنيف، أو فصل..." class="w-full bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-xl py-2.5 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all" fdprocessedid="o05tja">
                     <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-slate-400"></i>
                 </div>
             </div>
@@ -129,25 +129,25 @@
             <!-- Right Actions -->
             <div class="flex items-center gap-2 sm:gap-2.5">
                 <!-- Preview Reader Mode Toggle (Admin UI Element) -->
-                <button onclick="toggleReaderPreviewMode(true)" class="admin-only-ui hidden md:flex bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-bold py-2.5 px-3.5 rounded-xl text-xs transition-all items-center gap-1.5" title="شاهد الموقع كما سيظهر للزوار بدون أزرار التعديل" style="">
+                <button onclick="toggleReaderPreviewMode(true)" class="admin-only-ui hidden md:flex bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-bold py-2.5 px-3.5 rounded-xl text-xs transition-all items-center gap-1.5" title="شاهد الموقع كما سيظهر للزوار بدون أزرار التعديل" style="" fdprocessedid="1lquh">
                     <i class="fa-solid fa-eye"></i>
                     <span>معاينة وضع القارئ</span>
                 </button>
 
                 <!-- Comprehensive Admin & Customizer Button -->
-                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-bg-gradient text-white font-bold py-2.5 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2 border border-white/15" style="">
+                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-bg-gradient text-white font-bold py-2.5 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2 border border-white/15" style="" fdprocessedid="dfcv79">
                     <i class="fa-solid fa-sliders theme-text-accent"></i>
                     <span>لوحة التحكم</span>
                 </button>
 
                 <!-- Quick Export Ready HTML Button -->
-                <button onclick="openControlPanel('backup')" class="admin-only-ui hidden sm:flex bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 font-bold py-2.5 px-3.5 rounded-xl text-xs sm:text-sm transition-all items-center gap-1.5" title="تحميل ملف index.html النهائي للنشر بدون لوحة تحكم" style="">
+                <button onclick="openControlPanel('backup')" class="admin-only-ui hidden sm:flex bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 font-bold py-2.5 px-3.5 rounded-xl text-xs sm:text-sm transition-all items-center gap-1.5" title="تحميل ملف index.html النهائي للنشر بدون لوحة تحكم" style="" fdprocessedid="8gj9hj">
                     <i class="fa-solid fa-cloud-arrow-down"></i>
                     <span>تصدير الموقع للنشر</span>
                 </button>
 
                 <!-- Dark Mode Toggle -->
-                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors shrink-0" title="تبديل الوضع الليلي / النهاري">
+                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors shrink-0" title="تبديل الوضع الليلي / النهاري" fdprocessedid="vi8y0w">
                     <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
                 </button>
             </div>
@@ -252,7 +252,7 @@
                     </a>
                 </div></div>
                 </div>
-                <button onclick="openControlPanel('identity')" class="admin-only-ui shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-2" style="">
+                <button onclick="openControlPanel('identity')" class="admin-only-ui shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-2" style="" fdprocessedid="uhxtre">
                     <i class="fa-solid fa-pen-to-square"></i>
                     <span>تعديل النبذة والهوية</span>
                 </button>
@@ -271,11 +271,11 @@
 
                     <!-- Category Filter Pills -->
                     <div id="category-filters" class="flex items-center gap-2 overflow-x-auto pb-1">
-                        <button onclick="filterCategory('all')" data-cat="all" class="cat-btn theme-bg-primary text-white px-4 py-1.5 rounded-xl text-xs font-bold transition-all">الكل</button>
-                        <button onclick="filterCategory('غموض')" data-cat="غموض" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">غموض وتشويق</button>
-                        <button onclick="filterCategory('دراما')" data-cat="دراما" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">دراما</button>
-                        <button onclick="filterCategory('خيال')" data-cat="خيال" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">خيال وفلسفة</button>
-                        <button onclick="filterCategory('تاريخي')" data-cat="تاريخي" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all">تاريخي</button>
+                        <button onclick="filterCategory('all')" data-cat="all" class="cat-btn theme-bg-primary text-white px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="pr32x">الكل</button>
+                        <button onclick="filterCategory('غموض')" data-cat="غموض" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="cv9dnq">غموض وتشويق</button>
+                        <button onclick="filterCategory('دراما')" data-cat="دراما" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="nd33mj">دراما</button>
+                        <button onclick="filterCategory('خيال')" data-cat="خيال" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="qmduql">خيال وفلسفة</button>
+                        <button onclick="filterCategory('تاريخي')" data-cat="تاريخي" class="cat-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-xs font-bold transition-all" fdprocessedid="puiaxp">تاريخي</button>
                     </div>
                 </div>
 
@@ -899,7 +899,7 @@
         <section id="view-novel-details" class="space-y-8 hidden">
             <!-- Back Navigation & Admin Quick Edit -->
             <div class="flex items-center justify-between flex-wrap gap-3">
-                <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 text-sm font-bold theme-text-primary hover:underline">
+                <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 text-sm font-bold theme-text-primary hover:underline" fdprocessedid="o5qsri">
                     <i class="fa-solid fa-arrow-right"></i>
                     <span>العودة إلى المكتبة الرئيسية</span>
                 </button>
@@ -1309,13 +1309,13 @@
             <!-- Top Reader Controls Bar -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-md border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                    <button onclick="backToNovelFromReader()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-colors">
+                    <button onclick="backToNovelFromReader()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-colors" fdprocessedid="si4cf">
                         <i class="fa-solid fa-arrow-right"></i>
                         <span>صفحة الرواية</span>
                     </button>
 
                     <!-- Chapter Selector Dropdown -->
-                    <select id="reader-chapter-select-top" onchange="changeChapterFromDropdown(this.value)" class="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-amber-400 font-bold text-xs sm:text-sm rounded-xl px-3.5 py-2 border theme-border-primary focus:outline-none">
+                    <select id="reader-chapter-select-top" onchange="changeChapterFromDropdown(this.value)" class="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-amber-400 font-bold text-xs sm:text-sm rounded-xl px-3.5 py-2 border theme-border-primary focus:outline-none" fdprocessedid="ewfo3o">
                     <option value="0" selected="">
                         الفصل الأول
                     </option>
@@ -1450,21 +1450,21 @@
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                     <!-- Font Size -->
                     <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
-                        <button onclick="adjustFontSize(2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تكبير الخط">A+</button>
+                        <button onclick="adjustFontSize(2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تكبير الخط" fdprocessedid="igz0vj">A+</button>
                         <span class="text-slate-400 text-xs px-1">|</span>
-                        <button onclick="adjustFontSize(-2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تصغير الخط">A-</button>
+                        <button onclick="adjustFontSize(-2)" class="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition-colors" title="تصغير الخط" fdprocessedid="llrx0k">A-</button>
                     </div>
 
                     <!-- Line Height -->
-                    <button onclick="toggleLineHeight()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition-colors" title="تباعد الأسطر">
+                    <button onclick="toggleLineHeight()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition-colors" title="تباعد الأسطر" fdprocessedid="qog0sr">
                         <i class="fa-solid fa-arrows-up-down"></i>
                     </button>
 
                     <!-- Paper Theme Swatches -->
                     <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl">
-                        <button onclick="setReaderTheme('sepia')" class="w-6 h-6 rounded-lg bg-[#f4ecd8] border border-amber-700/30 shadow-inner" title="ورق دافئ مريح للعين"></button>
-                        <button onclick="setReaderTheme('white')" class="w-6 h-6 rounded-lg bg-white border border-slate-300 shadow-inner" title="أبيض ناصع"></button>
-                        <button onclick="setReaderTheme('dark')" class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 shadow-inner" title="وضع ليلي"></button>
+                        <button onclick="setReaderTheme('sepia')" class="w-6 h-6 rounded-lg bg-[#f4ecd8] border border-amber-700/30 shadow-inner" title="ورق دافئ مريح للعين" fdprocessedid="8hbku"></button>
+                        <button onclick="setReaderTheme('white')" class="w-6 h-6 rounded-lg bg-white border border-slate-300 shadow-inner" title="أبيض ناصع" fdprocessedid="j858dl"></button>
+                        <button onclick="setReaderTheme('dark')" class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 shadow-inner" title="وضع ليلي" fdprocessedid="nasd7e"></button>
                     </div>
                 </div>
             </div>
@@ -1489,12 +1489,12 @@
 
                 <!-- Bottom Chapter Navigation -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-current/15">
-                    <button id="btn-prev-chapter" onclick="navigateAdjacentChapter(-1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-black/10 hover:bg-black/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none" disabled="">
+                    <button id="btn-prev-chapter" onclick="navigateAdjacentChapter(-1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-black/10 hover:bg-black/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none" fdprocessedid="ovr7cc" disabled="">
                         <i class="fa-solid fa-chevron-right"></i>
                         <span>الفصل السابق</span>
                     </button>
 
-                    <select id="reader-chapter-select-bottom" onchange="changeChapterFromDropdown(this.value)" class="w-full sm:w-auto bg-black/5 font-bold text-sm rounded-xl px-4 py-3 border border-current/20 focus:outline-none">
+                    <select id="reader-chapter-select-bottom" onchange="changeChapterFromDropdown(this.value)" class="w-full sm:w-auto bg-black/5 font-bold text-sm rounded-xl px-4 py-3 border border-current/20 focus:outline-none" fdprocessedid="8t768p">
                     <option value="0" selected="">
                         الفصل الأول
                     </option>
@@ -1620,7 +1620,7 @@
                     </option>
                 </select>
 
-                    <button id="btn-next-chapter" onclick="navigateAdjacentChapter(1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm theme-bg-primary text-white hover:opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none">
+                    <button id="btn-next-chapter" onclick="navigateAdjacentChapter(1)" class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm theme-bg-primary text-white hover:opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-30 disabled:pointer-events-none" fdprocessedid="lmdj4">
                         <span>الفصل التالي</span>
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
@@ -1644,7 +1644,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex-1">
                             <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اسم القارئ *</label>
-                            <input type="text" id="comment-reader-name" required="" placeholder="اكتب اسمك هنا..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-emerald-600">
+                            <input type="text" id="comment-reader-name" required="" placeholder="اكتب اسمك هنا..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-emerald-600" fdprocessedid="q2yow">
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">تقييمك للفصل (من نجمة إلى 5 نجوم):</label>
@@ -1663,7 +1663,7 @@
                         <textarea id="comment-reader-text" required="" rows="3" placeholder="اكتب رأيك في أحداث الفصل..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm leading-relaxed focus:outline-none focus:border-emerald-600"></textarea>
                     </div>
                     <div class="flex justify-end">
-                        <button type="submit" class="theme-bg-gradient text-white font-black px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2">
+                        <button type="submit" class="theme-bg-gradient text-white font-black px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md hover:opacity-95 transition-all flex items-center gap-2" fdprocessedid="fqez4m">
                             <i class="fa-solid fa-paper-plane"></i>
                             <span>نشر وتثبيت التعليق</span>
                         </button>
@@ -1749,17 +1749,17 @@
             </div>
 
             <div class="space-y-3">
-                <input type="password" id="content-password-input" onkeydown="if(event.key === 'Enter') verifyContentPassword()" placeholder="اكتب الباسورد / رمز الدخول هنا..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-emerald-600 px-4 py-3 text-center font-bold text-sm focus:outline-none transition-colors">
+                <input type="password" id="content-password-input" onkeydown="if(event.key === 'Enter') verifyContentPassword()" placeholder="اكتب الباسورد / رمز الدخول هنا..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 focus:border-emerald-600 px-4 py-3 text-center font-bold text-sm focus:outline-none transition-colors" fdprocessedid="n389ev">
                 <p id="content-password-error" class="hidden text-xs font-bold text-red-600 dark:text-red-400">
                     <i class="fa-solid fa-circle-exclamation ml-1"></i> رمز الدخول غير صحيح، يرجى التأكد والمحاولة مجدداً
                 </p>
 
                 <div class="flex items-center gap-2 pt-1">
-                    <button onclick="verifyContentPassword()" class="flex-1 theme-bg-gradient text-white font-black py-3 rounded-xl text-sm shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2">
+                    <button onclick="verifyContentPassword()" class="flex-1 theme-bg-gradient text-white font-black py-3 rounded-xl text-sm shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2" fdprocessedid="jy5mc9">
                         <i class="fa-solid fa-unlock-keyhole"></i>
                         <span>فتح ودخول الآن</span>
                     </button>
-                    <button onclick="closeContentPasswordModal()" class="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors">
+                    <button onclick="closeContentPasswordModal()" class="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors" fdprocessedid="ykiopo">
                         إلغاء
                     </button>
                 </div>
@@ -1792,11 +1792,11 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="switchControlTab('backup')" class="hidden sm:flex bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs items-center gap-2 shadow-md transition-all">
+                    <button onclick="switchControlTab('backup')" class="hidden sm:flex bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2 rounded-xl text-xs items-center gap-2 shadow-md transition-all" fdprocessedid="0bv4vl">
                         <i class="fa-solid fa-file-code"></i>
                         <span>تحميل index.html للنشر</span>
                     </button>
-                    <button onclick="closeControlPanel()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                    <button onclick="closeControlPanel()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors" fdprocessedid="kgfjh7">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
@@ -1804,23 +1804,23 @@
 
             <!-- Navigation Tabs -->
             <div class="bg-slate-100 dark:bg-slate-800/90 px-4 pt-3 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 overflow-x-auto shrink-0">
-                <button onclick="switchControlTab('identity')" id="cp-tab-identity" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                <button onclick="switchControlTab('identity')" id="cp-tab-identity" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="y8pieh">
                     <i class="fa-solid fa-id-card"></i>
                     <span>1. هوية وأجزاء الموقع</span>
                 </button>
-                <button onclick="switchControlTab('appearance')" id="cp-tab-appearance" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                <button onclick="switchControlTab('appearance')" id="cp-tab-appearance" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="sqye9">
                     <i class="fa-solid fa-palette"></i>
                     <span>2. المظهر والألوان والخطوط</span>
                 </button>
-                <button onclick="switchControlTab('novels')" id="cp-tab-novels" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                <button onclick="switchControlTab('novels')" id="cp-tab-novels" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="ei8e7r">
                     <i class="fa-solid fa-book"></i>
                     <span>3. إدارة وتعديل الروايات</span>
                 </button>
-                <button onclick="switchControlTab('chapters')" id="cp-tab-chapters" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                <button onclick="switchControlTab('chapters')" id="cp-tab-chapters" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white" fdprocessedid="ye5gz8">
                     <i class="fa-solid fa-list-ol"></i>
                     <span>4. إدارة وتعديل الفصول</span>
                 </button>
-                <button onclick="switchControlTab('backup')" id="cp-tab-backup" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-black text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap bg-white dark:bg-slate-900 theme-text-primary shadow-sm border-t-2 border-emerald-600">
+                <button onclick="switchControlTab('backup')" id="cp-tab-backup" class="cp-tab-btn px-4 py-2.5 rounded-t-xl font-black text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap bg-white dark:bg-slate-900 theme-text-primary shadow-sm border-t-2 border-emerald-600" fdprocessedid="75ln3i">
                     <i class="fa-solid fa-rocket text-amber-500"></i>
                     <span>5. نشر الموقع وتصدير index.html</span>
                 </button>
@@ -1840,15 +1840,15 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اسم الموقع الرئيسي</label>
-                                <input type="text" id="cfg-site-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
+                                <input type="text" id="cfg-site-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="22yiw">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">الوصف الفرعي تحت الاسم</label>
-                                <input type="text" id="cfg-site-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
+                                <input type="text" id="cfg-site-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="55aots">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">أيقونة شعار الموقع</label>
-                                <select id="cfg-logo-icon" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
+                                <select id="cfg-logo-icon" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="5jtxbj">
                                     <option value="fa-feather-pointed">ريشة كاتب كلاسيكية</option>
                                     <option value="fa-book-open">كتاب مفتوح</option>
                                     <option value="fa-pen-nib">سن قلم ذهبي</option>
@@ -1861,11 +1861,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اسم الكاتب الأساسي</label>
-                                <input type="text" id="cfg-author-name" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
+                                <input type="text" id="cfg-author-name" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="v2v9c">
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">نبذة تعريفية عن الكاتب</label>
-                                <input type="text" id="cfg-author-bio" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
+                                <input type="text" id="cfg-author-bio" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="11rjv">
                             </div>
                         </div>
                     </div>
@@ -1879,11 +1879,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">رقم الواتساب (يظهر للقارئ عند طلب الباسورد)</label>
-                                <input type="text" id="cfg-whatsapp-number" oninput="updateIdentityLive()" placeholder="مثال: 01012345678 أو +201012345678" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm font-mono" dir="ltr">
+                                <input type="text" id="cfg-whatsapp-number" oninput="updateIdentityLive()" placeholder="مثال: 01012345678 أو +201012345678" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm font-mono" dir="ltr" fdprocessedid="ujak0d">
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">الجملة التوضيحية التي تظهر فوق رقم الواتساب</label>
-                                <input type="text" id="cfg-whatsapp-message" oninput="updateIdentityLive()" placeholder="لشراء الرواية والحصول على رمز الدخول الرجاء التواصل مع هذا الرقم من خلال واتس آب" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm">
+                                <input type="text" id="cfg-whatsapp-message" oninput="updateIdentityLive()" placeholder="لشراء الرواية والحصول على رمز الدخول الرجاء التواصل مع هذا الرقم من خلال واتس آب" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm" fdprocessedid="18ym8q">
                             </div>
                         </div>
                     </div>
@@ -1902,7 +1902,7 @@
                                 <span class="text-xs sm:text-sm font-bold">إظهار شريط الإعلانات العلوي</span>
                             </label>
                             <div class="sm:col-span-2">
-                                <input type="text" id="cfg-announcement-text" oninput="updateIdentityLive()" placeholder="نص الإعلان العلوي..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="cfg-announcement-text" oninput="updateIdentityLive()" placeholder="نص الإعلان العلوي..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="qnh6y">
                             </div>
                         </div>
 
@@ -1920,7 +1920,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">اختر الرواية المتصدرة في الواجهة</label>
-                                <select id="cfg-featured-novel-id" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <select id="cfg-featured-novel-id" onchange="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="qlpib">
                 <option value="novel-1792008424515" selected="">قريبًا: معرض القاهرة الدولي للكتاب 2027</option>
             
                 <option value="corrupt-antidote">الترياق الفاسد: هباءً منثورا</option>
@@ -1946,7 +1946,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">نص الشارة الترحيبية للرواية المتصدرة</label>
-                                <input type="text" id="cfg-hero-badge" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="cfg-hero-badge" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="mp4fk">
                             </div>
                         </div>
                     </div>
@@ -1960,15 +1960,15 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">عنوان قسم المكتبة</label>
-                                <input type="text" id="cfg-library-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="cfg-library-title" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="97r6s">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">وصف قسم المكتبة</label>
-                                <input type="text" id="cfg-library-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="cfg-library-subtitle" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="qtighc">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">نص الحقوق في أسفل الموقع</label>
-                                <input type="text" id="cfg-footer-text" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="cfg-footer-text" oninput="updateIdentityLive()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="y7x92c">
                             </div>
                         </div>
                     </div>
@@ -2118,7 +2118,7 @@
                             <h4 id="novel-form-heading" class="font-black text-base theme-text-primary">إضافة رواية جديدة للمكتبة</h4>
                             <p class="text-xs text-slate-500">اختر رواية من القائمة بالأسفل لتعديلها، أو املأ النموذج لإضافة رواية جديدة</p>
                         </div>
-                        <button onclick="resetNovelFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0">
+                        <button onclick="resetNovelFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0" fdprocessedid="gmo41d">
                             + تفريغ النموذج لرواية جديدة
                         </button>
                     </div>
@@ -2428,22 +2428,22 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1">اسم الرواية *</label>
-                                <input type="text" id="form-novel-title" required="" placeholder="مثال: الترياق الفاسد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="form-novel-title" required="" placeholder="مثال: الترياق الفاسد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="6pxbw">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">العنوان الفرعي على الغلاف</label>
-                                <input type="text" id="form-novel-subtitle" placeholder="مثال: حين يصبح الدواء هو الداء" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="form-novel-subtitle" placeholder="مثال: حين يصبح الدواء هو الداء" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="saj70n">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">اسم المؤلف على الغلاف</label>
-                                <input type="text" id="form-novel-author" required="" value="عبدالرحمن الرداد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="form-novel-author" required="" value="عبدالرحمن الرداد" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="kxb9fb">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-bold mb-1">التصنيف الأدبي</label>
-                                <select id="form-novel-genre" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <select id="form-novel-genre" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="ygt19g">
                                     <option value="غموض">غموض وتشويق</option>
                                     <option value="دراما">دراما اجتماعية</option>
                                     <option value="خيال">خيال وفلسفة</option>
@@ -2452,14 +2452,14 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">حالة الرواية</label>
-                                <select id="form-novel-status" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <select id="form-novel-status" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="n5l8g9">
                                     <option value="مكتملة">مكتملة</option>
                                     <option value="مستمرة">مستمرة (تُنشر تباعاً)</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">لون وتصميم الغلاف</label>
-                                <select id="form-novel-gradient" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <select id="form-novel-gradient" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="idb5m2">
                                     <option value="from-emerald-900 via-slate-950 to-black">أخضر زمردي غامق</option>
                                     <option value="from-slate-900 via-blue-950 to-slate-950">أزرق ليلي كلاسيكي</option>
                                     <option value="from-amber-950 via-stone-900 to-black">ذهبي صحراوي عتيق</option>
@@ -2469,7 +2469,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">أيقونة الغلاف</label>
-                                <select id="form-novel-icon" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <select id="form-novel-icon" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="uzg605">
                                     <option value="fa-flask-vial">قارورة الترياق (مختبر)</option>
                                     <option value="fa-feather-pointed">ريشة أدبية</option>
                                     <option value="fa-anchor">مرساة سفينة</option>
@@ -2480,7 +2480,7 @@
                             </div>
                         <div>
                 <label class="block text-xs font-bold mb-1 text-amber-600 dark:text-amber-400"><i class="fa-solid fa-star ml-1"></i> تقييم الرواية (عدد النجوم)</label>
-                <select id="form-novel-rating" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-amber-500/40 px-3.5 py-2 text-sm font-bold text-amber-600 dark:text-amber-400">
+                <select id="form-novel-rating" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-amber-500/40 px-3.5 py-2 text-sm font-bold text-amber-600 dark:text-amber-400" fdprocessedid="qvn9i">
                     <option value="5.0">⭐⭐⭐⭐⭐ (5.0 نجوم)</option>
                     <option value="4.9">⭐⭐⭐⭐⭐ (4.9 نجوم)</option>
                     <option value="4.8">⭐⭐⭐⭐⭐ (4.8 نجوم)</option>
@@ -2547,7 +2547,7 @@
                 </label>
                 <div id="novel-pdf-password-input-wrapper" class="space-y-1 hidden">
                     <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300">اكتب باسورد تحميل الـ PDF لهذه الرواية:</label>
-                    <input type="text" id="form-novel-pdf-password" placeholder="اكتب رمز فتح الـ PDF..." class="w-full sm:w-80 rounded-xl bg-white dark:bg-slate-900 border border-red-500/40 px-3.5 py-2 text-sm font-mono">
+                    <input type="text" id="form-novel-pdf-password" placeholder="اكتب رمز فتح الـ PDF..." class="w-full sm:w-80 rounded-xl bg-white dark:bg-slate-900 border border-red-500/40 px-3.5 py-2 text-sm font-mono" fdprocessedid="b52rec">
                 </div>
             </div><div class="bg-amber-500/5 dark:bg-amber-950/30 p-4 rounded-2xl border border-amber-500/30 space-y-2 md:col-span-2">
                 <label class="flex items-center gap-2.5 cursor-pointer">
@@ -2566,7 +2566,7 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-2">
-                            <button type="submit" id="btn-submit-novel" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:opacity-95 transition-all">إضافة ونشر الرواية الجديدة</button>
+                            <button type="submit" id="btn-submit-novel" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:opacity-95 transition-all" fdprocessedid="sblwhc">إضافة ونشر الرواية الجديدة</button>
                         </div>
                     </form>
                 </div>
@@ -2577,7 +2577,7 @@
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex-1">
                             <label class="block text-xs font-bold mb-1.5 theme-text-primary">اختر الرواية لإدارة أو تعديل فصولها:</label>
-                            <select id="admin-chapters-novel-select" onchange="renderAdminChaptersList()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold">
+                            <select id="admin-chapters-novel-select" onchange="renderAdminChaptersList()" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold" fdprocessedid="24gcl">
                 <option value="novel-1792008424515">قريبًا: معرض القاهرة الدولي للكتاب 2027</option>
             
                 <option value="corrupt-antidote" selected="">الترياق الفاسد: هباءً منثورا</option>
@@ -2601,7 +2601,7 @@
                 <option value="novel-1792476265246">شركة المنقذين المحدودة</option>
             </select>
                         </div>
-                        <button onclick="resetChapterFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 self-end">
+                        <button onclick="resetChapterFormToNew()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 self-end" fdprocessedid="wyv2sm">
                             + كتابة فصل جديد
                         </button>
                     </div>
@@ -2881,11 +2881,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold mb-1">عنوان الفصل *</label>
-                                <input type="text" id="form-chapter-title" required="" placeholder="مثال: الفصل الأول: العينة رقم سبعة" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="form-chapter-title" required="" placeholder="مثال: الفصل الأول: العينة رقم سبعة" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="h51av8">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">وقت القراءة التقريبي</label>
-                                <input type="text" id="form-chapter-time" value="6 دقائق" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm">
+                                <input type="text" id="form-chapter-time" value="6 دقائق" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-sm" fdprocessedid="festy">
                             </div>
                         </div>
 
@@ -2911,7 +2911,7 @@
                         </div>
 
                         <div class="flex justify-end">
-                            <button type="submit" id="btn-submit-chapter" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg">إضافة الفصل الجديد</button>
+                            <button type="submit" id="btn-submit-chapter" class="theme-bg-gradient text-white font-bold px-8 py-3 rounded-xl shadow-lg" fdprocessedid="ehv7o">إضافة الفصل الجديد</button>
                         </div>
                     </form>
                 </div>
@@ -3039,10 +3039,10 @@
             </div>
             <h3 class="text-lg font-black text-slate-900 dark:text-white">دخول الكاتب السري</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400">أدخل كلمة السر الخاصة بالكاتب لإظهار لوحة التحكم وتعديل الموقع:</p>
-            <input type="password" id="secret-pin-input" placeholder="كلمة السر..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-center font-bold text-sm focus:outline-none">
+            <input type="password" id="secret-pin-input" placeholder="كلمة السر..." class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-center font-bold text-sm focus:outline-none" fdprocessedid="0ynlxf">
             <div class="flex items-center gap-2 pt-2">
-                <button onclick="verifySecretAuthorPin()" class="flex-1 theme-bg-gradient text-white font-bold py-2.5 rounded-xl text-xs">فتح اللوحة</button>
-                <button onclick="closeSecretPinModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs">إلغاء</button>
+                <button onclick="verifySecretAuthorPin()" class="flex-1 theme-bg-gradient text-white font-bold py-2.5 rounded-xl text-xs" fdprocessedid="gyt6yv">فتح اللوحة</button>
+                <button onclick="closeSecretPinModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs" fdprocessedid="zp3dld">إلغاء</button>
             </div>
         </div>
     </div>
@@ -3072,11 +3072,11 @@
                 <p id="footer-copyright-text" class="text-xs text-slate-500 dark:text-slate-400 mt-1">جميع الحقوق محفوظة للكاتب عبدالرحمن الرداد © 2026</p>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
-                <button onclick="navigateTo('home')" class="hover:underline">الرئيسية</button>
+                <button onclick="navigateTo('home')" class="hover:underline" fdprocessedid="1sokea">الرئيسية</button>
                 <span>•</span>
-                <button onclick="requestNovelAccess(siteConfig.featuredNovelId || novels[0]?.id, 'details')" class="hover:underline">الرواية المتصدرة</button>
+                <button onclick="requestNovelAccess(siteConfig.featuredNovelId || novels[0]?.id, 'details')" class="hover:underline" fdprocessedid="wxkmlq">الرواية المتصدرة</button>
                 <span class="admin-only-ui" style="">•</span>
-                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-text-primary hover:underline" style="">لوحة التحكم وتخصيص الموقع</button>
+                <button onclick="openControlPanel('identity')" class="admin-only-ui theme-text-primary hover:underline" style="" fdprocessedid="40b5jar">لوحة التحكم وتخصيص الموقع</button>
             </div>
         <div id="footer-social-links" class="flex items-center justify-center gap-2.5">
                 <a id="ftr-fb-link" href="https://www.facebook.com/AbdelrahmanAhmedAlradad/" target="_blank" rel="noopener noreferrer" class="social-glass-btn w-9 h-9 rounded-xl bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center justify-center transition-all" title="فيسبوك" style="display: inline-flex;">
@@ -6963,7 +6963,236 @@
             setupSecretAuthorUnlock();
         };
     </script>
+
+
+      <script>
+        (function() {
+          // The root element's background fills the whole page. As in CSS,
+          // the body's background is used when the root element has none.
+          function getPageBackgroundColor() {
+            var docStyle = window.getComputedStyle(document.documentElement);
+            var color = docStyle.backgroundColor;
+            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
+                docStyle.backgroundImage === 'none' && document.body) {
+              color = window.getComputedStyle(document.body).backgroundColor;
+            }
+            return color || '';
+          }
+
+          var lastReportedColor = '';
+          function reportBackgroundColor() {
+            try {
+              var color = getPageBackgroundColor();
+              if (color === lastReportedColor) return;
+              lastReportedColor = color;
+              window.parent.postMessage({
+                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
+                backgroundColor: color
+              }, '*');
+            } catch (e) {}
+          }
+
+          // The page background usually changes through an attribute on html
+          // or body (for example a theme class), a style sheet in head, or the
+          // system color scheme.
+          if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(reportBackgroundColor);
+            observer.observe(document.documentElement, {attributes: true});
+            if (document.body) {
+              observer.observe(document.body, {attributes: true});
+            }
+            if (document.head) {
+              observer.observe(document.head, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                characterData: true
+              });
+            }
+          }
+          var colorSchemeQuery =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
+            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
+          }
+          window.addEventListener('load', reportBackgroundColor);
+          window.addEventListener('transitionend', reportBackgroundColor);
+          window.addEventListener('animationend', reportBackgroundColor);
+          reportBackgroundColor();
+        })();
+      </script>
     
+      <script>
+        (function() {
+          // The root element's background fills the whole page. As in CSS,
+          // the body's background is used when the root element has none.
+          function getPageBackgroundColor() {
+            var docStyle = window.getComputedStyle(document.documentElement);
+            var color = docStyle.backgroundColor;
+            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
+                docStyle.backgroundImage === 'none' && document.body) {
+              color = window.getComputedStyle(document.body).backgroundColor;
+            }
+            return color || '';
+          }
+
+          var lastReportedColor = '';
+          function reportBackgroundColor() {
+            try {
+              var color = getPageBackgroundColor();
+              if (color === lastReportedColor) return;
+              lastReportedColor = color;
+              window.parent.postMessage({
+                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
+                backgroundColor: color
+              }, '*');
+            } catch (e) {}
+          }
+
+          // The page background usually changes through an attribute on html
+          // or body (for example a theme class), a style sheet in head, or the
+          // system color scheme.
+          if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(reportBackgroundColor);
+            observer.observe(document.documentElement, {attributes: true});
+            if (document.body) {
+              observer.observe(document.body, {attributes: true});
+            }
+            if (document.head) {
+              observer.observe(document.head, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                characterData: true
+              });
+            }
+          }
+          var colorSchemeQuery =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
+            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
+          }
+          window.addEventListener('load', reportBackgroundColor);
+          window.addEventListener('transitionend', reportBackgroundColor);
+          window.addEventListener('animationend', reportBackgroundColor);
+          reportBackgroundColor();
+        })();
+      </script>
+    
+      <script>
+        (function() {
+          // The root element's background fills the whole page. As in CSS,
+          // the body's background is used when the root element has none.
+          function getPageBackgroundColor() {
+            var docStyle = window.getComputedStyle(document.documentElement);
+            var color = docStyle.backgroundColor;
+            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
+                docStyle.backgroundImage === 'none' && document.body) {
+              color = window.getComputedStyle(document.body).backgroundColor;
+            }
+            return color || '';
+          }
+
+          var lastReportedColor = '';
+          function reportBackgroundColor() {
+            try {
+              var color = getPageBackgroundColor();
+              if (color === lastReportedColor) return;
+              lastReportedColor = color;
+              window.parent.postMessage({
+                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
+                backgroundColor: color
+              }, '*');
+            } catch (e) {}
+          }
+
+          // The page background usually changes through an attribute on html
+          // or body (for example a theme class), a style sheet in head, or the
+          // system color scheme.
+          if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(reportBackgroundColor);
+            observer.observe(document.documentElement, {attributes: true});
+            if (document.body) {
+              observer.observe(document.body, {attributes: true});
+            }
+            if (document.head) {
+              observer.observe(document.head, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                characterData: true
+              });
+            }
+          }
+          var colorSchemeQuery =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
+            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
+          }
+          window.addEventListener('load', reportBackgroundColor);
+          window.addEventListener('transitionend', reportBackgroundColor);
+          window.addEventListener('animationend', reportBackgroundColor);
+          reportBackgroundColor();
+        })();
+      </script>
+    
+      <script>
+        (function() {
+          // The root element's background fills the whole page. As in CSS,
+          // the body's background is used when the root element has none.
+          function getPageBackgroundColor() {
+            var docStyle = window.getComputedStyle(document.documentElement);
+            var color = docStyle.backgroundColor;
+            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
+                docStyle.backgroundImage === 'none' && document.body) {
+              color = window.getComputedStyle(document.body).backgroundColor;
+            }
+            return color || '';
+          }
+
+          var lastReportedColor = '';
+          function reportBackgroundColor() {
+            try {
+              var color = getPageBackgroundColor();
+              if (color === lastReportedColor) return;
+              lastReportedColor = color;
+              window.parent.postMessage({
+                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
+                backgroundColor: color
+              }, '*');
+            } catch (e) {}
+          }
+
+          // The page background usually changes through an attribute on html
+          // or body (for example a theme class), a style sheet in head, or the
+          // system color scheme.
+          if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(reportBackgroundColor);
+            observer.observe(document.documentElement, {attributes: true});
+            if (document.body) {
+              observer.observe(document.body, {attributes: true});
+            }
+            if (document.head) {
+              observer.observe(document.head, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                characterData: true
+              });
+            }
+          }
+          var colorSchemeQuery =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
+            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
+          }
+          window.addEventListener('load', reportBackgroundColor);
+          window.addEventListener('transitionend', reportBackgroundColor);
+          window.addEventListener('animationend', reportBackgroundColor);
+          reportBackgroundColor();
+        })();
+      </script>
+    <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
 <!-- ==================== التحديث الشامل: الزجاج السائل الفاخر + التعليقات السحابية الثابتة ==================== -->
 <style id="liquid-glass-pro-styles">
     /* خلفية الإضاءة الديناميكية خلف الزجاج السائل */
@@ -7223,12 +7452,6 @@
         });
     }
 
-    function escHtml(v) {
-        return String(v == null ? '' : v).replace(/[&<>"']/g, function(ch) {
-            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
-        });
-    }
-
     // مزامنة التعليقات سحابياً ليراها كل من يدخل الموقع من أي جهاز
     async function fetchCloudComments() {
         try {
@@ -7259,7 +7482,6 @@
 
     async function pushCloudComments() {
         try {
-            await fetchCloudComments(); // ادمج تعليقات الآخرين أولاً قبل الكتابة
             await fetch(CLOUD_COMMENTS_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -7738,11 +7960,11 @@
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div class="flex items-center gap-2.5">
                         <div class="w-9 h-9 rounded-xl theme-bg-gradient text-amber-300 font-black flex items-center justify-center text-sm shadow-sm">
-                            ${escHtml((c.name || 'ق')[0])}
+                            ${(c.name || 'ق')[0]}
                         </div>
                         <div>
-                            <h5 class="font-black text-sm text-slate-900 dark:text-white">${escHtml(c.name)}</h5>
-                            <span class="text-[11px] text-slate-400">${escHtml(c.date || '')}</span>
+                            <h5 class="font-black text-sm text-slate-900 dark:text-white">${c.name}</h5>
+                            <span class="text-[11px] text-slate-400">${c.date || ''}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -7750,13 +7972,13 @@
                             ${renderStarsHtml(c.rating || 5)}
                         </div>
                         ${!isReaderOnlyMode ? `
-                            <button onclick="deleteChapterComment('${escHtml(c.id)}')" class="text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg text-xs" title="حذف التعليق">
+                            <button onclick="deleteChapterComment('${c.id}')" class="text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg text-xs" title="حذف التعليق">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         ` : ''}
                     </div>
                 </div>
-                <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed pr-1">${escHtml(c.text)}</p>
+                <p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed pr-1">${c.text}</p>
             </div>
         `).join('');
     };
@@ -7768,10 +7990,6 @@
         const name = nameInput.value.trim();
         const text = textInput.value.trim();
         if (!name || !text) return;
-        if (name.length > 40 || text.length > 1000) {
-            showToast('الاسم أو التعليق طويل جداً');
-            return;
-        }
 
         localStorage.setItem('reader_saved_author_name', name);
 
@@ -8037,7 +8255,7 @@
         textArea.select();
         try {
             document.execCommand('copy');
-            showSimpleToast('تم نسخ رابط الفصل بنجاح! ??');
+            showSimpleToast('تم نسخ رابط الفصل بنجاح! 📋');
         } catch (err) {
             prompt("انسخ الرابط المباشر من هنا:", text);
         }
@@ -8249,6 +8467,62 @@ document.addEventListener('click', function (e) {
     }
 });
 </script>
+      <script>
+        (function() {
+          // The root element's background fills the whole page. As in CSS,
+          // the body's background is used when the root element has none.
+          function getPageBackgroundColor() {
+            var docStyle = window.getComputedStyle(document.documentElement);
+            var color = docStyle.backgroundColor;
+            if ((color === 'rgba(0, 0, 0, 0)' || color === 'transparent') &&
+                docStyle.backgroundImage === 'none' && document.body) {
+              color = window.getComputedStyle(document.body).backgroundColor;
+            }
+            return color || '';
+          }
+
+          var lastReportedColor = '';
+          function reportBackgroundColor() {
+            try {
+              var color = getPageBackgroundColor();
+              if (color === lastReportedColor) return;
+              lastReportedColor = color;
+              window.parent.postMessage({
+                type: 'ATARI_CODE_EMBED_BACKGROUND_COLOR',
+                backgroundColor: color
+              }, '*');
+            } catch (e) {}
+          }
+
+          // The page background usually changes through an attribute on html
+          // or body (for example a theme class), a style sheet in head, or the
+          // system color scheme.
+          if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(reportBackgroundColor);
+            observer.observe(document.documentElement, {attributes: true});
+            if (document.body) {
+              observer.observe(document.body, {attributes: true});
+            }
+            if (document.head) {
+              observer.observe(document.head, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                characterData: true
+              });
+            }
+          }
+          var colorSchemeQuery =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+          if (colorSchemeQuery && colorSchemeQuery.addEventListener) {
+            colorSchemeQuery.addEventListener('change', reportBackgroundColor);
+          }
+          window.addEventListener('load', reportBackgroundColor);
+          window.addEventListener('transitionend', reportBackgroundColor);
+          window.addEventListener('animationend', reportBackgroundColor);
+          reportBackgroundColor();
+        })();
+      </script>
     <!-- ==========================================================
      إضافات الموقع:
      1) ترتيب الروايات من لوحة التحكم
@@ -8792,7 +9066,7 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 
-
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
 <!-- ==================== محسّن القراءة الصوتية (سرد + عامية مصرية + وقفات) — داخل الملف بدون أي خدمة خارجية ==================== -->
 <script id="speech-prep-module">
 (function () {
@@ -10888,7 +11162,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     }, 1000);
 })();
 </script>
-
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
 <script id="safe-social-links-fixer-complete">
 (function() {
     function injectSocialManager() {
@@ -10971,9 +11245,9 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     }, 1000);
 })();
 </script>
-
-
-<!-- ============================================================================
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><!-- ============================================================================
      تحديث الأداء الشامل (إصلاح الـ PDF + إنهاء لاج الزجاج السائل + دعم العامية المصرية)
      يوضع قبل </body> مباشرة دون حذف أي شيء من الكود الأصلي
      ============================================================================ -->
@@ -11205,8 +11479,8 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     };
 })();
 </script>
-
-<!-- ==================== كود إصلاح وتخفيف حجم التصدير فقط ==================== -->
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><!-- ==================== كود إصلاح وتخفيف حجم التصدير فقط ==================== -->
 <script>
 window.addEventListener('load', () => {
     const originalExport = window.exportProductionIndexHtml;
@@ -11232,10 +11506,10 @@ window.addEventListener('load', () => {
     }
 });
 </script>
-
-
-
-
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
 <div id="tts-bar">
       <div class="tts-row">
         <input id="tts-seek" type="range" min="0" max="0" value="0" step="1" aria-label="موضع القراءة">
@@ -11263,731 +11537,4 @@ window.addEventListener('load', () => {
                 <input type="checkbox" id="tts-egyptian-toggle" checked="">
                 <span>🇪🇬 تحسين نطق العامية المصرية</span>
             </label><p id="tts-hint">مفيش صوت عربي مثبّت على جهازك. ثبّت صوت عربي من إعدادات تحويل النص لكلام في الجهاز، أو جرّب متصفح Edge أو Chrome.</p>
-      </div></div><!-- ==================== ULTRA-FAST META SYNC + EXACT +1 VIEWS + WEBSOCKETS (V11 FINAL) ==================== -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script id="alradad-cloud-sync-script">
-(function() {
-    const FIREBASE_DB_URL = "https://alradad-site-default-rtdb.firebaseio.com";
-    const GITHUB_OWNER = "abdoalradad-cmd";
-    const GITHUB_REPO = "novel_site";
-    const GITHUB_FILE_PATH = "index.html";
-    const GITHUB_BRANCH = "main";
-
-    if (!firebase.apps.length) {
-        firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
-    }
-    const db = firebase.database();
-
-    let isApplyingCloudData = false;
-    let liveViewsMap = {};
-    let lastViewIncrementTime = 0; // لمنع الزيادة المزدوجة (+2) نهائياً
-
-    // 1. إخفاء لوحة التحكم تماماً للقراء عند الفتح
-    function enforceReaderModeOnLoad() {
-        localStorage.removeItem('author_unlocked');
-        try { if (typeof isAdminUnlocked !== 'undefined') isAdminUnlocked = false; } catch(e) {}
-
-        ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
-            const modal = document.getElementById(id);
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                modal.style.display = '';
-            }
-        });
-
-        document.querySelectorAll('.admin-only-ui').forEach(el => {
-            el.classList.add('hidden');
-            el.style.display = 'none';
-        });
-
-        const exitPill = document.getElementById('exit-preview-pill');
-        if (exitPill) exitPill.classList.add('hidden');
-
-        const toast = document.getElementById('toast');
-        if (toast) toast.classList.add('translate-y-24', 'opacity-0');
-    }
-
-    enforceReaderModeOnLoad();
-
-    function isAuthorActive() {
-        const cpModal = document.getElementById('control-panel-modal');
-        if (cpModal && !cpModal.classList.contains('hidden')) return true;
-        const adminBtns = document.querySelectorAll('.admin-only-ui');
-        for (let i = 0; i < adminBtns.length; i++) {
-            if (!adminBtns[i].classList.contains('hidden') && adminBtns[i].style.display !== 'none') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function updateSyncStatusBadge(text, color) {
-        const badge = document.getElementById('cloud-sync-status-badge');
-        if (!badge) return;
-        badge.textContent = text;
-        badge.className = `text-xs font-extrabold px-3 py-1 rounded-full border border-${color}-500/40 bg-${color}-500/15 text-${color}-400`;
-    }
-
-    function parseCleanNumber(val) {
-        if (typeof val === 'number') return val;
-        if (!val) return 0;
-        return parseInt(String(val).replace(/,/g, '').replace(/[^\d]/g, ''), 10) || 0;
-    }
-
-    function formatNumber(num) {
-        return Number(num || 0).toLocaleString('en-US');
-    }
-
-    // 2. حساب التقييم العام للرواية من تعليقات الفصول
-    function recalculateAllRatings() {
-        if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
-        novels.forEach(novel => {
-            let totalStars = 0;
-            let totalReviews = 0;
-            if (Array.isArray(novel.chapters)) {
-                novel.chapters.forEach(ch => {
-                    if (Array.isArray(ch.comments)) {
-                        ch.comments.forEach(c => {
-                            const r = parseFloat(c.rating);
-                            if (!isNaN(r) && r >= 1 && r <= 5) {
-                                totalStars += r;
-                                totalReviews++;
-                            }
-                        });
-                    }
-                });
-            }
-            novel.ratingsCount = totalReviews;
-            if (totalReviews > 0) {
-                novel.rating = (totalStars / totalReviews).toFixed(1);
-            } else if (!novel.rating) {
-                novel.rating = "5.0";
-            }
-        });
-    }
-
-    function generateStarsHtml(ratingVal) {
-        const num = parseFloat(ratingVal) || 5.0;
-        let html = '<span class="inline-flex items-center gap-0.5 text-amber-400">';
-        for (let i = 1; i <= 5; i++) {
-            if (i <= Math.floor(num)) {
-                html += '<i class="fa-solid fa-star"></i>';
-            } else if (i - num <= 0.5 && i > num) {
-                html += '<i class="fa-solid fa-star-half-stroke"></i>';
-            } else {
-                html += '<i class="fa-regular fa-star text-slate-400"></i>';
-            }
-        }
-        html += '</span>';
-        return html;
-    }
-
-    // 3. تحديث واجهة القارئ فوراً
-    function refreshAllUI() {
-        if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
-
-        novels.forEach(n => {
-            const baseViews = parseCleanNumber(n.views);
-            const cloudViews = liveViewsMap[n.id] !== undefined ? parseCleanNumber(liveViewsMap[n.id]) : baseViews;
-            const finalViews = Math.max(baseViews, cloudViews);
-            n.views = formatNumber(finalViews);
-            liveViewsMap[n.id] = finalViews;
-        });
-
-        recalculateAllRatings();
-
-        if (typeof applyConfigToDOM === "function") applyConfigToDOM();
-        if (typeof renderHeroBanner === "function") renderHeroBanner();
-        if (typeof renderNovelsGrid === "function") renderNovelsGrid();
-        if (typeof populateFeaturedSelect === "function") populateFeaturedSelect();
-
-        if (isAuthorActive()) {
-            if (typeof renderAdminNovelsList === "function") renderAdminNovelsList();
-            if (typeof renderAdminChaptersList === "function") renderAdminChaptersList();
-        } else {
-            document.querySelectorAll('.admin-only-ui').forEach(el => {
-                el.classList.add('hidden');
-                el.style.display = 'none';
-            });
-        }
-
-        paintViewsAndStarsOnCards();
-    }
-
-    function paintViewsAndStarsOnCards() {
-        if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
-
-        novels.forEach(novel => {
-            const viewsCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseCleanNumber(novel.views);
-            const viewsFormatted = formatNumber(viewsCount);
-
-            const cardBtns = document.querySelectorAll(`button[onclick*="'${novel.id}'"]`);
-            cardBtns.forEach(btn => {
-                const card = btn.closest('.group');
-                if (!card) return;
-
-                const ratingBadge = card.querySelector('.text-xs.font-bold.text-amber-500.flex.items-center.gap-1');
-                if (ratingBadge) {
-                    const starsStr = generateStarsHtml(novel.rating);
-                    const countTxt = novel.ratingsCount > 0 ? ` (${novel.ratingsCount})` : '';
-                    ratingBadge.innerHTML = `${starsStr} <span class="mr-1">${novel.rating}${countTxt}</span>`;
-                }
-
-                const metaRow = card.querySelector('.flex.items-center.gap-3.text-xs');
-                if (metaRow) {
-                    let viewSpan = metaRow.querySelector('.live-views-counter');
-                    if (!viewSpan) {
-                        viewSpan = document.createElement('span');
-                        viewSpan.className = 'live-views-counter font-bold text-amber-600 dark:text-amber-400';
-                        metaRow.appendChild(viewSpan);
-                    }
-                    viewSpan.innerHTML = `<i class="fa-solid fa-eye ml-1"></i>${viewsFormatted} مشاهدة`;
-                }
-            });
-        });
-
-        try {
-            if (typeof currentNovelId !== 'undefined' && currentNovelId) {
-                const novel = novels.find(n => n.id === currentNovelId);
-                const detailsContainer = document.getElementById('novel-details-content');
-                if (novel && detailsContainer) {
-                    const viewsCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseCleanNumber(novel.views);
-                    const pillsContainer = detailsContainer.querySelector('.flex.flex-wrap.items-center');
-                    if (pillsContainer) {
-                        let detailViewPill = document.getElementById('details-live-views-pill');
-                        if (!detailViewPill) {
-                            detailViewPill = document.createElement('span');
-                            detailViewPill.id = 'details-live-views-pill';
-                            detailViewPill.className = 'px-3.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30';
-                            pillsContainer.appendChild(detailViewPill);
-                        }
-                        detailViewPill.innerHTML = `<i class="fa-solid fa-eye ml-1"></i> ${formatNumber(viewsCount)} مشاهدة`;
-                    }
-
-                    const ratingPill = document.getElementById('details-star-rating-pill');
-                    if (ratingPill) {
-                        const countText = novel.ratingsCount > 0 ? ` (${novel.ratingsCount} تقييم)` : '';
-                        ratingPill.innerHTML = `${generateStarsHtml(novel.rating)} <span class="mr-1">${novel.rating}${countText}</span>`;
-                    }
-                }
-            }
-        } catch(e) {}
-    }
-
-    // 4. زيادة المشاهدات بمقدار (+1 فقط بالظبط) مع قفل زمني لمنع التكرار المزدوج
-    window.incrementNovelViewLive = function(novelId) {
-        const now = Date.now();
-        // إذا تم استدعاء الدالة مرتين في أقل من 1.5 ثانية لنفس الضغطة، نتجاهل الثانية فوراً
-        if (now - lastViewIncrementTime < 1500) return;
-        lastViewIncrementTime = now;
-
-        if (!novelId || typeof novels === 'undefined') return;
-        const novel = novels.find(n => n.id === novelId);
-        if (!novel) return;
-
-        // إرسال زيادة (+1 فقط) إلى السحابة، والمستمع اللحظي سيحدث الشاشة تلقائياً
-        const viewRef = db.ref('viewsCounts/' + novelId);
-        viewRef.transaction(currentCloudVal => {
-            const base = parseCleanNumber(currentCloudVal);
-            const localBase = liveViewsMap[novelId] !== undefined ? liveViewsMap[novelId] : parseCleanNumber(novel.views);
-            return Math.max(base, localBase) + 1;
-        });
-    };
-
-    // 5. بناء الفهرس الخفيف السريع (بدون نصوص الفصول الطويلة) ليظهر في 0.1 ثانية مثل المشاهدات!
-    function buildLightweightMetaPayload() {
-        const lightNovels = novels.map(n => ({
-            id: n.id,
-            title: n.title || "",
-            subtitle: n.subtitle || "",
-            author: n.author || "",
-            genre: n.genre || "غموض",
-            tags: n.tags || [],
-            status: n.status || "مكتملة",
-            views: n.views || "1",
-            rating: n.rating || "5.0",
-            ratingsCount: n.ratingsCount || 0,
-            coverGradient: n.coverGradient || "",
-            accentIcon: n.accentIcon || "fa-book-open",
-            coverImg: n.coverImg || "",
-            pdfUrl: n.pdfUrl || "",
-            isLocked: !!n.isLocked,
-            password: n.password || "",
-            pdfLocked: !!n.pdfLocked,
-            pdfPassword: n.pdfPassword || "",
-            allowSharing: n.allowSharing !== false,
-            hasPromo: !!n.hasPromo,
-            promoUrl: n.promoUrl || "",
-            synopsis: n.synopsis || "",
-            // نرسل عناوين الفصول وتعليقاتها فقط في المسار السريع بدون النص الطويل!
-            chaptersMeta: (n.chapters || []).map(ch => ({
-                id: ch.id,
-                title: ch.title || "",
-                readTime: ch.readTime || "6 دقائق",
-                isLocked: !!ch.isLocked,
-                password: ch.password || "",
-                comments: ch.comments || []
-            }))
-        }));
-
-        return {
-            siteConfig: JSON.parse(JSON.stringify(siteConfig)),
-            lightNovels: lightNovels,
-            lastUpdated: Date.now()
-        };
-    }
-
-    // 6. الاستماع اللحظي فائق السرعة عبر WebSockets
-    function startRealtimeSocketListeners() {
-        updateSyncStatusBadge("متصل بسرعة البرق ⚡", "amber");
-
-        // أ) مستمع عداد المشاهدات (0.1 ثانية)
-        db.ref('viewsCounts').on('value', snapshot => {
-            const data = snapshot.val();
-            if (data && typeof novels !== 'undefined') {
-                Object.keys(data).forEach(nId => {
-                    liveViewsMap[nId] = parseCleanNumber(data[nId]);
-                    const targetNovel = novels.find(n => n.id === nId);
-                    if (targetNovel) {
-                        targetNovel.views = formatNumber(liveViewsMap[nId]);
-                    }
-                });
-                paintViewsAndStarsOnCards();
-            }
-        });
-
-        // ب) مستمع الفهرس الخفيف السريع (novelsMeta) -> يعرض الروايات الجديدة والفصول في 0.1 ثانية فوراً!
-        db.ref('fastMeta').on('value', snapshot => {
-            const meta = snapshot.val();
-            if (!meta || !Array.isArray(meta.lightNovels) || meta.lightNovels.length === 0) return;
-
-            isApplyingCloudData = true;
-
-            if (meta.siteConfig) {
-                Object.assign(siteConfig, meta.siteConfig);
-            }
-
-            // دمج الروايات الجديدة فوراً مع الاحتفاظ بنصوص الفصول المحملة مسبقاً
-            const existingNovelsMap = {};
-            novels.forEach(n => { existingNovelsMap[n.id] = n; });
-
-            novels.length = 0;
-            meta.lightNovels.forEach(lightN => {
-                const oldNovel = existingNovelsMap[lightN.id];
-                const mergedChapters = (lightN.chaptersMeta || []).map((chMeta, idx) => {
-                    const oldCh = oldNovel && oldNovel.chapters ? (oldNovel.chapters.find(c => c.id === chMeta.id) || oldNovel.chapters[idx]) : null;
-                    return {
-                        id: chMeta.id,
-                        title: chMeta.title,
-                        readTime: chMeta.readTime,
-                        isLocked: chMeta.isLocked,
-                        password: chMeta.password,
-                        comments: chMeta.comments || [],
-                        content: oldCh && oldCh.content ? oldCh.content : "جاري تحميل نص الفصل من السحابة..."
-                    };
-                });
-
-                const fullNovelObj = Object.assign({}, oldNovel || {}, lightN, { chapters: mergedChapters });
-                delete fullNovelObj.chaptersMeta;
-                novels.push(fullNovelObj);
-            });
-
-            localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-            localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
-
-            refreshAllUI();
-            isApplyingCloudData = false;
-            updateSyncStatusBadge("متصل ومُحدّث في 0.1 ثانية 🚀", "emerald");
-        });
-
-        // ج) مستمع النصوص الكاملة في الخلفية (لتعبئة نصوص الفصول الجديدة بهدوء)
-        db.ref('siteData').on('value', snapshot => {
-            const cloudData = snapshot.val();
-            if (!cloudData || !Array.isArray(cloudData.novels) || cloudData.novels.length === 0) {
-                if (isAuthorActive()) window.pushToFirebase(true);
-                return;
-            }
-
-            isApplyingCloudData = true;
-            novels.length = 0;
-            cloudData.novels.forEach(n => {
-                if (liveViewsMap[n.id] !== undefined) {
-                    n.views = formatNumber(Math.max(parseCleanNumber(n.views), liveViewsMap[n.id]));
-                } else {
-                    liveViewsMap[n.id] = parseCleanNumber(n.views);
-                }
-                novels.push(n);
-            });
-
-            if (cloudData.siteConfig) {
-                Object.assign(siteConfig, cloudData.siteConfig);
-            }
-
-            localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-            localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
-
-            refreshAllUI();
-            isApplyingCloudData = false;
-        });
-    }
-
-    // 7. دفع التعديلات للسحابة (يرسل الفهرس الخفيف أولاً في 0.1 ثانية ليظهر للناس فوراً، ثم يرسل النصوص الكاملة)
-    const CHAPTER_PLACEHOLDER = "جاري تحميل نص الفصل من السحابة...";
-    window.pushToFirebase = async function(silent = false) {
-        if (isApplyingCloudData) return;
-        // حماية: القارئ العادي ممنوع يكتب فوق قاعدة البيانات كلها
-        if (!isAuthorActive()) return;
-        // حماية: لو أي فصل لسه نصه "جاري التحميل" نوقف الرفع عشان ما نمسح النصوص الحقيقية
-        const stillLoading = novels.some(n => (n.chapters || []).some(ch => ch.content === CHAPTER_PLACEHOLDER));
-        if (stillLoading) {
-            updateSyncStatusBadge("انتظر تحميل نصوص الفصول ثم أعد المحاولة ⏳", "amber");
-            if (!silent) alert("⏳ نصوص بعض الفصول لسه بتتحمل من السحابة. استنى ثواني وجرّب تاني حتى لا تضيع النصوص.");
-            return false;
-        }
-        try {
-            updateSyncStatusBadge("جاري النشر الفوري... ⚡", "amber");
-            recalculateAllRatings();
-
-            const viewsPayload = {};
-            novels.forEach(n => {
-                const v = liveViewsMap[n.id] !== undefined ? liveViewsMap[n.id] : parseCleanNumber(n.views);
-                n.views = formatNumber(v);
-                viewsPayload[n.id] = v;
-            });
-
-            localStorage.setItem('alradad_novels_db', JSON.stringify(novels));
-            localStorage.setItem('alradad_site_config', JSON.stringify(siteConfig));
-
-            // 1. إرسال الفهرس الخفيف والمشاهدات أولاً (تصل لكل القراء في 0.1 ثانية!)
-            const fastMetaPayload = buildLightweightMetaPayload();
-            await Promise.all([
-                db.ref('fastMeta').set(fastMetaPayload),
-                db.ref('viewsCounts').update(viewsPayload)
-            ]);
-
-            updateSyncStatusBadge("ظهرت الروايات للجميع فوراً! ✅", "emerald");
-
-            // 2. إرسال النصوص الكاملة للفصول في الخلفية
-            await db.ref('siteData').set({
-                siteConfig: JSON.parse(JSON.stringify(siteConfig)),
-                novels: JSON.parse(JSON.stringify(novels)),
-                lastUpdated: Date.now()
-            });
-
-            if (!silent) {
-                if (typeof showToast === "function") showToast("🚀 تم نشر الروايات والتعديلات في 0.1 ثانية!");
-                alert("✅ تم النشر بنجاح وظهرت التعديلات لجميع القراء في نفس اللحظة!");
-            }
-            return true;
-        } catch (err) {
-            console.error("Push Error:", err);
-            updateSyncStatusBadge("فشل الحفظ ❌", "red");
-            if (!silent) alert("❌ خطأ أثناء الحفظ: " + err.message);
-            return false;
-        }
-    };
-
-    window.pullFromFirebase = function(showAlert = false) {
-        localStorage.removeItem('alradad_novels_db');
-        localStorage.removeItem('alradad_site_config');
-        db.ref('fastMeta').once('value').then(() => {
-            if (showAlert) alert("✅ تم التحديث اللحظي بنجاح!");
-        });
-    };
-
-    // 8. ربط الدوال (مع مراقبة openNovelDetails فقط لمنع زيادة المشاهدات مرتين)
-    function initAllHooks() {
-        enforceReaderModeOnLoad();
-
-        const adminFns = [
-            'handleSaveNovel', 'deleteNovelById', 'moveNovelOrder',
-            'handleSaveChapter', 'deleteChapterByIndex', 'moveChapterOrder',
-            'applyColorPreset', 'applyCustomColor', 'applyCustomAccent'
-        ];
-
-        adminFns.forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._v11Hooked) {
-                const orig = window[fnName];
-                window[fnName] = function(...args) {
-                    const res = orig.apply(this, args);
-                    if (isAuthorActive()) {
-                        setTimeout(() => window.pushToFirebase(true), 100);
-                    }
-                    return res;
-                };
-                window[fnName]._v11Hooked = true;
-            }
-        });
-
-        if (typeof window.renderNovelsGrid === 'function' && !window.renderNovelsGrid._v11Hooked) {
-            const origGrid = window.renderNovelsGrid;
-            window.renderNovelsGrid = function(...args) {
-                recalculateAllRatings();
-                const res = origGrid.apply(this, args);
-                paintViewsAndStarsOnCards();
-                return res;
-            };
-            window.renderNovelsGrid._v11Hooked = true;
-        }
-
-        // مراقبة openNovelDetails فقط (وليس requestNovelAccess) لضمان زيادة +1 فقط!
-        if (typeof window.openNovelDetails === 'function' && !window.openNovelDetails._v11Hooked) {
-            const origOpenDetails = window.openNovelDetails;
-            window.openNovelDetails = function(novelId, ...rest) {
-                const res = origOpenDetails.apply(this, [novelId, ...rest]);
-                window.incrementNovelViewLive(novelId);
-                setTimeout(paintViewsAndStarsOnCards, 50);
-                return res;
-            };
-            window.openNovelDetails._v11Hooked = true;
-        }
-
-        // مراقبة openChapterReader فقط لزيادة المشاهدات عند قراءة فصل
-        if (typeof window.openChapterReader === 'function' && !window.openChapterReader._v11Hooked) {
-            const origOpenReader = window.openChapterReader;
-            window.openChapterReader = function(novelId, chapterIdx, ...rest) {
-                const res = origOpenReader.apply(this, [novelId, chapterIdx, ...rest]);
-                const targetId = novelId || (typeof currentNovelId !== 'undefined' ? currentNovelId : null);
-                if (targetId) window.incrementNovelViewLive(targetId);
-                return res;
-            };
-            window.openChapterReader._v11Hooked = true;
-        }
-
-        // تعليقات وتقييمات القراء تُرسل في المسار السريع أيضاً لتظهر في 0.1 ثانية!
-        ['handleAddChapterComment', 'deleteChapterComment'].forEach(fnName => {
-            if (typeof window[fnName] === 'function' && !window[fnName]._v11Hooked) {
-                const orig = window[fnName];
-                window[fnName] = function(...args) {
-                    const res = orig.apply(this, args);
-                    recalculateAllRatings();
-                    paintViewsAndStarsOnCards();
-                    if (isAuthorActive()) window.pushToFirebase(true);
-                    return res;
-                };
-                window[fnName]._v11Hooked = true;
-            }
-        });
-
-        injectCloudControlBox();
-        startRealtimeSocketListeners();
-    }
-
-    if (document.readyState === 'loading') {
-        window.addEventListener('DOMContentLoaded', initAllHooks);
-    } else {
-        initAllHooks();
-    }
-
-    function generateCleanReaderHtmlString() {
-        recalculateAllRatings();
-        const lockModeRadio = document.querySelector('input[name="export-lock-mode"]:checked');
-        const allowSecret = lockModeRadio ? (lockModeRadio.value === 'secret') : true;
-        const pinInput = document.getElementById('export-secret-pin');
-        const secretPin = pinInput && pinInput.value.trim() ? pinInput.value.trim() : SECRET_AUTHOR_PIN;
-
-        const cloneDoc = document.documentElement.cloneNode(true);
-        const tokenEl = cloneDoc.querySelector('#gh-personal-token');
-        if (tokenEl) tokenEl.setAttribute('value', '');
-
-        ['control-panel-modal', 'secret-pin-modal', 'content-password-modal', 'pdf-modal'].forEach(id => {
-            const m = cloneDoc.querySelector('#' + id);
-            if (m) {
-                m.classList.add('hidden');
-                m.classList.remove('flex');
-                m.removeAttribute('style');
-            }
-        });
-
-        cloneDoc.querySelectorAll('.admin-only-ui').forEach(el => {
-            el.classList.add('hidden');
-            el.style.display = 'none';
-        });
-
-        const homeView = cloneDoc.querySelector('#view-home');
-        const detailsView = cloneDoc.querySelector('#view-novel-details');
-        const readerView = cloneDoc.querySelector('#view-reader');
-        if (homeView) homeView.classList.remove('hidden');
-        if (detailsView) detailsView.classList.add('hidden');
-        if (readerView) readerView.classList.add('hidden');
-
-        let fullHtml = "<!DOCTYPE html>\n" + cloneDoc.outerHTML;
-
-        const newDefaultBlock = `/*__START_DEFAULT_DATA__*/
-        const PUBLISHED_READER_MODE = true;
-        const ALLOW_SECRET_AUTHOR_UNLOCK = ${allowSecret};
-        const SECRET_AUTHOR_PIN = ${JSON.stringify(secretPin)};
-        const EXPORT_BUILD_VERSION = "published_${Date.now()}";
-
-        // ==================== DEFAULT SITE CONFIGURATION ====================
-        const defaultSiteConfig = ${JSON.stringify(siteConfig, null, 4)};
-
-        // ==================== INITIAL NOVELS DATABASE ====================
-        const defaultNovels = ${JSON.stringify(novels, null, 4)};`;
-
-        const endRegex = /\/\*__START_DEFAULT_DATA__\*\/[\s\S]*?const defaultNovels\s*=\s*\[[\s\S]*?\n\];/;
-        if (!endRegex.test(fullHtml)) {
-            throw new Error("لم يتم العثور على كتلة البيانات الافتراضية داخل الملف - تم إلغاء الرفع حتى لا يُرفع ملف قديم.");
-        }
-        // دالة بدلاً من نص: لمنع تفسير رموز مثل $& و $' الموجودة داخل نصوص الفصول
-        fullHtml = fullHtml.replace(endRegex, () => newDefaultBlock);
-        return fullHtml;
-    }
-
-    window.publishDirectlyToGitHub = async function() {
-        const tokenInput = document.getElementById('gh-personal-token');
-        const branchInput = document.getElementById('gh-branch-name');
-        const btn = document.getElementById('btn-gh-direct-push');
-
-        const token = tokenInput && tokenInput.value.trim() ? tokenInput.value.trim() : localStorage.getItem('alradad_gh_token');
-        const branch = (branchInput && branchInput.value.trim()) ? branchInput.value.trim() : GITHUB_BRANCH;
-
-        if (!token) {
-            alert("⚠️ الرجاء إدخال كود GitHub Personal Access Token أولاً!");
-            if (tokenInput) tokenInput.focus();
-            return;
-        }
-
-        localStorage.setItem('alradad_gh_token', token);
-        localStorage.setItem('alradad_gh_branch', branch);
-
-        const originalBtnHtml = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>جاري الرفع على Firebase و GitHub...</span>`;
-
-        try {
-            await window.pushToFirebase(true);
-
-            const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
-            const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}&_t=${Date.now()}`, {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' },
-                cache: 'no-store'
-            });
-
-            let fileSha = null;
-            if (getRes.ok) {
-                const fileInfo = await getRes.json();
-                fileSha = fileInfo.sha;
-            } else if (getRes.status !== 404) {
-                const errData = await getRes.json();
-                throw new Error(errData.message || "تأكد من صحة الـ Token واسم الفرع");
-            }
-
-            const updatedHtml = generateCleanReaderHtmlString();
-            const utf8Bytes = new TextEncoder().encode(updatedHtml);
-            let binaryStr = "";
-            const chunkSize = 0x8000;
-            for (let i = 0; i < utf8Bytes.length; i += chunkSize) {
-                binaryStr += String.fromCharCode.apply(null, utf8Bytes.subarray(i, i + chunkSize));
-            }
-            const base64Content = btoa(binaryStr);
-
-            const putBody = {
-                message: `تحديث تلقائي من لوحة التحكم - ${new Date().toLocaleString('ar-EG')}`,
-                content: base64Content,
-                branch: branch
-            };
-            if (fileSha) putBody.sha = fileSha;
-
-            const putRes = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-                body: JSON.stringify(putBody)
-            });
-
-            if (!putRes.ok) {
-                const errJson = await putRes.json();
-                throw new Error(errJson.message || "فشل رفع الملف على GitHub");
-            }
-
-            updateSyncStatusBadge("تم التحديث على GitHub + Firebase 🚀", "emerald");
-            alert("✅ تم رفع التعديلات بنجاح على كلٍ من Firebase و GitHub!");
-        } catch (error) {
-            console.error("GitHub Push Error:", error);
-            alert("❌ حدث خطأ أثناء الرفع على GitHub:\n" + error.message);
-            updateSyncStatusBadge("فشل الرفع على GitHub ⚠️", "red");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalBtnHtml;
-        }
-    };
-
-    function injectCloudControlBox() {
-        const cpHeader = document.querySelector('#control-panel-modal > div > div:first-child > div:last-child');
-        if (cpHeader && !document.getElementById('quick-cloud-save-btn')) {
-            const quickBtn = document.createElement('button');
-            quickBtn.id = 'quick-cloud-save-btn';
-            quickBtn.type = 'button';
-            quickBtn.onclick = () => window.pushToFirebase(false);
-            quickBtn.className = 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer';
-            quickBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>نشر فوري (0.1 ثانية) ⚡</span>`;
-            cpHeader.insertBefore(quickBtn, cpHeader.firstChild);
-        }
-
-        const backupPane = document.getElementById('cp-pane-backup');
-        if (!backupPane) return;
-        const oldBox = document.getElementById('cloud-github-auto-box');
-        if (oldBox) oldBox.remove();
-
-        const savedToken = localStorage.getItem('alradad_gh_token') || '';
-        const savedBranch = localStorage.getItem('alradad_gh_branch') || 'main';
-
-        const box = document.createElement('div');
-        box.id = 'cloud-github-auto-box';
-        box.className = 'bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-500/50 shadow-2xl space-y-5 mb-6';
-        box.innerHTML = `
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                        <i class="fa-solid fa-rocket"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-lg sm:text-xl font-black text-amber-400">محرك الفهرس السريع Fast-Meta (V11)</h4>
-                        <p class="text-xs text-slate-300">الروايات الجديدة والمشاهدات (+1 بالضبط) تظهر لجميع القراء في 0.1 ثانية!</p>
-                    </div>
-                </div>
-                <span id="cloud-sync-status-badge" class="text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">
-                    متصل بسرعة البرق ✅
-                </span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-bold mb-1.5 text-slate-300">كود GitHub Personal Token:</label>
-                    <input type="password" id="gh-personal-token" value="${savedToken}" placeholder="ghp_..." dir="ltr"
-                        class="w-full rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-400 px-4 py-2.5 text-xs font-mono text-amber-300 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold mb-1.5 text-slate-300">فرع النشر (Branch):</label>
-                    <input type="text" id="gh-branch-name" value="${savedBranch}" placeholder="main" dir="ltr"
-                        class="w-full rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-400 px-4 py-2.5 text-xs font-mono text-white focus:outline-none">
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-3 pt-2">
-                <button type="button" onclick="window.pushToFirebase(false)"
-                    class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
-                    <i class="fa-solid fa-bolt text-lg"></i>
-                    <span>1. حفظ ونشر فوري (0.1 ثانية)</span>
-                </button>
-
-                <button type="button" id="btn-gh-direct-push" onclick="publishDirectlyToGitHub()"
-                    class="flex-1 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
-                    <i class="fa-brands fa-github text-lg"></i>
-                    <span>2. تحديث ملف index.html على GitHub</span>
-                </button>
-            </div>
-        `;
-
-        backupPane.insertBefore(box, backupPane.firstChild);
-    }
-})();
-</script>
-</body></html>
+      </div></div></body></html>
