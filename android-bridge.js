@@ -101,6 +101,7 @@
     } catch (e) {}
   }
   function handleBack() {
+    if (typeof window.__appCloseLibrary === 'function' && window.__appCloseLibrary()) return;
     var modals = [
       ['secret-pin-modal', 'closeSecretPinModal'],
       ['content-password-modal', 'closeContentPasswordModal'],
@@ -212,6 +213,41 @@
   '@keyframes appIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}',
   'html.is-native-app #view-home:not(.hidden),html.is-native-app #view-novel-details:not(.hidden),html.is-native-app #view-reader:not(.hidden){animation:appIn .32s cubic-bezier(.2,.8,.2,1) backwards}',
 
+  /* ---- هيدر غير ثابت + غطاء شريط الحالة ---- */
+  'html.is-native-app{--sat:0px}',
+  'html.is-native-app body{padding-top:var(--sat)}',
+  'html.is-native-app header.sticky{position:relative!important;top:auto!important}',
+  'html.is-native-app{scroll-padding-top:calc(var(--sat) + 12px)}',
+  '#app-sat{display:none}',
+  'html.is-native-app #app-sat{display:block;position:fixed;top:0;left:0;right:0;height:var(--sat);background:#022c22;z-index:9500}',
+  'html.is-native-app #hero-banner-wrapper .flex-1>div:first-child{white-space:nowrap;font-size:.62rem!important}',
+  'html.is-native-app #hero-banner-wrapper button{white-space:nowrap}',
+  'html.is-native-app #author-bio-card{margin-bottom:.5rem}',
+
+  /* ---- شاشة المكتبة (متابعة القراءة) ---- */
+  '#app-lib{display:none}',
+  'html.is-native-app.lib-open #app-lib{display:block;position:fixed;left:0;right:0;top:var(--sat);bottom:0;z-index:8500;overflow-y:auto;direction:rtl;padding:18px 14px calc(92px + env(safe-area-inset-bottom,0px));font-family:var(--ui-font,Cairo,sans-serif);animation:appIn .28s ease backwards}',
+  '#app-lib h2{font-size:1.35rem;font-weight:900;margin:2px 4px 2px;display:flex;align-items:center;gap:.5rem}',
+  '#app-lib h2 i{color:var(--brand-accent)}',
+  '#app-lib .sub{font-size:.78rem;opacity:.65;margin:0 4px 16px}',
+  '#app-lib h3{font-size:.9rem;font-weight:800;margin:20px 4px 10px;opacity:.75}',
+  '.lib-card{display:flex;gap:12px;align-items:center;background:#fff;border-radius:20px;padding:12px;margin-bottom:12px;box-shadow:0 2px 16px rgba(15,23,42,.08);position:relative;-webkit-tap-highlight-color:transparent;transition:transform .15s}',
+  '.lib-card:active{transform:scale(.98)}',
+  'html.dark .lib-card{background:#0f1a17;box-shadow:0 2px 16px rgba(0,0,0,.4)}',
+  '.lib-cover{width:64px;height:92px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-dark));background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:var(--brand-accent);font-size:1.4rem;box-shadow:0 6px 14px rgba(0,0,0,.25)}',
+  '.lib-info{flex:1;min-width:0}',
+  '.lib-title{font-weight:900;font-size:.98rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}',
+  '.lib-meta{font-size:.72rem;opacity:.65;margin:2px 0 8px}',
+  '.lib-bar{height:7px;border-radius:99px;background:rgba(100,116,139,.2);overflow:hidden}',
+  '.lib-bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-accent),#fbbf24)}',
+  '.lib-go{flex-shrink:0;width:40px;height:40px;border-radius:14px;border:0;background:var(--brand-primary);color:#fff;font-size:.95rem;display:flex;align-items:center;justify-content:center}',
+  'html.dark .lib-go{background:var(--brand-accent);color:#022c22}',
+  '.lib-x{position:absolute;top:6px;left:8px;border:0;background:none;color:inherit;opacity:.35;font-size:.8rem;padding:6px}',
+  '.lib-empty{text-align:center;padding:48px 24px;opacity:.85}',
+  '.lib-empty i{font-size:3.2rem;color:var(--brand-accent);margin-bottom:14px;display:block}',
+  '.lib-empty b{display:block;font-size:1.05rem;margin-bottom:6px}',
+  '.lib-empty span{font-size:.82rem;opacity:.7;line-height:1.8}',
+
   /* ---- القارئ ---- */
   'html.is-native-app[data-view="reader"] body{padding-bottom:env(safe-area-inset-bottom,0px)}',
   'html.is-native-app[data-view="reader"] main{padding:0 0 16px!important}',
@@ -254,12 +290,96 @@
     return 'home';
   }
 
+  /* ---- مكتبتي: تتبّع القراءة ---- */
+  var LS_KEY = 'app_reading_v1';
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(LS_KEY) || '{}') || {}; } catch (e) { store = {}; }
+  function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(store)); } catch (e) {} }
+  function G(name) { try { return (0, eval)('typeof ' + name + ' !== "undefined" ? ' + name + ' : null'); } catch (e) { return null; } }
+  function novelById(id) { var arr = G('novels') || []; for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i]; return null; }
+  var timer = null;
+  function pct() {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    return h > 0 ? Math.min(1, Math.max(0, window.scrollY / h)) : 0;
+  }
+  function record(inReader) {
+    var id = G('currentNovelId'), n = id && novelById(id);
+    if (!n) return;
+    var r = store[id] || { ch: 0, p: 0, ts: 0, done: false, seen: true };
+    if (inReader) {
+      var ch = parseInt(G('currentChapterIndex'), 10) || 0, p = pct();
+      var last = n.chapters.length - 1;
+      r.ch = ch; r.p = p; r.started = true;
+      r.done = ch >= last && p >= 0.93 ? true : (r.done && ch >= last);
+    }
+    r.ts = Date.now(); r.seen = true;
+    store[id] = r; save();
+  }
+  function trackView(v) {
+    clearInterval(timer); timer = null;
+    if (v === 'novel-details') { var id = G('currentNovelId'); if (id && !store[id] && novelById(id)) record(false); }
+    if (v === 'reader') { setTimeout(function () { record(true); }, 400); timer = setInterval(function () { record(true); }, 1500); }
+  }
+  window.addEventListener('pagehide', function () { if (currentView() === 'reader') record(true); });
+
+  /* ---- مكتبتي: الشاشة ---- */
+  var lib = document.createElement('div');
+  lib.id = 'app-lib';
+  function libOpen() { return root.classList.contains('lib-open'); }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function card(id, n, r) {
+    var total = n.chapters.length, ratio = Math.min(1, ((r.ch || 0) + (r.p || 0)) / Math.max(1, total));
+    var started = r.started && (r.ch > 0 || r.p > 0.02);
+    var cover = n.coverImg ? '<div class="lib-cover" style="background-image:url(\'' + esc(n.coverImg) + '\')"></div>'
+      : '<div class="lib-cover"><i class="fa-solid ' + esc(n.accentIcon || 'fa-book') + '"></i></div>';
+    var meta = r.done ? 'أنهيت الرواية' : started ? 'الفصل ' + ((r.ch || 0) + 1) + ' من ' + total + ' · ' + Math.round(ratio * 100) + '%' : 'لم تبدأ القراءة بعد · ' + total + ' فصول';
+    return '<div class="lib-card" data-id="' + esc(id) + '">' + cover +
+      '<div class="lib-info"><div class="lib-title">' + esc(n.title) + '</div><div class="lib-meta">' + meta + '</div>' +
+      '<div class="lib-bar"><i style="width:' + (r.done ? 100 : Math.round(ratio * 100)) + '%"></i></div></div>' +
+      '<button class="lib-go" aria-label="متابعة"><i class="fa-solid ' + (started || r.done ? 'fa-play' : 'fa-book-open') + '" style="margin-right:-2px"></i></button>' +
+      '<button class="lib-x" data-x="' + esc(id) + '" aria-label="إزالة"><i class="fa-solid fa-xmark"></i></button></div>';
+  }
+  function paintLib() {
+    var ids = Object.keys(store).filter(function (id) { return novelById(id); })
+      .sort(function (a, b) { return (store[b].ts || 0) - (store[a].ts || 0); });
+    var cont = ids.filter(function (id) { return !store[id].done; }), done = ids.filter(function (id) { return store[id].done; });
+    var h = '<h2><i class="fa-solid fa-bookmark"></i>مكتبتي</h2><p class="sub">الروايات التي دخلتها وتابع من حيث توقفت</p>';
+    if (!ids.length) {
+      h += '<div class="lib-empty"><i class="fa-solid fa-book-open-reader"></i><b>مكتبتك فارغة</b><span>الروايات التي تفتحها وتبدأ قراءتها<br>ستظهر هنا لتكمل منها لاحقًا</span></div>';
+    } else {
+      if (cont.length) h += '<h3>أكمل القراءة</h3>' + cont.map(function (id) { return card(id, novelById(id), store[id]); }).join('');
+      if (done.length) h += '<h3>أنهيتها</h3>' + done.map(function (id) { return card(id, novelById(id), store[id]); }).join('');
+    }
+    lib.innerHTML = h;
+    var bg = getComputedStyle(document.body).backgroundColor;
+    if (!bg || bg === 'transparent' || /rgba\(.*,\s*0\)$/.test(bg)) bg = root.classList.contains('dark') ? '#020617' : '#fcf8f2';
+    lib.style.background = bg;
+  }
+  function openLib() { paintLib(); root.classList.add('lib-open'); lib.scrollTop = 0; }
+  function closeLib() { root.classList.remove('lib-open'); }
+  window.__appCloseLibrary = function () { if (libOpen()) { closeLib(); setActive('home'); return true; } return false; };
+  lib.addEventListener('click', function (e) {
+    var x = e.target.closest('[data-x]');
+    if (x) { delete store[x.dataset.x]; save(); paintLib(); return; }
+    var c = e.target.closest('.lib-card');
+    if (!c) return;
+    var id = c.dataset.id, r = store[id], n = novelById(id);
+    if (!r || !n) return;
+    closeLib();
+    var started = r.started && (r.ch > 0 || r.p > 0.02);
+    if (started && typeof window.openChapterReader === 'function') {
+      window.openChapterReader(id, r.ch || 0);
+      var target = r.p || 0;
+      setTimeout(function () { var hh = document.documentElement.scrollHeight - window.innerHeight; if (hh > 0 && target > 0.02) window.scrollTo({ top: hh * target }); }, 700);
+    } else if (typeof window.openNovelDetails === 'function') window.openNovelDetails(id, false, true);
+  });
+
   /* ---- الشريط السفلي ---- */
   var TABS = [
     { id: 'home', icon: 'fa-house', label: 'الرئيسية' },
-    { id: 'library', icon: 'fa-book-open', label: 'المكتبة' },
+    { id: 'library', icon: 'fa-book-open', label: 'الروايات' },
     { id: 'search', icon: 'fa-magnifying-glass', label: 'بحث' },
-    { id: 'author', icon: 'fa-feather-pointed', label: 'الكاتب' },
+    { id: 'mylib', icon: 'fa-bookmark', label: 'المكتبة' },
     { id: 'theme', icon: 'fa-moon', label: 'المظهر' }
   ];
   var bar = document.createElement('nav');
@@ -293,18 +413,20 @@
     var b = e.target.closest('button');
     if (!b) return;
     try { if (navigator.vibrate) navigator.vibrate(8); } catch (x) {}
-    var id = b.dataset.tab, wasHome = currentView() === 'home';
+    var id = b.dataset.tab;
     if (id === 'theme') {
       if (typeof window.toggleDarkMode === 'function') window.toggleDarkMode();
-      setTimeout(syncThemeIcon, 50);
+      setTimeout(function () { syncThemeIcon(); paintLib(); }, 60);
       return;
     }
+    if (id === 'mylib') { setActive('mylib'); openLib(); return; }
+    var wasHome = currentView() === 'home' && !libOpen();
+    closeLib();
     setActive(id);
     toHome();
     var d = wasHome ? 0 : 350;
     if (id === 'home') setTimeout(function () { window.scrollTo({ top: 0, behavior: 'smooth' }); }, d + 30);
     else if (id === 'library') scrollToEl('#library-section-title', d + 60);
-    else if (id === 'author') scrollToEl('#author-bio-card', d + 60);
     else if (id === 'search') {
       setTimeout(function () { window.scrollTo({ top: 0, behavior: 'smooth' }); }, d + 30);
       setTimeout(function () {
@@ -318,11 +440,23 @@
   function onView() {
     var v = currentView();
     root.setAttribute('data-view', v);
+    if (libOpen()) closeLib();
+    trackView(v);
     if (v === 'novel-details') setActive('library');
     else if (v === 'home' && !bar.querySelector('.on')) setActive('home');
   }
   var mo = new MutationObserver(onView);
   function init() {
+    var cover = document.createElement('div'); cover.id = 'app-sat';
+    document.body.appendChild(cover);
+    document.body.appendChild(lib);
+    // ارتفاع شريط الحالة: من Capacitor أو env أو قيمة افتراضية
+    var pr = document.createElement('div');
+    pr.style.cssText = 'position:fixed;visibility:hidden;padding-top:max(var(--safe-area-inset-top,0px),env(safe-area-inset-top,0px))';
+    document.body.appendChild(pr);
+    var sat = parseFloat(getComputedStyle(pr).paddingTop) || 0;
+    pr.remove();
+    root.style.setProperty('--sat', (sat > 0 ? sat : (NATIVE ? 28 : 0)) + 'px');
     document.body.appendChild(bar);
     VIEWS.forEach(function (v) {
       var el = document.getElementById('view-' + v);
