@@ -154,7 +154,7 @@
   }, true);
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-23.3';
+  var BRIDGE_VERSION = '2026-10-23.4';
   (function () {
     var t = null;
     function start(e) {
@@ -264,8 +264,8 @@
   /* ---- أساس ---- */
   'html.is-native-app{--sat:0px;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;scroll-padding-top:calc(var(--sat) + 12px)}',
   'html.is-native-app body{-webkit-touch-callout:none;padding-top:var(--sat);padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}',
-  'html.is-native-app button,html.is-native-app a,html.is-native-app nav{-webkit-user-select:none;user-select:none}',
-  'html.is-native-app .novel-text,html.is-native-app #reader-paper,html.is-native-app input,html.is-native-app textarea{-webkit-user-select:text;user-select:text}',
+  'html.is-native-app body *{-webkit-user-select:none;user-select:none}',
+  'html.is-native-app #reader-paper,html.is-native-app #reader-paper *,html.is-native-app input,html.is-native-app textarea,html.is-native-app [contenteditable]{-webkit-user-select:text;user-select:text}',
   'html.is-native-app main{padding:14px 14px 24px!important}',
   'html.is-native-app footer{display:none!important}',
   'html.is-native-app #nx-shelves{display:none!important}',
