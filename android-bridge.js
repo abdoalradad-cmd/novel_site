@@ -111,7 +111,10 @@
   /* ---------- 3) تحميل الرواية PDF: طباعة أندرويد الأصلية (تدعم العربي والروايات الطويلة) ---------- */
   var origPrint = window.print ? window.print.bind(window) : null;
   window.print = function () {
-    if (!nativeOK('AppNative')) { if (origPrint) origPrint(); return; }
+    if (!nativeOK('AppNative')) {
+      toast('تحميل PDF يحتاج النسخة الأحدث من التطبيق. ثبّت آخر APK بعد مسح القديم.');
+      return;
+    }
     var pa = document.getElementById('print-area');
     var inner = pa ? pa.innerHTML : '';
     if (!inner) { if (origPrint) origPrint(); return; }
@@ -121,7 +124,9 @@
       '<meta name="viewport" content="width=device-width,initial-scale=1">' +
       '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700;900&display=swap">' +
       '<style>@page{size:A4;margin:14mm}html,body{margin:0;padding:0;background:#fff}</style></head><body>' + inner + '</body></html>';
-    plugin('AppNative').print({ html: doc, name: title.replace(/[\\/:*?"<>|]+/g, ' ') }).catch(function () { toast('تعذّر تجهيز ملف الـ PDF'); });
+    plugin('AppNative').print({ html: doc, name: title.replace(/[\\/:*?"<>|]+/g, ' ') }).catch(function (e) {
+      toast('تعذّر تجهيز ملف الـ PDF: ' + String((e && e.message) || e || ''));
+    });
   };
   window.addEventListener('load', function () {
     // كل أزرار التحميل تمر على الطباعة الأصلية (جودة أفضل من html2canvas)
@@ -129,6 +134,41 @@
       window.generateDirectPdfFromChapters = function () { return window.triggerPrintPdf(); };
     }
   });
+
+  /* ---------- 3.5) صور جوجل درايف: محاولات بديلة لو فشل التحميل داخل التطبيق ---------- */
+  document.addEventListener('error', function (e) {
+    var im = e.target;
+    if (!im || im.tagName !== 'IMG') return;
+    var m = /(?:googleusercontent\.com\/d\/|drive\.google\.com\/(?:uc\?[^"']*id=|thumbnail\?id=|file\/d\/))([\w-]{20,})/.exec(im.src || '');
+    if (!m) return;
+    var tries = parseInt(im.getAttribute('data-try') || '0', 10);
+    var urls = [
+      'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w1000',
+      'https://lh3.googleusercontent.com/d/' + m[1] + '=w1000',
+      'https://drive.google.com/uc?export=view&id=' + m[1]
+    ];
+    if (tries >= urls.length) return;
+    im.setAttribute('data-try', String(tries + 1));
+    im.referrerPolicy = 'no-referrer';
+    im.src = urls[tries];
+  }, true);
+
+  /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
+  var BRIDGE_VERSION = '2026-10-23.3';
+  (function () {
+    var t = null;
+    function start(e) {
+      if (!e.target || !e.target.closest || !e.target.closest('#header-site-title')) return;
+      clearTimeout(t);
+      t = setTimeout(function () {
+        toast('واجهة التطبيق ' + BRIDGE_VERSION + ' | الإضافة الأصلية: ' + (nativeOK('AppNative') ? 'متصلة ✅' : 'غير موجودة ❌ (ثبّت آخر APK)'));
+      }, 1800);
+    }
+    function stop() { clearTimeout(t); }
+    document.addEventListener('touchstart', start, { passive: true });
+    document.addEventListener('touchend', stop, { passive: true });
+    document.addEventListener('touchmove', stop, { passive: true });
+  })();
 
   /* ---------- 4) الروابط الخارجية ---------- */
   function openExternal(url) {
