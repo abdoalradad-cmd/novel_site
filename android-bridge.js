@@ -118,20 +118,66 @@
     var pa = document.getElementById('print-area');
     var inner = pa ? pa.innerHTML : '';
     if (!inner) { if (origPrint) origPrint(); return; }
+    sendToNativePrint(inner, novelTitle());
+  };
+  function novelTitle() {
     var nid = G('currentNovelId'), list = G('novels') || [], title = 'رواية';
     for (var i = 0; i < list.length; i++) if (list[i].id === nid) title = 'رواية ' + list[i].title;
-    var doc = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">' +
+    return title;
+  }
+  function printDoc(inner) {
+    return '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">' +
       '<meta name="viewport" content="width=device-width,initial-scale=1">' +
       '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700;900&display=swap">' +
       '<style>@page{size:A4;margin:14mm}html,body{margin:0;padding:0;background:#fff;direction:rtl}' +
       '#pw>div{width:auto!important;max-width:640px!important;padding:0!important;margin:0 auto!important;box-sizing:border-box!important}' +
       '#pw p,#pw h1,#pw h2,#pw h3{overflow-wrap:anywhere}</style></head><body><div id="pw">' + inner + '</div></body></html>';
-    plugin('AppNative').print({ html: doc, name: title.replace(/[\\/:*?"<>|]+/g, ' ') }).catch(function (e) {
-      toast('تعذّر تجهيز ملف الـ PDF: ' + String((e && e.message) || e || ''));
-    });
-  };
+  }
+  /* شاشة انتظار واضحة أثناء تجهيز الـ PDF (بدل التهنيج الصامت) */
+  function busy(on) {
+    var el = document.getElementById('rp-busy');
+    if (!on) { if (el) el.remove(); return; }
+    if (el) return;
+    var st = document.getElementById('rp-busy-st');
+    if (!st) {
+      st = document.createElement('style'); st.id = 'rp-busy-st';
+      st.textContent = '@keyframes rpspin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(st);
+    }
+    el = document.createElement('div'); el.id = 'rp-busy';
+    el.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(2,44,34,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#fff;font-family:Cairo,sans-serif;font-weight:700;font-size:16px;text-align:center;padding:24px';
+    el.innerHTML = '<div style="width:54px;height:54px;border:5px solid rgba(255,255,255,.25);border-top-color:#fbbf24;border-radius:50%;animation:rpspin .9s linear infinite"></div>' +
+      '<div>جاري تجهيز ملف الـ PDF…<br><span style="font-weight:400;font-size:13px;opacity:.85">اختر «حفظ بتنسيق PDF» من النافذة اللي هتظهر</span></div>';
+    document.body.appendChild(el);
+  }
+  function sendToNativePrint(inner, title) {
+    var n = plugin('AppNative');
+    busy(true);
+    return n.print({ html: printDoc(inner), name: title.replace(/[\\/:*?"<>|]+/g, ' ') })
+      .then(function () { setTimeout(function () { busy(false); }, 400); })
+      .catch(function (e) {
+        busy(false);
+        toast('تعذّر تجهيز ملف الـ PDF: ' + String((e && e.message) || e || ''));
+      });
+  }
+  /* نغلّف triggerPrintPdf الأصلية: شاشة انتظار فورية + #print-area مخفي تمامًا (ظهوره كان بيوسّع الصفحة ويهنّج) */
+  function installFastPdf() {
+    if (!nativeOK('AppNative') || typeof window.triggerPrintPdf !== 'function' || window.triggerPrintPdf.__rp) return;
+    var st = document.createElement('style');
+    st.textContent = '#print-area{display:none!important}';
+    document.head.appendChild(st);
+    var orig = window.triggerPrintPdf;
+    window.triggerPrintPdf = function () {
+      busy(true);
+      requestAnimationFrame(function () { setTimeout(function () {
+        try { orig(); } catch (e) { busy(false); toast('تعذّر تجهيز ملف الـ PDF'); }
+      }, 60); });
+    };
+    window.triggerPrintPdf.__rp = true;
+  }
   window.addEventListener('load', function () {
     // كل أزرار التحميل تمر على الطباعة الأصلية (جودة أفضل من html2canvas)
+    installFastPdf();
     if (nativeOK('AppNative') && typeof window.triggerPrintPdf === 'function') {
       window.generateDirectPdfFromChapters = function () { return window.triggerPrintPdf(); };
     }
@@ -198,7 +244,7 @@
   });
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-24.5';
+  var BRIDGE_VERSION = '2026-10-24.6';
   (function () {
     var t = null;
     function start(e) {
