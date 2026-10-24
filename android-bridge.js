@@ -243,8 +243,61 @@
     }).catch(function (e) { window.__swErr = String((e && e.message) || e || 'خطأ'); });
   });
 
+  /* ---------- تنبيه الإصدار الجديد + تحميل مباشر ---------- */
+  function cmpVer(a, b) {
+    var x = String(a).split('.'), y = String(b).split('.'), n = Math.max(x.length, y.length);
+    for (var i = 0; i < n; i++) {
+      var p = parseInt(x[i] || '0', 10) || 0, q = parseInt(y[i] || '0', 10) || 0;
+      if (p !== q) return p > q ? 1 : -1;
+    }
+    return 0;
+  }
+  function directUrl(u) {
+    var m = /drive\.google\.com\/file\/d\/([\w-]+)/.exec(u) || /drive\.google\.com\/(?:open|uc)\?[^#]*\bid=([\w-]+)/.exec(u);
+    return m ? 'https://drive.google.com/uc?export=download&id=' + m[1] : u;
+  }
+  function openDownload(u) {
+    u = directUrl(u);
+    var br = plugin('Browser');
+    if (br && br.open) { br.open({ url: u }); return; }
+    window.open(u, '_blank');
+  }
+  var updShown = false;
+  function showUpdate(newV, curV, url) {
+    if (updShown || document.getElementById('rp-upd')) return;
+    updShown = true;
+    var el = document.createElement('div'); el.id = 'rp-upd';
+    el.style.cssText = 'position:fixed;inset:0;z-index:2147483200;background:rgba(2,20,16,.78);display:flex;align-items:center;justify-content:center;padding:22px;direction:rtl;font-family:Cairo,system-ui,sans-serif';
+    el.innerHTML = '<div style="width:100%;max-width:360px;background:#fff;color:#0f172a;border-radius:26px;padding:26px 22px 18px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45)">' +
+      '<div style="width:68px;height:68px;margin:0 auto 14px;border-radius:20px;background:linear-gradient(135deg,#34d399,#065f46);display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px">⬇</div>' +
+      '<div style="font-weight:900;font-size:1.2rem;margin-bottom:8px">يوجد إصدار جديد من التطبيق</div>' +
+      '<div style="font-size:.9rem;line-height:1.9;color:#475569;margin-bottom:16px">إصدارك الحالي <b dir="ltr">' + curV + '</b> والإصدار الجديد <b dir="ltr">' + newV + '</b>.<br>حمّل التحديث علشان تستمتع بآخر الميزات والإصلاحات.</div>' +
+      '<button id="rp-upd-go" style="width:100%;border:0;border-radius:16px;padding:14px;font:900 1rem Cairo,sans-serif;color:#fff;background:linear-gradient(135deg,#065f46,#022c22);box-shadow:0 8px 20px rgba(2,44,34,.35)">تحميل الإصدار الجديد</button>' +
+      '<button id="rp-upd-later" style="margin-top:10px;border:0;background:none;color:#94a3b8;font:700 .8rem Cairo,sans-serif;padding:6px 12px">لاحقًا</button></div>';
+    document.body.appendChild(el);
+    el.querySelector('#rp-upd-go').onclick = function () {
+      if (!url) { toast('رابط التحميل غير مُعدّ بعد'); return; }
+      openDownload(url);
+    };
+    el.querySelector('#rp-upd-later').onclick = function () { el.remove(); };
+  }
+  function checkUpdate(tries) {
+    var c = G('siteConfig');
+    if (!c) { if (tries < 10) setTimeout(function () { checkUpdate(tries + 1); }, 1000); return; }
+    var v = String(c.appVersion || '').trim();
+    if (!v) return;
+    var app = plugin('App');
+    if (!app || !app.getInfo) return;
+    app.getInfo().then(function (info) {
+      var cur = String((info && info.version) || '0');
+      if (cmpVer(v, cur) > 0) showUpdate(v, cur, String(c.appDownloadUrl || '').trim());
+    }).catch(function () {});
+  }
+  window.addEventListener('load', function () { setTimeout(function () { checkUpdate(0); }, 2800); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && !updShown) setTimeout(function () { checkUpdate(5); }, 600); });
+
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-24.7';
+  var BRIDGE_VERSION = '2026-10-24.8';
   (function () {
     var t = null;
     function start(e) {
@@ -252,6 +305,7 @@
       clearTimeout(t);
       t = setTimeout(function () {
         var base = 'نسخة ' + BRIDGE_VERSION + ' | أصلية: ' + (nativeOK('AppNative') ? '✅' : '❌');
+        try { var ap = plugin('App'); if (ap && ap.getInfo) ap.getInfo().then(function (i) { window.__appVer = i && i.version; }); if (window.__appVer) base += ' | تطبيق v' + window.__appVer; } catch (e) {}
         if (!('serviceWorker' in navigator)) { toast(base + ' | أوفلاين: غير مدعوم ❌'); return; }
         navigator.serviceWorker.getRegistrations().then(function (regs) {
           return (window.caches ? caches.keys() : Promise.resolve([])).then(function (ks) {
@@ -328,6 +382,7 @@
   }
   function handleBack() {
     if (typeof window.__appBack === 'function' && window.__appBack()) return;
+    if (typeof window.__rpNotifIsOpen === 'function' && window.__rpNotifIsOpen()) { window.rpCloseNotifications(); return; }
     var modals = [
       ['secret-pin-modal', 'closeSecretPinModal'],
       ['content-password-modal', 'closeContentPasswordModal'],
@@ -379,12 +434,17 @@
   /* ---- الهيدر: شريط أخضر يتحرك مع الصفحة ---- */
   'html.is-native-app header.sticky{position:relative!important;top:auto!important;background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-dark))!important;border:0!important;border-radius:0 0 26px 26px;box-shadow:0 6px 24px rgba(2,44,34,.35)!important;backdrop-filter:none!important}',
   'html.is-native-app header.sticky>div:first-child{height:60px!important;padding-left:14px!important;padding-right:14px!important}',
-  'html.is-native-app header #header-site-title{color:#fff!important;font-size:1.02rem!important;line-height:1.3}',
+  'html.is-native-app header #header-site-title{font-size:0!important;line-height:1.3;color:#fff!important}',
+  'html.is-native-app header #header-site-title::after{content:"RadPad";font-family:Poppins,Cairo,system-ui,sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:.3px;color:#fff}',
   'html.is-native-app header #header-site-subtitle{display:none!important}',
-  'html.is-native-app header [onclick*="navigateTo"]>div:first-child{width:2.5rem!important;height:2.5rem!important;border-radius:.9rem!important;background:rgba(255,255,255,.14)!important;border-color:rgba(255,255,255,.25)!important}',
+  'html.is-native-app header [onclick*="navigateTo"]>div:first-child{width:2.7rem!important;height:2.7rem!important;background:none!important;border:0!important;box-shadow:none!important}',
+  'html.is-native-app header [onclick*="navigateTo"]>div:first-child svg{width:100%;height:100%}',
   'html.is-native-app header button{background:rgba(255,255,255,.14)!important;color:#fcd34d!important;border:0!important}',
   'html.is-native-app header button.admin-only-ui{color:#fff!important}',
-  'html.is-native-app header>div:nth-child(2){padding:0 14px 14px!important}',
+  'html.is-native-app header>div:nth-child(2){display:none!important}',
+  'html.is-native-app header button:not(#rp-bell){display:none!important}',
+  'html.is-native-app header #rp-bell{width:2.6rem!important;height:2.6rem!important;border-radius:.9rem!important;color:#fcd34d!important}',
+  'html.is-native-app #rp-bell-badge{border-color:#064e3b}',
   'html.is-native-app header #mobile-search-input{background:rgba(255,255,255,.96)!important;color:#0f172a!important;border:0!important;border-radius:16px!important;height:46px;font-size:.95rem;box-shadow:0 4px 14px rgba(0,0,0,.18)}',
   'html.is-native-app header #mobile-search-input::placeholder{color:#64748b}',
   'html.is-native-app header>div:nth-child(2) i{top:15px!important;color:#64748b!important}',
