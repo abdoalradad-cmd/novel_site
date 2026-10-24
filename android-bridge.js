@@ -240,18 +240,27 @@
         var sw = reg.active || navigator.serviceWorker.controller;
         if (sw) { sw.postMessage({ type: 'precache', urls: urls }); try { localStorage.setItem('__sw_pre_v1', '1'); } catch (e) {} }
       }, 6000);
-    }).catch(function () {});
+    }).catch(function (e) { window.__swErr = String((e && e.message) || e || 'خطأ'); });
   });
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-24.6';
+  var BRIDGE_VERSION = '2026-10-24.7';
   (function () {
     var t = null;
     function start(e) {
       if (!e.target || !e.target.closest || !e.target.closest('#header-site-title')) return;
       clearTimeout(t);
       t = setTimeout(function () {
-        toast('واجهة التطبيق ' + BRIDGE_VERSION + ' | الإضافة الأصلية: ' + (nativeOK('AppNative') ? 'متصلة ✅' : 'غير موجودة ❌ (ثبّت آخر APK)'));
+        var base = 'نسخة ' + BRIDGE_VERSION + ' | أصلية: ' + (nativeOK('AppNative') ? '✅' : '❌');
+        if (!('serviceWorker' in navigator)) { toast(base + ' | أوفلاين: غير مدعوم ❌'); return; }
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          return (window.caches ? caches.keys() : Promise.resolve([])).then(function (ks) {
+            return Promise.all(ks.map(function (k) { return caches.open(k).then(function (c) { return c.keys(); }); })).then(function (all) {
+              var n = all.reduce(function (a, b) { return a + b.length; }, 0);
+              toast(base + ' | أوفلاين: تسجيل ' + (regs.length ? '✅' : '❌') + ' / تحكم ' + (navigator.serviceWorker.controller ? '✅' : '❌') + ' / ملفات محفوظة ' + n + (window.__swErr ? ' / خطأ: ' + window.__swErr : ''));
+            });
+          });
+        }).catch(function (e) { toast(base + ' | أوفلاين خطأ: ' + e); });
       }, 1800);
     }
     function stop() { clearTimeout(t); }
