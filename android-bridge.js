@@ -123,7 +123,9 @@
     var doc = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">' +
       '<meta name="viewport" content="width=device-width,initial-scale=1">' +
       '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700;900&display=swap">' +
-      '<style>@page{size:A4;margin:14mm}html,body{margin:0;padding:0;background:#fff}</style></head><body>' + inner + '</body></html>';
+      '<style>@page{size:A4;margin:14mm}html,body{margin:0;padding:0;background:#fff;direction:rtl}' +
+      '#pw>div{width:auto!important;max-width:640px!important;padding:0!important;margin:0 auto!important;box-sizing:border-box!important}' +
+      '#pw p,#pw h1,#pw h2,#pw h3{overflow-wrap:anywhere}</style></head><body><div id="pw">' + inner + '</div></body></html>';
     plugin('AppNative').print({ html: doc, name: title.replace(/[\\/:*?"<>|]+/g, ' ') }).catch(function (e) {
       toast('تعذّر تجهيز ملف الـ PDF: ' + String((e && e.message) || e || ''));
     });
@@ -153,8 +155,50 @@
     im.src = urls[tries];
   }, true);
 
+  /* ---------- شاشة بداية RadPad داخل الصفحة (تظهر حتى يكتمل تحميل الموقع) ---------- */
+  (function () {
+    var start = Date.now(), hidden = false, el = document.createElement('div');
+    el.id = 'rp-splash';
+    el.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#065f46,#022c22);color:#fff;font-family:Poppins,system-ui,-apple-system,Roboto,sans-serif;transition:opacity .45s ease;direction:ltr';
+    el.innerHTML = '<div style="width:104px;height:104px;border-radius:28px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center">' +
+      '<svg width="50" viewBox="62 -702 551 702" aria-hidden="true"><path transform="scale(1,-1)" fill="#fff" d="M420 0 274 265H233V0H62V702H349Q432 702 490.5 673.0Q549 644 578.0 593.5Q607 543 607 481Q607 411 567.5 356.0Q528 301 451 278L613 0ZM233 386H339Q386 386 409.5 409.0Q433 432 433 474Q433 514 409.5 537.0Q386 560 339 560H233Z"/></svg></div>' +
+      '<div style="font-weight:800;font-size:34px;margin-top:20px;letter-spacing:.3px">RadPad</div>' +
+      '<div style="font-size:11px;margin-top:12px;opacity:.65;letter-spacing:.4px">powered by Abdelrahman Alradad</div>';
+    whenRoot(function () { document.documentElement.appendChild(el); });
+    function hide() {
+      if (hidden) return;
+      hidden = true;
+      setTimeout(function () {
+        el.style.opacity = '0';
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+      }, Math.max(0, 1100 - (Date.now() - start)));
+    }
+    if (document.readyState === 'complete') hide(); else window.addEventListener('load', hide);
+    setTimeout(hide, 9000);
+  })();
+
+  /* ---------- العمل بدون إنترنت: Service Worker (الملف sw.js بجانب index.html) ---------- */
+  window.addEventListener('load', function () {
+    if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
+    var base = location.pathname.replace(/[^\/]*$/, '');
+    navigator.serviceWorker.register(base + 'sw.js', { scope: base }).then(function () {
+      return navigator.serviceWorker.ready;
+    }).then(function (reg) {
+      var done = false;
+      try { done = localStorage.getItem('__sw_pre_v1') === '1'; } catch (e) {}
+      if (done) return;
+      // أول مرة: خزّن كل ما حمّلته الصفحة (الروايات والخطوط والصور) ليعمل التطبيق بدون إنترنت
+      setTimeout(function () {
+        var urls = [location.origin + base];
+        try { performance.getEntriesByType('resource').forEach(function (r) { urls.push(r.name); }); } catch (e) {}
+        var sw = reg.active || navigator.serviceWorker.controller;
+        if (sw) { sw.postMessage({ type: 'precache', urls: urls }); try { localStorage.setItem('__sw_pre_v1', '1'); } catch (e) {} }
+      }, 6000);
+    }).catch(function () {});
+  });
+
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-23.4';
+  var BRIDGE_VERSION = '2026-10-24.5';
   (function () {
     var t = null;
     function start(e) {
