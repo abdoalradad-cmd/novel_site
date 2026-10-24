@@ -297,7 +297,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden && !updShown) setTimeout(function () { checkUpdate(5); }, 600); });
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-24.8';
+  var BRIDGE_VERSION = '2026-10-24.9';
   (function () {
     var t = null;
     function start(e) {
@@ -450,7 +450,7 @@
   'html.is-native-app header>div:nth-child(2) i{top:15px!important;color:#64748b!important}',
   'html.is-native-app:not([data-view="home"]) header>div:nth-child(2){display:none!important}',
   'html.is-native-app[data-view="reader"] header.sticky{display:none!important}',
-  'html.is-native-app #announcement-bar{padding:.35rem .9rem!important;font-size:.7rem!important;line-height:1.5;border:0!important}',
+  'html.is-native-app #announcement-bar{display:none!important}',
   'html.is-native-app[data-view="reader"] #announcement-bar{display:none!important}',
 
   /* ---- البانر الرئيسي ---- */
