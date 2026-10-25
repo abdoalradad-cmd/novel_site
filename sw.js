@@ -16,7 +16,7 @@ self.addEventListener('activate', (e) => {
 });
 
 // طلبات لا نخزّنها أبدًا (بيانات حيّة)
-const SKIP = /(firebaseio\.com|identitytoolkit|securetoken|firebaseinstallations|google-analytics|googletagmanager|youtube\.com|ytimg\.com|googlevideo\.com)/i;
+const SKIP = /(\/api\/(me|my|admin|login|register|password)|firebaseio\.com|identitytoolkit|securetoken|firebaseinstallations|google-analytics|googletagmanager|youtube\.com|ytimg\.com|googlevideo\.com)/i;
 
 function withTimeout(promise, ms) {
   return new Promise((resolve, reject) => {

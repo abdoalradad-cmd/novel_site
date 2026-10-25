@@ -297,7 +297,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden && !updShown) setTimeout(function () { checkUpdate(5); }, 600); });
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-24.9';
+  var BRIDGE_VERSION = '2026-10-25.1';
   (function () {
     var t = null;
     function start(e) {
@@ -382,6 +382,7 @@
   }
   function handleBack() {
     if (typeof window.__appBack === 'function' && window.__appBack()) return;
+    if (typeof window.__rpAcctBack === 'function' && window.__rpAcctBack()) return;
     if (typeof window.__rpNotifIsOpen === 'function' && window.__rpNotifIsOpen()) { window.rpCloseNotifications(); return; }
     var modals = [
       ['secret-pin-modal', 'closeSecretPinModal'],
@@ -589,7 +590,7 @@
     { id: 'library', icon: 'fa-book-open', label: 'الروايات' },
     { id: 'search', icon: 'fa-magnifying-glass', label: 'بحث' },
     { id: 'mylib', icon: 'fa-bookmark', label: 'المكتبة' },
-    { id: 'theme', icon: 'fa-moon', label: 'المظهر' }
+    { id: 'account', icon: 'fa-user', label: 'حسابي' }
   ];
   var bar = document.createElement('nav');
   bar.id = 'app-tabbar';
@@ -608,6 +609,7 @@
   function syncThemeIcon() {
     var ic = bar.querySelector('[data-tab="theme"] i');
     if (ic) ic.className = 'fa-solid ' + (root.classList.contains('dark') ? 'fa-sun' : 'fa-moon');
+    if (libOpen()) paintLib();
   }
   function toHome() { if (currentView() !== 'home' && typeof window.navigateTo === 'function') window.navigateTo('home'); }
   function scrollToEl(sel, delay) {
@@ -779,6 +781,7 @@
     if (e.target && (e.target.id === 'mobile-search-input' || e.target.id === 'search-input')) { e.target.blur(); setActive('search'); openSearch(); }
   });
 
+  window.__appAfterOverlay = function () { if (activeTab === 'account') setActive(currentView() === 'novel-details' ? 'library' : 'home'); };
   window.__appBack = function () {
     if (searchOpen()) { closeSearch(); return true; }
     if (libOpen()) { closeLib(); setActive('home'); return true; }
@@ -791,9 +794,9 @@
     if (!b) return;
     try { if (navigator.vibrate) navigator.vibrate(8); } catch (x) {}
     var id = b.dataset.tab;
-    if (id === 'theme') {
-      if (typeof window.toggleDarkMode === 'function') window.toggleDarkMode();
-      setTimeout(function () { syncThemeIcon(); if (libOpen()) paintLib(); }, 60);
+    if (id === 'account') {
+      closeLib(); closeSearch(true); setActive('account');
+      if (typeof window.rpOpenAccount === 'function') window.rpOpenAccount();
       return;
     }
     if (id === 'search') { setActive('search'); openSearch(); return; }
