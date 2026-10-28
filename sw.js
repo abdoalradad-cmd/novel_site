@@ -3,6 +3,7 @@
    - بدون إنترنت أو مع شبكة بطيئة: يعرض آخر نسخة محفوظة.
    ضع هذا الملف بجانب index.html في مستودع الموقع (بنفس الاسم sw.js). */
 const CACHE = 'radpad-v1';
+const CFG_KEY = '__rp_cfg';
 const NET_TIMEOUT = 7000;
 
 self.addEventListener('install', (e) => { self.skipWaiting(); });
@@ -33,14 +34,37 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
   if (SKIP.test(url.host + url.pathname)) return;
+  if (url.pathname.endsWith('/' + CFG_KEY)) { e.respondWith(cfgResponse()); return; }
   e.respondWith(handle(e, req));
 });
+
+/* آخر إعدادات تحديث التطبيق (الفيرجن + رابط التحميل) اللي اتقرت من الصفحة الأحدث */
+async function cfgResponse() {
+  try {
+    const c = await caches.open(CACHE);
+    const hit = await c.match(new URL(CFG_KEY, self.registration.scope).href);
+    if (hit) return hit;
+  } catch (err) {}
+  return new Response('{}', { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+}
+async function rememberCfg(res) {
+  try {
+    const t = await res.clone().text();
+    const v = /"appVersion"\s*:\s*"([^"]*)"/.exec(t), u = /"appDownloadUrl"\s*:\s*"([^"]*)"/.exec(t);
+    if (!v) return;
+    const c = await caches.open(CACHE);
+    await c.put(new URL(CFG_KEY, self.registration.scope).href, new Response(JSON.stringify({ appVersion: v[1], appDownloadUrl: u ? u[1] : '' }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }));
+  } catch (err) {}
+}
 
 async function handle(e, req) {
   const cache = await caches.open(CACHE);
   // الشبكة أولًا؛ ولو أي تحميل نجح (حتى بعد انتهاء المهلة) يُحفظ في الخلفية
-  const net = fetch(req).then((res) => {
-    if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone()).catch(() => {});
+  // الصفحة الرئيسية: نتجاوز كاش المتصفح (10 دقايق في GitHub Pages) علشان التعديلات الجديدة تظهر فورًا
+  const isPage = req.mode === 'navigate' || /\/(index\.html)?$/.test(new URL(req.url).pathname);
+  const net = (isPage ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req)).then((res) => {
+    if (res && (res.ok || res.type === 'opaque') && !/no-store/i.test(res.headers.get('cache-control') || '')) cache.put(req, res.clone()).catch(() => {});
+    if (isPage && res && res.ok) e.waitUntil(rememberCfg(res.clone()));
     return res;
   });
   e.waitUntil(net.catch(() => {}));

@@ -281,23 +281,29 @@
     };
     el.querySelector('#rp-upd-later').onclick = function () { el.remove(); };
   }
+  /* آخر إعدادات محفوظة من الـ Service Worker (أحدث من نسخة الصفحة المعروضة لو الصفحة جت من كاش قديم) */
+  function swCfg() {
+    return fetch(new URL('__rp_cfg', document.baseURI).href, { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return {}; });
+  }
   function checkUpdate(tries) {
     var c = G('siteConfig');
     if (!c) { if (tries < 10) setTimeout(function () { checkUpdate(tries + 1); }, 1000); return; }
-    var v = String(c.appVersion || '').trim();
-    if (!v) return;
     var app = plugin('App');
     if (!app || !app.getInfo) return;
-    app.getInfo().then(function (info) {
-      var cur = String((info && info.version) || '0');
-      if (cmpVer(v, cur) > 0) showUpdate(v, cur, String(c.appDownloadUrl || '').trim());
+    Promise.all([app.getInfo(), swCfg()]).then(function (r) {
+      var cur = String((r[0] && r[0].version) || '0'), s = r[1] || {};
+      var v = String(c.appVersion || '').trim(), url = String(c.appDownloadUrl || '').trim();
+      var sv = String(s.appVersion || '').trim();
+      if (sv && (!v || cmpVer(sv, v) > 0)) { v = sv; url = String(s.appDownloadUrl || '').trim() || url; }
+      if (!v) return;
+      if (cmpVer(v, cur) > 0) showUpdate(v, cur, url);
     }).catch(function () {});
   }
-  window.addEventListener('load', function () { setTimeout(function () { checkUpdate(0); }, 2800); });
+  window.addEventListener('load', function () { setTimeout(function () { checkUpdate(0); }, 2800); setTimeout(function () { checkUpdate(5); }, 12000); setInterval(function () { if (!document.hidden && !updShown) checkUpdate(5); }, 90000); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden && !updShown) setTimeout(function () { checkUpdate(5); }, 600); });
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-27.1';
+  var BRIDGE_VERSION = '2026-10-28.1';
   (function () {
     var t = null;
     function start(e) {
