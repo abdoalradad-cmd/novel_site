@@ -3220,6 +3220,12 @@ html.dark .rp-note.g{background:rgba(16,185,129,.1);border-color:rgba(16,185,129
         <div id="rp-pop-list" class="space-y-2.5 mt-3"></div>
     </div>
     <div class="rp-adm-card">
+        <h4><i class="fa-solid fa-id-card theme-text-primary"></i><span>بروفايلات الكُتّاب (نسخة للموقع الأصلي)</span></h4>
+        <p class="rp-adm-note">بتحفظ صور الكُتّاب ونبذهم وروابطهم وعدد متابعينهم جوه ملف الموقع علشان صفحاتهم تظهر للناس فورًا حتى لو السيرفر بطيء أو فيه مشكلة. بتتحدّث لوحدها كل ما تفتح الموقع كأدمن، وتقدر تحدّثها بإيدك. بعدها صدّر الموقع وارفعه على GitHub.</p>
+        <div id="rp-prof-info" class="rp-adm-note" style="font-weight:800"></div>
+        <button type="button" class="rp-adm-btn" onclick="rpAdmSyncProfiles()">🔄 تحديث البروفايلات الآن</button>
+    </div>
+    <div class="rp-adm-card">
         <h4><i class="fa-solid fa-code-branch theme-text-primary"></i><span>إصدار التطبيق</span></h4>
         <p class="rp-adm-note">اكتب رقم أحدث إصدار من التطبيق (مثال: 1 أو 2 أو 1.5). أي حد تطبيقه أقدم من الرقم ده هيظهرله تنبيه «يوجد إصدار جديد» وتحته زر تحميل. سيبه فاضي لو مش عايز تنبيه.</p>
         <input id="rp-app-version" type="text" inputmode="decimal" dir="ltr" class="rp-adm-in" placeholder="مثال: 1" autocomplete="off">
@@ -3436,7 +3442,7 @@ html.dark .rp-note.g{background:rgba(16,185,129,.1);border-color:rgba(16,185,129
     <div id="rp-all-page" aria-hidden="true">
         <div class="rp-np-top">
             <button type="button" class="rp-np-back" onclick="rpCloseAll()" aria-label="رجوع"><i class="fa-solid fa-arrow-right"></i></button>
-            <h2>📚 كل الروايات</h2>
+            <h2 id="rp-all-title">📚 كل الروايات</h2>
         </div>
         <div class="rp-pg-body" id="rp-all-body"></div>
     </div>
@@ -10510,6 +10516,7 @@ document.addEventListener('click', function (e) {
   function popIds() { var c = cfg(); if (!Array.isArray(c.popularIds)) c.popularIds = []; return c.popularIds; }
   function plainT(s) { var t = document.createElement('textarea'); t.innerHTML = String(s == null ? '' : s); return t.value; }
   function renderPop() {
+    try { paintProf(); } catch (e) {}
     var box = $('rp-pop-list'), sel = $('rp-pop-add'); if (!box || !sel) return;
     var all = []; try { all = novels.filter(function (n) { return !n.isUser; }); } catch (e) {}
     var ids = popIds().filter(function (id) { return all.some(function (n) { return n.id === id; }); });
@@ -10534,6 +10541,21 @@ document.addEventListener('click', function (e) {
     else { var j = a === 'popup' ? i - 1 : i + 1; if (j < 0 || j >= ids.length) return; var t = ids[i]; ids[i] = ids[j]; ids[j] = t; }
     popChanged();
   }
+
+  /* ---------- بروفايلات الكُتّاب: نسخة تتصدّر مع الموقع ---------- */
+  function profCount() { var P = cfg().authorProfiles || {}; return Object.keys(P).length; }
+  function paintProf() { var el = $('rp-prof-info'); if (!el) return; var at = cfg().authorProfilesAt; el.textContent = profCount() ? ('محفوظ ' + profCount() + ' بروفايل' + (at ? ' — آخر تحديث: ' + new Date(at).toLocaleString('ar-EG') : '')) : 'لسه ما اتحفظش أي بروفايل.'; }
+  window.rpAdmSyncProfiles = function (silent) {
+    var base = (cfg().apiUrl || '').replace(/\/+$/, ''); if (!base) { if (!silent) flash('رابط السيرفر مش متضبط'); return; }
+    fetch(base + '/api/authors', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
+      var P = {}; (d.authors || []).forEach(function (a) { P[a.id] = { name: a.name, avatar: a.avatar || '', bio: a.bio || '', links: a.links || {}, isAdmin: !!a.isAdmin, joinedAt: a.joinedAt || 0, followers: a.followers || 0 }; });
+      if (!Object.keys(P).length) return;
+      var old = JSON.stringify(cfg().authorProfiles || {}); if (old === JSON.stringify(P)) { if (!silent) flash('البروفايلات محدّثة بالفعل ✅'); return; }
+      cfg().authorProfiles = P; cfg().authorProfilesAt = Date.now(); persist(); paintProf();
+      if (!silent) flash('اتحفظ ' + Object.keys(P).length + ' بروفايل ✅ — صدّر الموقع وارفعه على GitHub');
+    }).catch(function () { if (!silent) flash('تعذّر الاتصال بالسيرفر'); });
+  };
+  try { window.addEventListener('load', function () { setTimeout(function () { try { if (!isReaderOnlyMode) window.rpAdmSyncProfiles(true); } catch (e) {} paintProf(); }, 6000); }); } catch (e) {}
 
   function onSettingsInput() {
     var c = cfg();
@@ -11393,7 +11415,9 @@ document.addEventListener('click', function (e) {
     var m = /(\d{12,})/.exec(String(n.id)); if (m) return +m[1];
     return 1000 - (i || 0);
   }
-  function readsOf(n) { return READS[n.id] || 0; }
+  function numOf(v) { if (typeof v === 'number') return v; return parseInt(String(v == null ? '' : v).replace(/[^\d]/g, ''), 10) || 0; }
+  /* القراءات الحقيقية: عدّاد الموقع (Firebase) لروايات الموقع، وعدّاد السيرفر لروايات الكُتّاب */
+  function readsOf(n) { return n.isUser ? (READS[n.id] || 0) : numOf(n.views); }
   function authorKey(n) { return n.isUser && n.uid ? String(n.uid) : (n.authorUid ? String(n.authorUid) : 'admin'); }
   function loadReads() {
     if (!base()) return;
@@ -11405,6 +11429,7 @@ document.addEventListener('click', function (e) {
     reported[id] = 1;
     try { fetch(base() + '/api/reads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ k: id }) }); } catch (e) {}
   }
+  try { var oPaint = window.paintViewsAndStarsOnCards; if (typeof oPaint === 'function') window.paintViewsAndStarsOnCards = function () { var r = oPaint.apply(this, arguments); try { schedule(); if ($('rp-all-page') && $('rp-all-page').classList.contains('open') && document.activeElement !== $('rp-all-q')) renderAll(); } catch (e) {} return r; }; } catch (e) {}
   var oOpenCh = window.openChapterReader;
   if (typeof oOpenCh === 'function') window.openChapterReader = function (nid) { try { reportRead(nid); } catch (e) {} return oOpenCh.apply(this, arguments); };
 
@@ -11424,7 +11449,7 @@ document.addEventListener('click', function (e) {
   function section(icon, title, list, o) {
     o = o || {};
     if (!list.length) return '';
-    return '<div class="rp-rsec"><div class="rp-rhead"><h3><i class="fa-solid fa-' + icon + '"></i>' + title + '</h3>' + (o.all ? '<button type="button" class="rp-rall" data-rp-all="1">كل الروايات ‹</button>' : '') + '</div><div class="rp-hs">' +
+    return '<div class="rp-rsec"><div class="rp-rhead"><h3 data-rp-all="' + (o.mode || 'all') + '" style="cursor:pointer"><i class="fa-solid fa-' + icon + '"></i>' + title + '</h3>' + '<button type="button" class="rp-rall" data-rp-all="' + (o.mode || 'all') + '">عرض الكل ‹</button>' + '</div><div class="rp-hs">' +
       list.map(function (n, i) { return card(n, { rank: o.rank ? (i + 1) : 0, reads: o.reads }); }).join('') + '</div></div>';
   }
 
@@ -11441,21 +11466,24 @@ document.addEventListener('click', function (e) {
   function renderRows() {
     var host = build(); if (!host) return;
     var vis = visible(); if (!vis.length) { host.innerHTML = ''; return; }
+    var L = lists(vis), pop = L.pop, most = L.most, recent = L.recent;
+    var shown = {}; pop.slice(0, 15).concat(most.slice(0, 15), recent.slice(0, 15)).forEach(function (n) { shown[n.id] = 1; });
+    var rest = vis.filter(function (n) { return !shown[n.id]; }).slice(0, 20);
+    var anyReads = most.some(function (n) { return readsOf(n) > 0; });
+    host.innerHTML = section('fire', 'الروايات المشهورة', pop.slice(0, 15), { mode: 'popular' }) +
+      section('ranking-star', 'الأكثر قراءة', most.slice(0, 15), { rank: anyReads, reads: anyReads, mode: 'most' }) +
+      section('clock-rotate-left', 'المضافة حديثًا', recent.slice(0, 15), { mode: 'recent' }) +
+      section('layer-group', 'روايات أخرى', rest, { mode: 'all' }) +
+      '<button type="button" class="rp-allbtn" data-rp-all="all"><i class="fa-solid fa-table-list"></i> كل الروايات (' + vis.length + ')</button>';
+  }
+  function lists(vis) {
     var idx = {}; vis.forEach(function (n, i) { idx[n.id] = i; });
     var ids = cfg().popularIds; ids = Array.isArray(ids) ? ids : [];
     var pop = []; ids.forEach(function (id) { var n = vis.filter(function (x) { return x.id === id; })[0]; if (n && pop.indexOf(n) < 0) pop.push(n); });
     if (!pop.length) pop = vis.slice(0, 15);
-    pop = pop.slice(0, 15);
-    var most = vis.slice().sort(function (a, b) { return (readsOf(b) - readsOf(a)) || (idx[a.id] - idx[b.id]); }).slice(0, 15);
-    var recent = vis.map(function (n, i) { return { n: n, t: tsOf(n, i), i: i }; }).sort(function (a, b) { return (b.t - a.t) || (a.i - b.i); }).slice(0, 15).map(function (x) { return x.n; });
-    var shown = {}; pop.concat(most, recent).forEach(function (n) { shown[n.id] = 1; });
-    var rest = vis.filter(function (n) { return !shown[n.id]; }).slice(0, 20);
-    var anyReads = most.some(function (n) { return readsOf(n) > 0; });
-    host.innerHTML = section('fire', 'الروايات المشهورة', pop) +
-      section('ranking-star', 'الأكثر قراءة', most, { rank: anyReads, reads: anyReads }) +
-      section('clock-rotate-left', 'المضافة حديثًا', recent) +
-      section('layer-group', 'روايات أخرى', rest, { all: true }) +
-      '<button type="button" class="rp-allbtn" data-rp-all="1"><i class="fa-solid fa-table-list"></i> كل الروايات (' + vis.length + ')</button>';
+    var most = vis.slice().sort(function (a, b) { return (readsOf(b) - readsOf(a)) || (idx[a.id] - idx[b.id]); });
+    var recent = vis.map(function (n, i) { return { n: n, t: tsOf(n, i), i: i }; }).sort(function (a, b) { return (b.t - a.t) || (a.i - b.i); }).map(function (x) { return x.n; });
+    return { pop: pop.slice(0, 15), most: most, recent: recent };
   }
   function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} }, 60); }
   window.rpRenderRows = renderRows;
@@ -11488,29 +11516,41 @@ document.addEventListener('click', function (e) {
     var body = $('rp-all-body'); if (!body) return;
     var vis = visible(), gs = []; vis.forEach(function (n) { var g = plain(n.genre || ''); if (g && gs.indexOf(g) < 0) gs.push(g); });
     var q = ALL.q.trim().toLowerCase();
-    var list = vis.filter(function (n) { return (ALL.cat === 'all' || plain(n.genre) === ALL.cat) && (!q || (plain(n.title) + ' ' + plain(n.author)).toLowerCase().indexOf(q) > -1); });
+    var LS = lists(vis), base = ({ popular: LS.pop, most: LS.most, recent: LS.recent })[ALL.mode] || vis;
+    var list = base.filter(function (n) { return (ALL.cat === 'all' || plain(n.genre) === ALL.cat) && (!q || (plain(n.title) + ' ' + plain(n.author)).toLowerCase().indexOf(q) > -1); });
     var keep = $('rp-all-q') && document.activeElement === $('rp-all-q');
     body.innerHTML = '<input id="rp-all-q" class="rp-srch" type="search" placeholder="ابحث باسم الرواية أو الكاتب…" value="' + esc(ALL.q) + '">' +
-      '<div class="rp-pills"><button type="button" class="rp-pill2 ' + (ALL.cat === 'all' ? 'on' : '') + '" data-rp-cat="all">الكل (' + vis.length + ')</button>' + gs.map(function (g) { return '<button type="button" class="rp-pill2 ' + (ALL.cat === g ? 'on' : '') + '" data-rp-cat="' + esc(g) + '">' + esc(g) + '</button>'; }).join('') + '</div>' +
+      '<div class="rp-pills"><button type="button" class="rp-pill2 ' + (ALL.cat === 'all' ? 'on' : '') + '" data-rp-cat="all">الكل (' + base.length + ')</button>' + gs.map(function (g) { return '<button type="button" class="rp-pill2 ' + (ALL.cat === g ? 'on' : '') + '" data-rp-cat="' + esc(g) + '">' + esc(g) + '</button>'; }).join('') + '</div>' +
       (list.length ? list.map(listItem).join('') : '<div style="text-align:center;padding:40px 10px;color:#64748b">لا توجد روايات مطابقة</div>');
     if (keep) { var i = $('rp-all-q'); i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch (e) {} }
   }
   function openP(id) { var p = $(id); if (!p) return; p.classList.add('open'); p.setAttribute('aria-hidden', 'false'); p.scrollTop = 0; document.documentElement.style.overflow = 'hidden'; }
   function closeP(id) { var p = $(id); if (!p) return; p.classList.remove('open'); p.setAttribute('aria-hidden', 'true'); if (!document.querySelector('#rp-all-page.open,#rp-prof-page.open,#rp-acct-page.open')) document.documentElement.style.overflow = ''; try { if (window.__appAfterOverlay) window.__appAfterOverlay(); } catch (e) {} }
-  window.rpOpenAll = function () { ALL = { cat: 'all', q: '' }; renderAll(); openP('rp-all-page'); };
+  var ALLT = { all: '📚 كل الروايات', popular: '🔥 الروايات المشهورة', most: '🏆 الأكثر قراءة', recent: '🕒 المضافة حديثًا' };
+  window.rpOpenAll = function (mode) { mode = ALLT[mode] ? mode : 'all'; ALL = { cat: 'all', q: '', mode: mode }; var t = $('rp-all-title'); if (t) t.textContent = ALLT[mode]; renderAll(); openP('rp-all-page'); };
   window.rpCloseAll = function () { closeP('rp-all-page'); };
 
   /* ---------- البروفايل ---------- */
   var PF = { id: null, data: null };
   function isOpen(id) { var p = $(id); return !!(p && p.classList.contains('open')); }
   window.rpCloseProfile = function () { closeP('rp-prof-page'); };
+  function bakedProfile(key) {
+    var P = (cfg().authorProfiles) || {}, out = null;
+    Object.keys(P).forEach(function (k) { var p = P[k]; if (!p) return; if (String(key) === 'admin' ? p.isAdmin : String(k) === String(key)) out = p; });
+    if (!out) return null;
+    var id = Object.keys(P).filter(function (k) { return P[k] === out; })[0];
+    return { id: +id || id, name: out.name, avatar: out.avatar || '', bio: out.bio || '', links: out.links || {}, isAdmin: !!out.isAdmin, joinedAt: out.joinedAt || 0, followers: out.followers || 0, following: false, self: false, novels: [] };
+  }
   window.rpOpenProfile = function (key) {
     if (key === undefined || key === null) return;
     PF = { id: key, data: null }; openP('rp-prof-page');
     var b = $('rp-pf-body'); b.innerHTML = '<div style="text-align:center;padding:60px 10px;color:#64748b">جاري التحميل…</div>'; $('rp-pf-title').textContent = 'الكاتب';
     if (!base()) { b.innerHTML = '<div style="text-align:center;padding:60px 10px;color:#64748b">الصفحات الشخصية مش متاحة دلوقتي</div>'; return; }
-    R.api('/api/authors/' + (String(key) === 'admin' ? 'admin' : encodeURIComponent(key))).then(function (d) { PF.data = d.author; if (d.author.isAdmin) ADMIN_ID = d.author.id; renderProfile(); })
-      .catch(function (e) { b.innerHTML = '<div style="text-align:center;padding:60px 10px;color:#dc2626">' + esc(e.message || 'تعذّر تحميل الصفحة') + '</div>'; });
+    /* نسخة البروفايل المصدّرة مع الموقع على GitHub: بتظهر فورًا وتفضل شغالة لو السيرفر بطيء أو واقع */
+    var baked = bakedProfile(key);
+    if (baked) { PF.data = baked; renderProfile(); }
+    R.api('/api/authors/' + (String(key) === 'admin' ? 'admin' : encodeURIComponent(key))).then(function (d) { if (PF.id !== key) return; PF.data = d.author; if (d.author.isAdmin) ADMIN_ID = d.author.id; renderProfile(); })
+      .catch(function (e) { if (baked) return; b.innerHTML = '<div style="text-align:center;padding:60px 10px;color:#dc2626">' + esc(e.message || 'تعذّر تحميل الصفحة') + '</div>'; });
   };
   function authorNovels(a) {
     var vis = visible();
@@ -11533,13 +11573,13 @@ document.addEventListener('click', function (e) {
     else if (!logged) btn = '<button type="button" class="rp-fbtn" data-rp-login="1"><i class="fa-solid fa-user-plus"></i> سجّل دخول للمتابعة</button>';
     else if (a.isAdmin) btn = '<button type="button" class="rp-fbtn on" disabled><i class="fa-solid fa-circle-check"></i> متابَع تلقائيًا</button>';
     else btn = '<button type="button" class="rp-fbtn ' + (a.following ? 'on' : '') + '" data-rp-follow="1">' + (a.following ? '<i class="fa-solid fa-check"></i> متابَع' : '<i class="fa-solid fa-plus"></i> متابعة') + '</button>';
-    var note = a.isAdmin ? 'كل مستخدمي RadPad بيتابعوا الصفحة الرسمية تلقائي، وهيوصلك إشعار بأي رواية أو فصل جديد.' : (a.following ? '🔔 هيوصلك إشعار لما ينزل رواية أو فصل جديد.' : (logged ? 'تابع الكاتب علشان يوصلك إشعار بأي جديد.' : ''));
+    var note = a.isAdmin ? '' : (a.following ? '🔔 هيوصلك إشعار لما ينزل رواية أو فصل جديد.' : (logged ? 'تابع الكاتب علشان يوصلك إشعار بأي جديد.' : ''));
     b.innerHTML = '<div class="rp-pf-hero"><div class="rp-pf-cover"></div><div class="rp-pf-main"><div class="rp-pf-av">' + (a.avatar ? '<img src="' + esc(a.avatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : esc((a.name || '?').charAt(0))) + '</div>' +
       '<div class="rp-pf-name">' + esc(a.name) + (a.isAdmin ? ' <i class="fa-solid fa-circle-check rp-ver" title="الصفحة الرسمية"></i>' : '') + '</div>' +
       '<span class="rp-pf-tag">' + (a.isAdmin ? '👑 الصفحة الرسمية' : '✍️ كاتب') + '</span>' +
       (bio ? '<p class="rp-pf-bio">' + esc(bio).replace(/\n/g, '<br>') + '</p>' : '') + socials +
       '<div class="rp-pf-st"><div><b>' + list.length + '</b><span>رواية</span></div><div><b id="rp-pf-fc">' + fnum(a.followers) + '</b><span>متابع</span></div><div><b>' + fnum(totalReads) + '</b><span>قراءة</span></div></div>' +
-      btn + '<div class="rp-pf-note">' + note + '</div>' +
+      btn + (note ? '<div class="rp-pf-note">' + note + '</div>' : '') +
       '<div class="rp-pf-note" style="margin-top:12px"><i class="fa-regular fa-calendar"></i> على RadPad منذ ' + esc(fdate(a.joinedAt)) + ' <button type="button" class="rp-rall" data-rp-share="1" style="margin-right:10px"><i class="fa-solid fa-share-nodes"></i> مشاركة</button></div></div></div>' +
       '<div class="rp-pf-sec"><i class="fa-solid fa-book" style="color:var(--brand-primary,#065f46)"></i> روايات ' + esc(a.name) + ' (' + list.length + ')</div>' +
       (list.length ? '<div class="rp-pf-grid">' + list.map(function (n) { return card(n, { reads: readsOf(n) > 0 }); }).join('') + '</div>' : '<div style="text-align:center;padding:30px 10px;color:#64748b">لسه ما نزلتش روايات منشورة</div>');
@@ -11565,7 +11605,7 @@ document.addEventListener('click', function (e) {
       var pid = t.getAttribute('data-rp-pdf'); closeP('rp-all-page'); closeP('rp-prof-page');
       try { openPdfModal(pid); } catch (e) {}
     } else if (t.hasAttribute('data-rp-author')) window.rpOpenProfile(t.getAttribute('data-rp-author'));
-    else if (t.hasAttribute('data-rp-all')) window.rpOpenAll();
+    else if (t.hasAttribute('data-rp-all')) window.rpOpenAll(t.getAttribute('data-rp-all'));
     else if (t.hasAttribute('data-rp-cat')) { ALL.cat = t.getAttribute('data-rp-cat'); renderAll(); }
     else if (t.hasAttribute('data-rp-follow')) doFollow(t);
     else if (t.hasAttribute('data-rp-login')) { closeP('rp-prof-page'); if (window.rpOpenAccount) window.rpOpenAccount(); }
