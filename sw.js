@@ -6,7 +6,18 @@ const CACHE = 'radpad-v1';
 const CFG_KEY = '__rp_cfg';
 const NET_TIMEOUT = 7000;
 
-self.addEventListener('install', (e) => { self.skipWaiting(); });
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
+  // أول تثبيت: نحفظ الصفحة الرئيسية فورًا علشان التطبيق يفتح بدون نت حتى لو اتفتح مرة واحدة بس
+  e.waitUntil((async () => {
+    try {
+      const cache = await caches.open(CACHE);
+      const home = new URL('./', self.registration.scope).href;
+      const res = await fetch(home, { cache: 'no-cache' });
+      if (res && res.ok) await cache.put(home, res);
+    } catch (err) {}
+  })());
+});
 
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
