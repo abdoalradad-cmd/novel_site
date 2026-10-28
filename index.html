@@ -11027,11 +11027,28 @@ document.addEventListener('click', function (e) {
   }
 
   /* ---------- الرئيسية ---------- */
+  /* روايات الموقع الأصلية (بتاعة الأدمن) — بتظهر في «رواياتي» وفي بروفايل الأدمن */
+  function siteMine() {
+    var u = me(); if (!isAdmin()) return [];
+    try { return novels.filter(function (n) { return !n.isUser && (!n.authorUid || String(n.authorUid) === String(u.id)); }); } catch (e) { return []; }
+  }
+  function siteRow(n) {
+    var cover = n.coverImg && httpsUrl(String(n.coverImg).replace(/&amp;/g, '&'));
+    var cv = '<div class="rp-cv" style="background:linear-gradient(135deg,#065f46,#022c22)">' + (cover ? '<img src="' + esc(cover) + '" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.remove()">' : ic('book')) + '</div>';
+    var lk = n.isLocked || (n.chapters || []).some(function (c) { return c.isLocked; });
+    return '<div class="rp-item"><div class="rp-nv">' + cv + '<div class="rp-nv-main"><b>' + (n.title || '') + '</b><div class="rp-meta"><span class="rp-pill live">ظاهرة للناس</span>' + (lk ? '<span class="rp-pill lock">' + ic('lock') + ' مقفولة</span>' : '') + '<span class="rp-pill">' + (n.chapters || []).length + ' فصل</span></div>' +
+      '<div class="rp-row"><button type="button" class="rp-btn sm" data-act="siteread" data-id="' + esc(n.id) + '">' + ic('book-open') + ' فتح</button><button type="button" class="rp-btn sm sec" data-act="sitectl">' + ic('pen') + ' تعديل من لوحة التحكم</button></div></div></div></div>';
+  }
+  function siteCard() {
+    var L = siteMine(); if (!L.length) return '';
+    return '<div class="rp-card"><h3>' + ic('earth-africa') + ' روايات الموقع (' + L.length + ')</h3><p class="rp-sub">دي رواياتك الأصلية اللي على الموقع، وبتظهر في صفحتك الشخصية زي ما الناس بتشوفها. التعديل عليها من لوحة التحكم.</p>' + L.map(siteRow).join('') + '</div>';
+  }
   function renderHome() {
     var u = me(); setTitle('حسابي'); var admin = isAdmin(); if (!PREM.info) loadPremInfo();
+    var SM = siteMine(), smCh = SM.reduce(function (a, n) { return a + (n.chapters || []).length; }, 0);
     var chs = S.mine.reduce(function (a, n) { return a + (n.chaptersCount || 0); }, 0), liveN = S.mine.filter(function (n) { return n.isLive; }).length;
-    var html = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b style="font-size:1.15rem;display:block">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span></div></div>' +
-      '<div class="rp-stats"><div class="rp-stat"><b>' + S.mine.length + '</b><span>رواياتي</span></div><div class="rp-stat"><b>' + liveN + '</b><span>منشورة</span></div><div class="rp-stat"><b>' + chs + '</b><span>فصل</span></div><div class="rp-stat"><b>' + S.mine.filter(function (n) { return n.status === 'pending'; }).length + '</b><span>مراجعة</span></div></div></div>';
+    var html = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b style="font-size:1.15rem;display:block">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span> <button type="button" class="rp-pill" data-act="viewprofile" style="margin-top:6px;border:0;cursor:pointer">' + ic('user') + ' صفحتي</button></div></div>' +
+      '<div class="rp-stats"><div class="rp-stat"><b>' + (S.mine.length + SM.length) + '</b><span>رواياتي</span></div><div class="rp-stat"><b>' + (liveN + SM.length) + '</b><span>منشورة</span></div><div class="rp-stat"><b>' + (chs + smCh) + '</b><span>فصل</span></div><div class="rp-stat"><b>' + S.mine.filter(function (n) { return n.status === 'pending'; }).length + '</b><span>مراجعة</span></div></div></div>';
     html += premCard();
     var tabs = [['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات']];
     if (admin) tabs.push(['pending', 'inbox', 'الطلبات', S.pending.length], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['premium', 'crown', 'Premium'], ['backup', 'database', 'النسخ الاحتياطي']);
@@ -11055,7 +11072,7 @@ document.addEventListener('click', function (e) {
     if (t === 'premium') return premAdminTab();
     if (t === 'backup') return '<div class="rp-card"><h3>' + ic('database') + ' النسخ الاحتياطي</h3><p class="rp-sub">روايات الناس وحساباتهم محفوظة على Cloudflare. حمّل نسخة احتياطية كل فترة واحتفظ بيها في مكان آمن (فيها بيانات الحسابات، فما تشاركهاش مع حد) وتقدر ترجّعها لو حصلت مشكلة.</p><div class="rp-row"><button type="button" class="rp-btn" data-act="backup">' + ic('download') + ' تحميل نسخة</button><button type="button" class="rp-btn sec" data-act="restore">' + ic('upload') + ' استعادة من ملف</button></div><input id="rp-restore-file" type="file" accept=".json,application/json" style="display:none"><div class="rp-err" id="rp-bk-msg" style="color:' + (S.bkColor || '#047857') + '">' + esc(S.bkMsg || '') + '</div></div>';
     return '<div class="rp-card"><h3>' + ic('feather-pointed') + ' انشر روايتك</h3><p class="rp-sub">اكتب روايتك وفصولها، اقفلها بباسورد لو عايز، حط برومو، وابعتها للمراجعة. بعد ما الأدمن يوافق هتظهر للناس في الموقع والتطبيق.</p><button type="button" class="rp-btn block" data-act="new">' + ic('plus') + ' رواية جديدة</button></div>' +
-      (S.mine.length ? S.mine.map(novelRow).join('') : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
+      siteCard() + (S.mine.length ? S.mine.map(novelRow).join('') : siteMine().length ? '' : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
   }
   function admin_only(t) { return t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium'; }
   function settingsTab() {
@@ -11285,6 +11302,8 @@ document.addEventListener('click', function (e) {
     else if (a === 'auth') doAuth();
     else if (a === 'logout') { dropTopics(); window.__rpFeed = []; try { window.__rpPaintBell && window.__rpPaintBell(); } catch (x) {} lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); S = fresh(); render(); flash('تم تسجيل الخروج'); }
     else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.err = ''; render(); if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
+    else if (a === 'siteread') { close(); try { requestNovelAccess(id, 'details'); } catch (x) {} }
+    else if (a === 'sitectl') { close(); try { openControlPanel('novels'); } catch (x) { try { openControlPanel(); } catch (y) {} } }
     else if (a === 'viewprofile') { if (window.rpOpenProfile) window.rpOpenProfile(me().id); }
     else if (a === 'pickav') { var af = $('rp-av-file'); if (af) af.click(); }
     else if (a === 'rename') { var nn = ($('rp-s-name').value || '').trim(); if (nn.length >= 2) api('/api/me', { method: 'PUT', body: { name: nn, bio: ($('rp-s-bio') || {}).value || '', links: { facebook: ($('rp-s-fb') || {}).value || '', wattpad: ($('rp-s-wp') || {}).value || '', youtube: ($('rp-s-yt') || {}).value || '' } } }).then(function (d) { lsSet(USER_KEY, JSON.stringify(d.user)); render(); flash('تم حفظ البروفايل ✅'); }).catch(function (x) { flash(x.message); }); else flash('الاسم قصير'); }
