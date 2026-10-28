@@ -297,7 +297,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden && !updShown) setTimeout(function () { checkUpdate(5); }, 600); });
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-25.1';
+  var BRIDGE_VERSION = '2026-10-27.1';
   (function () {
     var t = null;
     function start(e) {
@@ -781,7 +781,7 @@
     if (e.target && (e.target.id === 'mobile-search-input' || e.target.id === 'search-input')) { e.target.blur(); setActive('search'); openSearch(); }
   });
 
-  window.__appAfterOverlay = function () { if (activeTab === 'account') setActive(currentView() === 'novel-details' ? 'library' : 'home'); };
+  window.__appAfterOverlay = function () { if (activeTab === 'account' || activeTab === 'library') setActive(currentView() === 'novel-details' ? 'library' : 'home'); };
   window.__appBack = function () {
     if (searchOpen()) { closeSearch(); return true; }
     if (libOpen()) { closeLib(); setActive('home'); return true; }
@@ -807,7 +807,7 @@
     toHome();
     var d = wasHome ? 0 : 350;
     if (id === 'home') setTimeout(function () { window.scrollTo({ top: 0, behavior: 'smooth' }); }, d + 30);
-    else if (id === 'library') scrollToEl('#library-section-title', d + 60);
+    else if (id === 'library') { if (typeof window.rpOpenAll === 'function') window.rpOpenAll(); else scrollToEl('#library-section-title', d + 60); }
   });
 
   /* ================= متابعة الصفحة الحالية ================= */
