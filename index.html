@@ -11730,17 +11730,19 @@ document.addEventListener('click', function (e) {
     '#chapter-comments-section,#btn-easy-copy,#nx-details-extra{display:none!important}' +
     '#rp-wp-bar{position:relative;display:flex;align-items:flex-start;justify-content:space-around;gap:6px;margin:26px auto 8px;max-width:520px;padding:8px 10px;border-top:1px solid rgba(127,127,127,.25)}' +
     '#rp-wp-bar button{flex:1;background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;font:800 .78rem Cairo,sans-serif;color:inherit;-webkit-tap-highlight-color:transparent}' +
-    '#rp-wp-bar button i{font-size:1.65rem;line-height:1;color:#f97316;transition:transform .15s}' +
+    '#rp-wp-bar button i{font-size:1.65rem;line-height:1;color:#2f6b55;transition:transform .15s}' +
     '#rp-wp-bar button:active i{transform:scale(.88)}' +
     '#rp-wp-bar button b{font-weight:800;opacity:.9}' +
-    '#rp-wp-bar .rp-on i{color:#f59e0b}' +
-    '#rp-wp-pill{position:absolute;bottom:calc(100% - 4px);inset-inline-start:50%;transform:translateX(-50%) translateY(8px) scale(.92);opacity:0;pointer-events:none;display:flex;align-items:center;gap:4px;padding:7px 14px;border-radius:999px;background:#fff;color:#0f172a;box-shadow:0 10px 28px rgba(2,44,34,.28);border:1px solid rgba(127,127,127,.25);transition:all .18s ease;z-index:5}' +
-    'html.dark #rp-wp-pill{background:#1e293b;color:#f1f5f9}' +
+    '#rp-wp-bar .rp-on i{color:#14532d}#rp-wp-bar button b{color:#1f4d3c}html.dark #rp-wp-bar button b{color:#a7f3d0}html.dark #rp-wp-bar button i{color:#6ee7b7}' +
+    '#rp-wp-pill{position:absolute;bottom:calc(100% - 4px);left:50%;right:auto;transform:translateX(-50%) translateY(8px) scale(.92);opacity:0;pointer-events:none;display:flex;align-items:center;gap:2px;padding:6px 10px;border-radius:999px;background:#f3fbf7;color:#0f172a;box-shadow:0 10px 28px rgba(2,44,34,.3);border:1.5px solid #86c9a8;white-space:nowrap;transition:all .18s ease;z-index:5}' +
+    'html.dark #rp-wp-pill{background:#12332a;color:#f1f5f9;border-color:#2f6b55}' +
     '#rp-wp-pill.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(1)}' +
-    '#rp-wp-pill button{flex:none;padding:2px;font-size:1.55rem;color:#cbd5e1;transition:transform .12s,color .12s}' +
-    '#rp-wp-pill button i{font-size:1.55rem}' +
-    '#rp-wp-pill button.on{color:#f59e0b}#rp-wp-pill button.on i{color:#f59e0b}' +
-    '#rp-wp-pill button i{color:inherit}' +
+    '#rp-wp-pill button{flex:none;position:relative;width:42px;height:44px;padding:0;color:#cfe8dc;transition:transform .12s,color .12s}' +
+    '#rp-wp-pill button i{font-size:2.1rem;line-height:44px;color:inherit}' +
+    '#rp-wp-pill button em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:3px;font:900 .82rem Cairo,sans-serif;font-style:normal;color:#1f4d3c}' +
+    '#rp-wp-pill button.on{color:#2f6b55}#rp-wp-pill button.on em{color:#fff}' +
+    'html.dark #rp-wp-pill button{color:#24574a}html.dark #rp-wp-pill button em{color:#d1fae5}html.dark #rp-wp-pill button.on{color:#34d399}html.dark #rp-wp-pill button.on em{color:#052e22}' +
+    'html,body{overflow-x:clip}' +
     '#rp-wp-pill button:active{transform:scale(1.25)}' +
     '#rp-wp-sheet{position:fixed;inset:0;z-index:2147483000;display:none;flex-direction:column;background:#fff;color:#0f172a;font-family:Cairo,system-ui,sans-serif;direction:rtl}' +
     'html.dark #rp-wp-sheet{background:#0b1220;color:#f1f5f9}' +
@@ -11777,7 +11779,7 @@ document.addEventListener('click', function (e) {
         '<button type="button" data-wp="cm"><i class="fa-regular fa-comment"></i><b id="rp-wp-cn">0</b></button>' +
         '<button type="button" id="rp-wp-copy" data-wp="copy"><i class="fa-regular fa-paper-plane"></i><b>نسخ الرابط</b></button>';
       var pill = bar.querySelector('#rp-wp-pill');
-      pill.innerHTML = [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" data-wp-rate="' + n + '" aria-label="' + n + '"><i class="fa-solid fa-star"></i></button>'; }).join('');
+      pill.innerHTML = [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" data-wp-rate="' + n + '" aria-label="' + n + ' نجوم"><i class="fa-solid fa-star"></i><em>' + n + '</em></button>'; }).join('');
       anchor.parentNode.insertBefore(bar, anchor);
     }
     return bar;
@@ -11865,7 +11867,7 @@ document.addEventListener('click', function (e) {
     var pill = document.getElementById('rp-wp-pill');
     if (!b) { if (pill && pill.classList.contains('open') && !(e.target.closest && e.target.closest('#rp-wp-pill'))) pill.classList.remove('open'); return; }
     var a = b.getAttribute('data-wp');
-    if (a === 'star') { if (!logged()) return needLogin('سجّل دخول الأول علشان تقيّم'); pill.style.insetInlineStart = 'auto'; pill.style.left = (b.offsetLeft + b.offsetWidth / 2) + 'px'; pill.classList.toggle('open'); loadCm().then(function () { try { refreshBar(); } catch (x) {} }); }
+    if (a === 'star') { if (!logged()) return needLogin('سجّل دخول الأول علشان تقيّم'); var bar0 = document.getElementById('rp-wp-bar'), pw = pill.offsetWidth || 240, bw = bar0.clientWidth, cx = b.offsetLeft + b.offsetWidth / 2; cx = Math.max(pw / 2 + 4, Math.min(bw - pw / 2 - 4, cx)); pill.style.left = cx + 'px'; pill.classList.toggle('open'); loadCm().then(function () { try { refreshBar(); } catch (x) {} }); }
     else if (a === 'cm') { if (pill) pill.classList.remove('open'); openSheet(); loadCm().then(function () { try { refreshBar(); } catch (x) {} }); }
     else if (a === 'copy') { try { window.easyCopyLink(); } catch (x) { toast('تعذّر نسخ الرابط'); } }
     else if (a === 'close') closeSheet();
