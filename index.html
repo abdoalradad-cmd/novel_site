@@ -1233,7 +1233,7 @@ html.dark .rp-note.g{background:rgba(16,185,129,.1);border-color:rgba(16,185,129
                                             <i class="fa-solid fa-book-open-reader"></i>
                                         </div>
                                         <div>
-                                            <span class="block text-base sm:text-lg font-black">قراءة الرواية على الموقع</span>
+                                            <span class="block text-base sm:text-lg font-black">قراءة الرواية</span>
                                             <span class="block text-xs text-white/80 mt-0.5">اختر الفصل للقراءة (12 فصول متاحة)</span>
                                         </div>
                                     </div>
@@ -1275,7 +1275,7 @@ html.dark .rp-note.g{background:rgba(16,185,129,.1);border-color:rgba(16,185,129
                 <div id="novel-promo-iframe-container" class="w-full aspect-video rounded-2xl overflow-hidden bg-slate-950 shadow-2xl border border-slate-200 dark:border-slate-800"></div>
             </div>
 
-            <!-- Chapter Selection List (Revealed when user clicks "قراءة الرواية على الموقع") -->
+            <!-- Chapter Selection List (Revealed when user clicks "قراءة الرواية") -->
             <div id="novel-chapters-section" class="bg-white dark:bg-slate-900 dynamic-card-radius p-6 sm:p-10 shadow-xl border theme-border-primary space-y-6 transition-all">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                     <div>
@@ -6992,7 +6992,7 @@ html.dark .rp-note.g{background:rgba(16,185,129,.1);border-color:rgba(16,185,129
                                             <i class="fa-solid fa-book-open-reader"></i>
                                         </div>
                                         <div>
-                                            <span class="block text-base sm:text-lg font-black">قراءة الرواية على الموقع</span>
+                                            <span class="block text-base sm:text-lg font-black">قراءة الرواية</span>
                                             <span class="block text-xs text-white/80 mt-0.5">اختر الفصل للقراءة (${novel.chapters.length} فصول متاحة)</span>
                                         </div>
                                     </div>
@@ -11702,75 +11702,217 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 <script id="rp-social-module">
-/* التعليقات والتقييم للمسجّلين فقط + إشعار للكاتب */
+/* شريط واتباد أسفل الفصل: تقييم بالنجوم + تعليقات + نسخ الرابط — للمسجّلين فقط + إشعار للكاتب */
 (function () {
   'use strict';
   var R = window.__rp; if (!R) return;
+  var VOTE = '★ تقييم';
   function G(n) { try { return (0, eval)(n); } catch (e) { return undefined; } }
   function logged() { return !!(R.token && R.token() && R.me && R.me()); }
   function plain(s) { var t = document.createElement('textarea'); t.innerHTML = String(s == null ? '' : s); return t.value; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function toast(m) { try { window.showToast ? window.showToast(m) : R.flash(m); } catch (e) {} }
+  function fnum(n) { n = +n || 0; return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'K' : String(n); }
+  function key() { return G('currentNovelId') + '__' + G('currentChapterIndex'); }
+  function entries() {
+    try {
+      var nid = G('currentNovelId'), idx = G('currentChapterIndex');
+      var n = (G('novels') || []).filter(function (x) { return x.id === nid; })[0];
+      var c = n && n.chapters && n.chapters[idx] && n.chapters[idx].comments;
+      return Array.isArray(c) ? c : [];
+    } catch (e) { return []; }
+  }
+  function isVote(c) { return String(c && c.text || '').indexOf(VOTE) === 0; }
+  function myName() { var u = R.me && R.me(); return u ? u.name : ''; }
 
   var st = document.createElement('style'); st.id = 'rp-social-style';
-  st.textContent = '#chapter-comments-section form.rp-cm-locked>*:not(#rp-cm-gate){display:none!important}' +
-    '#rp-cm-gate{display:none}#chapter-comments-section form.rp-cm-locked #rp-cm-gate{display:block;text-align:center;padding:10px 6px}' +
-    '#rp-cm-gate b{display:block;font-size:.98rem;margin-bottom:4px;color:#0f172a}html.dark #rp-cm-gate b{color:#f1f5f9}' +
-    '#rp-cm-gate span{display:block;font-size:.8rem;color:#64748b;margin-bottom:12px;line-height:1.8}' +
-    '#rp-cm-gate button{border:0;border-radius:14px;padding:11px 22px;font:900 .88rem Cairo,sans-serif;color:#fff;background:linear-gradient(135deg,#065f46,#022c22);cursor:pointer;box-shadow:0 8px 18px rgba(2,44,34,.25)}' +
-    '#rp-cm-who{display:flex;align-items:center;gap:10px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:14px;padding:8px 12px;font-size:.82rem;color:#065f46;font-weight:800}' +
-    'html.dark #rp-cm-who{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35);color:#6ee7b7}' +
-    '#rp-cm-who i{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2f5d4e,#1b3f33);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:900;overflow:hidden;flex:none}' +
-    '#rp-cm-who i img{width:100%;height:100%;object-fit:cover}' +
-    '#comment-reader-text{resize:none!important;overflow:hidden;min-height:92px;line-height:1.9;transition:height .12s ease;border-radius:16px!important;padding:12px 16px!important}' +
-    '#comment-reader-text:focus{box-shadow:0 0 0 3px rgba(16,185,129,.25)}';
+  st.textContent =
+    '#chapter-comments-section,#btn-easy-copy,#nx-details-extra{display:none!important}' +
+    '#rp-wp-bar{position:relative;display:flex;align-items:flex-start;justify-content:space-around;gap:6px;margin:26px auto 8px;max-width:520px;padding:8px 10px;border-top:1px solid rgba(127,127,127,.25)}' +
+    '#rp-wp-bar button{flex:1;background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;font:800 .78rem Cairo,sans-serif;color:inherit;-webkit-tap-highlight-color:transparent}' +
+    '#rp-wp-bar button i{font-size:1.65rem;line-height:1;color:#f97316;transition:transform .15s}' +
+    '#rp-wp-bar button:active i{transform:scale(.88)}' +
+    '#rp-wp-bar button b{font-weight:800;opacity:.9}' +
+    '#rp-wp-bar .rp-on i{color:#f59e0b}' +
+    '#rp-wp-pill{position:absolute;bottom:calc(100% - 4px);inset-inline-start:50%;transform:translateX(-50%) translateY(8px) scale(.92);opacity:0;pointer-events:none;display:flex;align-items:center;gap:4px;padding:7px 14px;border-radius:999px;background:#fff;color:#0f172a;box-shadow:0 10px 28px rgba(2,44,34,.28);border:1px solid rgba(127,127,127,.25);transition:all .18s ease;z-index:5}' +
+    'html.dark #rp-wp-pill{background:#1e293b;color:#f1f5f9}' +
+    '#rp-wp-pill.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(1)}' +
+    '#rp-wp-pill button{flex:none;padding:2px;font-size:1.55rem;color:#cbd5e1;transition:transform .12s,color .12s}' +
+    '#rp-wp-pill button i{font-size:1.55rem}' +
+    '#rp-wp-pill button.on{color:#f59e0b}#rp-wp-pill button.on i{color:#f59e0b}' +
+    '#rp-wp-pill button i{color:inherit}' +
+    '#rp-wp-pill button:active{transform:scale(1.25)}' +
+    '#rp-wp-sheet{position:fixed;inset:0;z-index:2147483000;display:none;flex-direction:column;background:#fff;color:#0f172a;font-family:Cairo,system-ui,sans-serif;direction:rtl}' +
+    'html.dark #rp-wp-sheet{background:#0b1220;color:#f1f5f9}' +
+    '#rp-wp-sheet.open{display:flex}' +
+    '#rp-wp-head{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;border-bottom:1px solid rgba(127,127,127,.25);font-weight:900}' +
+    '#rp-wp-head button{border:0;background:none;color:inherit;font-size:1.3rem;cursor:pointer;padding:4px 8px}' +
+    '#rp-wp-head span{flex:1;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '#rp-wp-comp{display:flex;align-items:flex-end;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(127,127,127,.18)}' +
+    '#rp-wp-ta{flex:1;min-height:46px;max-height:220px;resize:none;border:2px solid #a7f3d0;border-radius:24px;padding:11px 18px;font:600 .92rem/1.8 Cairo,system-ui,sans-serif;background:transparent;color:inherit;outline:none;overflow:hidden;transition:border-color .15s,height .1s}' +
+    '#rp-wp-ta:focus{border-color:#10b981}' +
+    '#rp-wp-send{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:#10b981;color:#fff;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(16,185,129,.35)}' +
+    '#rp-wp-send[disabled]{opacity:.45;box-shadow:none}' +
+    '#rp-wp-gate{text-align:center;padding:16px 14px;border-bottom:1px solid rgba(127,127,127,.18)}' +
+    '#rp-wp-gate b{display:block;margin-bottom:4px}#rp-wp-gate span{display:block;font-size:.8rem;opacity:.7;margin-bottom:10px;line-height:1.8}' +
+    '#rp-wp-gate button{border:0;border-radius:14px;padding:10px 22px;font:900 .86rem Cairo,sans-serif;color:#fff;background:linear-gradient(135deg,#065f46,#022c22);cursor:pointer}' +
+    '#rp-wp-list{flex:1;overflow-y:auto;padding:6px 14px calc(env(safe-area-inset-bottom,0px) + 20px)}' +
+    '.rp-wp-c{display:flex;gap:11px;padding:14px 2px;border-bottom:1px solid rgba(127,127,127,.14)}' +
+    '.rp-wp-av{flex:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#2f5d4e,#1b3f33);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;overflow:hidden}' +
+    '.rp-wp-av img{width:100%;height:100%;object-fit:cover}' +
+    '.rp-wp-cb{flex:1;min-width:0}.rp-wp-cn{font-weight:900;font-size:.9rem}' +
+    '.rp-wp-ct{margin:3px 0 4px;font-size:.9rem;line-height:1.9;white-space:pre-wrap;word-break:break-word}' +
+    '.rp-wp-cd{font-size:.72rem;opacity:.6}' +
+    '.rp-wp-empty{text-align:center;padding:50px 20px;opacity:.65;font-weight:700;line-height:2}';
   if (!document.getElementById('rp-social-style')) document.head.appendChild(st);
 
-  function grow(ta) { if (!ta) return; ta.style.height = 'auto'; ta.style.height = Math.max(92, ta.scrollHeight + 2) + 'px'; }
-  function decorate() {
-    var form = document.querySelector('#chapter-comments-section form'); if (!form) return;
-    var nameInp = document.getElementById('comment-reader-name'), ta = document.getElementById('comment-reader-text');
-    if (nameInp) { nameInp.removeAttribute('required'); if (nameInp.parentElement) nameInp.parentElement.style.display = 'none'; }
-    var gate = document.getElementById('rp-cm-gate');
-    if (!gate) { gate = document.createElement('div'); gate.id = 'rp-cm-gate'; form.insertBefore(gate, form.firstChild); }
-    var who = document.getElementById('rp-cm-who');
-    if (!who) { who = document.createElement('div'); who.id = 'rp-cm-who'; var fc = form.children[1] || null; form.insertBefore(who, fc); }
-    if (logged()) {
-      var u = R.me(); form.classList.remove('rp-cm-locked');
-      if (nameInp) nameInp.value = u.name || '';
-      who.style.display = 'flex';
-      who.innerHTML = '<i>' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</i><span>هتنشر باسم: <b>' + esc(u.name) + '</b></span>';
-    } else {
-      form.classList.add('rp-cm-locked'); who.style.display = 'none';
-      gate.innerHTML = '<b>🔒 التعليق والتقييم للمسجّلين بس</b><span>سجّل دخول بحسابك علشان تقدر تعلّق وتقيّم، وتعليقك هيظهر باسمك.</span><button type="button" data-rp-gate="1">تسجيل الدخول / إنشاء حساب</button>';
+  /* ----- الشريط ----- */
+  function buildBar() {
+    var anchor = document.getElementById('chapter-comments-section'); if (!anchor || !anchor.parentNode) return null;
+    var bar = document.getElementById('rp-wp-bar');
+    if (!bar) {
+      bar = document.createElement('div'); bar.id = 'rp-wp-bar';
+      bar.innerHTML = '<div id="rp-wp-pill" aria-hidden="true"></div>' +
+        '<button type="button" id="rp-wp-star" data-wp="star"><i class="fa-solid fa-star"></i><b id="rp-wp-sn">قيّم</b></button>' +
+        '<button type="button" data-wp="cm"><i class="fa-regular fa-comment"></i><b id="rp-wp-cn">0</b></button>' +
+        '<button type="button" id="rp-wp-copy" data-wp="copy"><i class="fa-regular fa-paper-plane"></i><b>نسخ الرابط</b></button>';
+      var pill = bar.querySelector('#rp-wp-pill');
+      pill.innerHTML = [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" data-wp-rate="' + n + '" aria-label="' + n + '"><i class="fa-solid fa-star"></i></button>'; }).join('');
+      anchor.parentNode.insertBefore(bar, anchor);
     }
-    if (ta && !ta.__rpGrow) { ta.__rpGrow = 1; ta.addEventListener('input', function () { grow(ta); }); ta.setAttribute('rows', '3'); }
-    grow(ta);
+    return bar;
   }
-  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-rp-gate]'); if (b) { try { window.rpOpenAccount(); } catch (x) {} } });
+  function allowCopy() { try { var n = (G('novels') || []).filter(function (x) { return x.id === G('currentNovelId'); })[0]; return !n || n.allowDirectSharing !== false; } catch (e) { return true; } }
+  function refreshBar() {
+    var bar = buildBar(); if (!bar) return;
+    var arr = entries(), votes = arr.filter(isVote), cms = arr.filter(function (c) { return !isVote(c); });
+    var avg = votes.length ? votes.reduce(function (a, c) { return a + (Number(c.rating) || 5); }, 0) / votes.length : 0;
+    document.getElementById('rp-wp-sn').textContent = votes.length ? (avg.toFixed(1) + ' (' + fnum(votes.length) + ')') : 'قيّم';
+    document.getElementById('rp-wp-cn').textContent = fnum(cms.length);
+    var cp = document.getElementById('rp-wp-copy'); if (cp) cp.style.display = allowCopy() ? '' : 'none';
+    var mine = logged() ? votes.filter(function (c) { return c.name === myName(); })[0] : null;
+    document.getElementById('rp-wp-star').classList.toggle('rp-on', !!mine);
+    var pill = document.getElementById('rp-wp-pill');
+    pill.querySelectorAll('[data-wp-rate]').forEach(function (b) { b.classList.toggle('on', !!mine && +b.getAttribute('data-wp-rate') <= (Number(mine.rating) || 0)); });
+    if (document.getElementById('rp-wp-sheet') && document.getElementById('rp-wp-sheet').classList.contains('open')) renderList();
+  }
+  function needLogin(msg) { toast(msg || 'سجّل دخول الأول علشان تعلّق أو تقيّم'); try { window.rpOpenAccount(); } catch (e) {} }
 
+  /* ----- نشر (تعليق أو تقييم) عبر نفس دالة الموقع علشان يتحفظ على Firebase ----- */
+  function post(text, stars) {
+    var nameInp = document.getElementById('comment-reader-name'), ta = document.getElementById('comment-reader-text');
+    if (!nameInp || !ta || typeof window.handleAddChapterComment !== 'function') { toast('تعذّر النشر دلوقتي'); return false; }
+    nameInp.value = myName(); ta.value = text;
+    try { window.selectCommentStar(stars || 5); } catch (e) {}
+    window.handleAddChapterComment({ preventDefault: function () {} });
+    return true;
+  }
+  function vote(n) {
+    if (!logged()) return needLogin('سجّل دخول الأول علشان تقيّم');
+    var mine = entries().filter(function (c) { return isVote(c) && c.name === myName(); })[0];
+    if (mine) { toast('قيّمت الفصل ده قبل كده ⭐ ' + (mine.rating || '')); return; }
+    post(VOTE + ' ' + n + '/5', n); toast('شكرًا على تقييمك ⭐');
+    setTimeout(refreshBar, 60);
+  }
+
+  /* ----- لوحة التعليقات ----- */
+  function sheet() {
+    var s = document.getElementById('rp-wp-sheet'); if (s) return s;
+    s = document.createElement('div'); s.id = 'rp-wp-sheet';
+    s.innerHTML = '<div id="rp-wp-head"><button type="button" data-wp="close" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button><span id="rp-wp-title">التعليقات</span></div><div id="rp-wp-top"></div><div id="rp-wp-list"></div>';
+    document.body.appendChild(s); return s;
+  }
+  function renderTop() {
+    var top = document.getElementById('rp-wp-top'); if (!top) return;
+    if (!logged()) {
+      top.innerHTML = '<div id="rp-wp-gate"><b>🔒 التعليق للمسجّلين بس</b><span>سجّل دخول بحسابك علشان تعلّق، وتعليقك هيظهر باسمك.</span><button type="button" data-wp="login">تسجيل الدخول / إنشاء حساب</button></div>';
+      return;
+    }
+    if (!document.getElementById('rp-wp-ta')) {
+      top.innerHTML = '<div id="rp-wp-comp"><textarea id="rp-wp-ta" rows="1" maxlength="1000" placeholder="اكتب تعليقك…"></textarea><button type="button" id="rp-wp-send" data-wp="send" disabled aria-label="إرسال"><i class="fa-solid fa-paper-plane"></i></button></div>';
+      var ta = document.getElementById('rp-wp-ta');
+      ta.addEventListener('input', function () { grow(ta); document.getElementById('rp-wp-send').disabled = !ta.value.trim(); });
+    }
+  }
+  function grow(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(220, Math.max(46, ta.scrollHeight + 2)) + 'px'; ta.style.overflow = ta.scrollHeight > 220 ? 'auto' : 'hidden'; }
+  function renderList() {
+    var box = document.getElementById('rp-wp-list'); if (!box) return;
+    var cms = entries().filter(function (c) { return !isVote(c); });
+    document.getElementById('rp-wp-title').textContent = 'التعليقات (' + cms.length + ')';
+    box.innerHTML = cms.length ? cms.map(function (c) {
+      var nm = String(c.name || '?');
+      return '<div class="rp-wp-c"><div class="rp-wp-av">' + esc(nm.charAt(0)) + '</div><div class="rp-wp-cb"><div class="rp-wp-cn">' + esc(nm) + '</div><div class="rp-wp-ct">' + esc(c.text) + '</div><div class="rp-wp-cd">' + esc(c.date || '') + '</div></div></div>';
+    }).join('') : '<div class="rp-wp-empty">لسه مفيش تعليقات على الفصل ده.<br>كن أول من يعلّق!</div>';
+  }
+  function openSheet() {
+    var s = sheet(); renderTop(); renderList(); s.classList.add('open'); document.documentElement.style.overflow = 'hidden';
+    var ta = document.getElementById('rp-wp-ta'); if (ta) setTimeout(function () { try { ta.focus(); } catch (e) {} }, 250);
+  }
+  function closeSheet() { var s = document.getElementById('rp-wp-sheet'); if (s) s.classList.remove('open'); document.documentElement.style.overflow = ''; }
+  function send() {
+    var ta = document.getElementById('rp-wp-ta'); if (!ta) return;
+    var text = ta.value.trim(); if (!text) return;
+    if (!logged()) return needLogin();
+    if (post(text, 5)) { ta.value = ''; grow(ta); document.getElementById('rp-wp-send').disabled = true; setTimeout(function () { renderList(); refreshBar(); var l = document.getElementById('rp-wp-list'); if (l) l.scrollTop = 0; }, 80); }
+  }
+
+  document.addEventListener('click', function (e) {
+    var pillBtn = e.target.closest && e.target.closest('[data-wp-rate]');
+    if (pillBtn) { document.getElementById('rp-wp-pill').classList.remove('open'); vote(+pillBtn.getAttribute('data-wp-rate')); return; }
+    var b = e.target.closest && e.target.closest('[data-wp]');
+    var pill = document.getElementById('rp-wp-pill');
+    if (!b) { if (pill && pill.classList.contains('open') && !(e.target.closest && e.target.closest('#rp-wp-pill'))) pill.classList.remove('open'); return; }
+    var a = b.getAttribute('data-wp');
+    if (a === 'star') { if (!logged()) return needLogin('سجّل دخول الأول علشان تقيّم'); pill.style.insetInlineStart = 'auto'; pill.style.left = (b.offsetLeft + b.offsetWidth / 2) + 'px'; pill.classList.toggle('open'); }
+    else if (a === 'cm') { if (pill) pill.classList.remove('open'); openSheet(); }
+    else if (a === 'copy') { try { window.easyCopyLink(); } catch (x) { toast('تعذّر نسخ الرابط'); } }
+    else if (a === 'close') closeSheet();
+    else if (a === 'send') send();
+    else if (a === 'login') { closeSheet(); try { window.rpOpenAccount(); } catch (x) {} }
+  });
+
+  /* ----- إشعار للكاتب بعد النشر ----- */
   var oAdd = window.handleAddChapterComment;
   if (typeof oAdd === 'function') window.handleAddChapterComment = function (e) {
-    if (!logged()) { try { e.preventDefault(); } catch (x) {} toast('سجّل دخول الأول علشان تعلّق أو تقيّم'); try { window.rpOpenAccount(); } catch (x) {} return; }
-    var nameInp = document.getElementById('comment-reader-name'), ta = document.getElementById('comment-reader-text');
-    var text = ta ? ta.value.trim() : '';
-    if (nameInp) nameInp.value = R.me().name || '';
+    if (!logged()) { try { e.preventDefault(); } catch (x) {} needLogin(); return; }
+    var ta = document.getElementById('comment-reader-text'), text = ta ? ta.value.trim() : '';
     var nid = G('currentNovelId'), stars = G('selectedCommentRating') || 5, novel = null;
-    try { novel = novels.filter(function (n) { return n.id === nid; })[0]; } catch (x) {}
+    try { novel = (G('novels') || []).filter(function (n) { return n.id === nid; })[0]; } catch (x) {}
     var res = oAdd.apply(this, arguments);
     if (text && novel && R.base()) {
-      try { R.api('/api/notify', { method: 'POST', body: { novel: String(novel.id), kind: 'comment', title: plain(novel.title), stars: stars, snippet: text, authorUid: novel.authorUid || (novel.isUser ? novel.uid : 0) } }).catch(function () {}); } catch (x) {}
+      var rating = text.indexOf(VOTE) === 0;
+      try { R.api('/api/notify', { method: 'POST', body: { novel: String(novel.id), kind: rating ? 'rating' : 'comment', title: plain(novel.title), stars: stars, snippet: rating ? '' : text, authorUid: novel.authorUid || (novel.isUser ? novel.uid : 0) } }).catch(function () {}); } catch (x) {}
     }
-    setTimeout(function () { grow(document.getElementById('comment-reader-text')); }, 30);
     return res;
   };
   var oRender = window.renderChapterComments;
-  if (typeof oRender === 'function') window.renderChapterComments = function () { var r = oRender.apply(this, arguments); try { decorate(); } catch (x) {} return r; };
+  if (typeof oRender === 'function') window.renderChapterComments = function () { var r = oRender.apply(this, arguments); try { refreshBar(); } catch (x) {} return r; };
   var oOpen = window.openChapterReader;
-  if (typeof oOpen === 'function') window.openChapterReader = function () { var r = oOpen.apply(this, arguments); setTimeout(function () { try { decorate(); } catch (x) {} }, 120); return r; };
-  window.addEventListener('load', function () { setTimeout(decorate, 800); });
-  document.addEventListener('rp-auth-changed', decorate);
-  setInterval(function () { try { if (document.getElementById('chapter-comments-section')) decorate(); } catch (x) {} }, 4000);
+  if (typeof oOpen === 'function') window.openChapterReader = function () { closeSheet(); var r = oOpen.apply(this, arguments); setTimeout(function () { try { refreshBar(); } catch (x) {} }, 150); return r; };
+  document.addEventListener('rp-auth-changed', function () { try { renderTop(); refreshBar(); } catch (x) {} });
+  window.addEventListener('load', function () { setTimeout(function () { try { refreshBar(); } catch (x) {} }, 900); });
+  setInterval(function () { try { if (document.getElementById('chapter-comments-section')) refreshBar(); } catch (x) {} }, 3000);
+
+  /* زر المفضلة تحت زرّي قراءة الرواية وتحميل PDF */
+  function favOn(id) { try { var o = JSON.parse(localStorage.getItem('nx_reader_v1') || '{}'); return (o.favs || []).indexOf(id) !== -1; } catch (e) { return false; } }
+  function ensureFav() {
+    var v = document.getElementById('view-novel-details');
+    if (!v || v.classList.contains('hidden')) return;
+    var rb = v.querySelector('button[onclick^="toggleChaptersSection"]'); if (!rb) return;
+    var grid = rb.parentElement; if (!grid) return;
+    var id = G('currentNovelId'); if (!id) return;
+    var b = document.getElementById('rp-fav-btn');
+    if (b && b.getAttribute('data-nx-fav') === id && b.previousElementSibling === grid) return;
+    if (b) b.remove();
+    var on = favOn(id);
+    b = document.createElement('button');
+    b.id = 'rp-fav-btn'; b.type = 'button'; b.setAttribute('data-nx-fav', id);
+    b.setAttribute('onclick', "nxToggleFav('" + String(id).replace(/'/g, "\\'") + "')");
+    b.className = 'w-full mt-4 px-5 py-4 rounded-2xl text-base font-black flex items-center justify-center gap-2 border border-rose-300/60 text-rose-600 bg-rose-50 dark:bg-rose-500/10 dark:text-rose-300 hover:opacity-90';
+    b.innerHTML = '<i class="' + (on ? 'fa-solid' : 'fa-regular') + ' fa-heart"></i><span>' + (on ? 'في مفضلتك' : 'أضف للمفضلة') + '</span>';
+    grid.insertAdjacentElement('afterend', b);
+  }
+  setInterval(function () { try { ensureFav(); } catch (x) {} }, 800);
 })();
 </script>
 <!-- ==================== الصوت المصري العصبي من سيرفر خارجي (اختياري) ==================== -->
