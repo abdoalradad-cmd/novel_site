@@ -187,6 +187,14 @@ html.dark .rp-pf-av{border-color:#0f1a2c}
 .rp-pf-name{margin:10px 0 2px;font:900 1.35rem Cairo,sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
 .rp-ver{color:#2563eb;font-size:1.05rem}
 .rp-pf-tag{display:inline-block;font:900 .68rem Cairo,sans-serif;background:#fef3c7;color:#92400e;border-radius:99px;padding:3px 12px}
+.rp-au{flex:none;width:96px;text-align:center;cursor:pointer;scroll-snap-align:start}
+.rp-au-av{width:78px;height:78px;margin:0 auto 8px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#2f5d4e,#1b3f33);color:#fff;font-weight:900;font-size:1.7rem;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 6px 16px rgba(2,44,34,.22)}
+html.dark .rp-au-av{border-color:#0f1a2c}
+.rp-au-av img{width:100%;height:100%;object-fit:cover}
+.rp-au-n{font-size:.78rem;font-weight:900;line-height:1.5;color:#0f172a;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.dark .rp-au-n{color:#f1f5f9}
+.rp-au-f{font-size:.68rem;color:#64748b;font-weight:700;margin-top:2px}
+.rp-auli{cursor:pointer}.rp-auli .rp-au-av{width:58px;height:58px;margin:0;font-size:1.3rem;flex:none}
 .rp-pf-soc{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0 4px}
 .rp-soc{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:12px;color:#fff!important;font-size:.76rem;font-weight:800;text-decoration:none}
 .rp-soc.fb{background:#2563eb}.rp-soc.wp{background:#ff500a}.rp-soc.yt{background:#dc2626}
@@ -11496,7 +11504,31 @@ document.addEventListener('click', function (e) {
       section('ranking-star', 'الأكثر قراءة', most.slice(0, 15), { rank: anyReads, reads: anyReads, mode: 'most' }) +
       section('clock-rotate-left', 'المضافة حديثًا', recent.slice(0, 15), { mode: 'recent' }) +
       section('layer-group', 'روايات أخرى', rest, { mode: 'all' }) +
+      section('crown', 'Premium', L.prem.slice(0, 15), { mode: 'premium', reads: true }) +
+      authorsRow(authorsList()) +
       '<button type="button" class="rp-allbtn" data-rp-all="all"><i class="fa-solid fa-table-list"></i> كل الروايات (' + vis.length + ')</button>';
+  }
+  function isPremNovel(n) { try { return !!(n.isLocked || n.gate || (n.chapters || []).some(function (c) { return c && c.isLocked; })); } catch (e) { return false; } }
+  /* ---------- كُتّاب الموقع ---------- */
+  var AUTH = null;
+  function loadAuthors() {
+    if (!base()) return;
+    fetch(base() + '/api/authors').then(function (r) { return r.json(); }).then(function (d) { if (d && d.authors && d.authors.length) { AUTH = d.authors; schedule(); if (isOpen('rp-all-page') && ALL.mode === 'authors') renderAll(); } }).catch(function () {});
+  }
+  function authorsList() {
+    var src = [];
+    if (AUTH) src = AUTH.map(function (a) { return { id: a.id, name: a.name, avatar: a.avatar, followers: a.followers || 0, isAdmin: !!a.isAdmin }; });
+    else { var P = cfg().authorProfiles || {}; src = Object.keys(P).map(function (k) { var p = P[k]; return { id: +k, name: p.name, avatar: p.avatar, followers: p.followers || 0, isAdmin: !!p.isAdmin }; }); }
+    src.forEach(function (a) { a.key = a.isAdmin ? 'admin' : String(a.id); a.count = authorNovels({ isAdmin: a.isAdmin, id: a.id }).length; });
+    src = src.filter(function (a) { return a.isAdmin || a.count > 0; });
+    src.sort(function (a, b) { return (b.isAdmin - a.isAdmin) || (b.followers - a.followers); });
+    return src;
+  }
+  function avHtml(a, cls) { return '<div class="' + cls + '">' + (a.avatar ? '<img src="' + esc(a.avatar) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : esc((a.name || '?').charAt(0))) + '</div>'; }
+  function authorsRow(list) {
+    if (!list.length) return '';
+    return '<div class="rp-rsec"><div class="rp-rhead"><h3 data-rp-all="authors" style="cursor:pointer"><i class="fa-solid fa-feather-pointed"></i>كُتّاب الموقع</h3><button type="button" class="rp-rall" data-rp-all="authors">عرض الكل ‹</button></div><div class="rp-hs">' +
+      list.slice(0, 20).map(function (a) { return '<div class="rp-au" data-rp-author="' + esc(a.key) + '">' + avHtml(a, 'rp-au-av') + '<div class="rp-au-n">' + esc(a.name) + (a.isAdmin ? ' <i class="fa-solid fa-circle-check" style="color:#2563eb;font-size:.7em"></i>' : '') + '</div><div class="rp-au-f">' + fnum(a.followers) + ' متابع</div></div>'; }).join('') + '</div></div>';
   }
   function lists(vis) {
     var idx = {}; vis.forEach(function (n, i) { idx[n.id] = i; });
@@ -11505,10 +11537,11 @@ document.addEventListener('click', function (e) {
     if (!pop.length) pop = vis.slice(0, 15);
     var most = vis.slice().sort(function (a, b) { return (readsOf(b) - readsOf(a)) || (idx[a.id] - idx[b.id]); });
     var recent = vis.map(function (n, i) { return { n: n, t: tsOf(n, i), i: i }; }).sort(function (a, b) { return (b.t - a.t) || (a.i - b.i); }).map(function (x) { return x.n; });
-    return { pop: pop.slice(0, 15), most: most, recent: recent };
+    var prem = most.filter(isPremNovel);
+    return { pop: pop.slice(0, 15), most: most, recent: recent, prem: prem };
   }
   function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} }, 60); }
-  window.rpRenderRows = renderRows;
+  window.rpRenderRows = renderRows; window.rpLoadAuthors = function () { loadAuthors(); };
 
   /* ---------- نمط الصفوف: للقراء فقط، ويُخفى أثناء البحث ---------- */
   function applyMode() {
@@ -11534,11 +11567,19 @@ document.addEventListener('click', function (e) {
     return '<div class="rp-li">' + coverHtml(n, 0, true) + '<div class="in"><div class="rp-bk-t" style="min-height:0;-webkit-line-clamp:2" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) +
       '<div style="margin-bottom:8px"><span class="rp-gen">' + esc(plain(n.genre || 'عام')) + '</span><span class="rp-bk-m">' + (n.chapters || []).length + ' فصل · ' + esc(plain(n.status || '')) + (readsOf(n) ? ' · 👁 ' + fnum(readsOf(n)) : '') + '</span></div><div class="btns">' + btns(n) + '</div></div></div>';
   }
+  function renderAuthorsAll(body) {
+    var q = ALL.q.trim().toLowerCase(), keep = $('rp-all-q') && document.activeElement === $('rp-all-q');
+    var list = authorsList().filter(function (a) { return !q || String(a.name).toLowerCase().indexOf(q) > -1; });
+    body.innerHTML = '<input id="rp-all-q" class="rp-srch" type="search" placeholder="ابحث باسم الكاتب…" value="' + esc(ALL.q) + '">' +
+      (list.length ? list.map(function (a) { return '<div class="rp-li rp-auli" data-rp-author="' + esc(a.key) + '">' + avHtml(a, 'rp-au-av') + '<div class="in" style="justify-content:center"><div class="rp-bk-t" style="min-height:0">' + esc(a.name) + (a.isAdmin ? ' <i class="fa-solid fa-circle-check" style="color:#2563eb;font-size:.8em"></i>' : '') + '</div><div class="rp-bk-m">' + fnum(a.followers) + ' متابع · ' + a.count + ' رواية</div></div><i class="fa-solid fa-chevron-left" style="align-self:center;color:#94a3b8"></i></div>'; }).join('') : '<div style="text-align:center;padding:40px 10px;color:#64748b">لا يوجد كُتّاب</div>');
+    if (keep) { var i = $('rp-all-q'); i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch (e) {} }
+  }
   function renderAll() {
     var body = $('rp-all-body'); if (!body) return;
     var vis = visible(), gs = []; vis.forEach(function (n) { var g = plain(n.genre || ''); if (g && gs.indexOf(g) < 0) gs.push(g); });
     var q = ALL.q.trim().toLowerCase();
-    var LS = lists(vis), base = ({ popular: LS.pop, most: LS.most, recent: LS.recent })[ALL.mode] || vis;
+    if (ALL.mode === 'authors') { renderAuthorsAll(body); return; }
+    var LS = lists(vis), base = ({ popular: LS.pop, most: LS.most, recent: LS.recent, premium: LS.prem })[ALL.mode] || vis;
     var list = base.filter(function (n) { return (ALL.cat === 'all' || plain(n.genre) === ALL.cat) && (!q || (plain(n.title) + ' ' + plain(n.author)).toLowerCase().indexOf(q) > -1); });
     var keep = $('rp-all-q') && document.activeElement === $('rp-all-q');
     body.innerHTML = '<input id="rp-all-q" class="rp-srch" type="search" placeholder="ابحث باسم الرواية أو الكاتب…" value="' + esc(ALL.q) + '">' +
@@ -11548,7 +11589,7 @@ document.addEventListener('click', function (e) {
   }
   function openP(id) { var p = $(id); if (!p) return; p.classList.add('open'); p.setAttribute('aria-hidden', 'false'); p.scrollTop = 0; document.documentElement.style.overflow = 'hidden'; }
   function closeP(id) { var p = $(id); if (!p) return; p.classList.remove('open'); p.setAttribute('aria-hidden', 'true'); if (!document.querySelector('#rp-all-page.open,#rp-prof-page.open,#rp-acct-page.open')) document.documentElement.style.overflow = ''; try { if (window.__appAfterOverlay) window.__appAfterOverlay(); } catch (e) {} }
-  var ALLT = { all: '📚 كل الروايات', popular: '🔥 الروايات المشهورة', most: '🏆 الأكثر قراءة', recent: '🕒 المضافة حديثًا' };
+  var ALLT = { all: '📚 كل الروايات', popular: '🔥 الروايات المشهورة', most: '🏆 الأكثر قراءة', recent: '🕒 المضافة حديثًا', premium: '👑 Premium', authors: '✍️ كُتّاب الموقع' };
   window.rpOpenAll = function (mode) { mode = ALLT[mode] ? mode : 'all'; ALL = { cat: 'all', q: '', mode: mode }; var t = $('rp-all-title'); if (t) t.textContent = ALLT[mode]; renderAll(); openP('rp-all-page'); };
   window.rpCloseAll = function () { closeP('rp-all-page'); };
 
@@ -11651,7 +11692,7 @@ document.addEventListener('click', function (e) {
   /* ---------- تشغيل ---------- */
   var oApply = window.applySiteConfiguration;
   if (typeof oApply === 'function') window.applySiteConfiguration = function () { var r = oApply.apply(this, arguments); try { applyMode(); schedule(); } catch (e) {} return r; };
-  function boot() { applyMode(); renderRows(); loadReads(); }
+  function boot() { applyMode(); renderRows(); loadReads(); loadAuthors(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 500); });
   else setTimeout(boot, 500);
   setTimeout(schedule, 2000); setTimeout(schedule, 4500);
