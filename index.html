@@ -2076,6 +2076,10 @@ html.dark .rp-upz{background:rgba(16,185,129,.06);border-color:rgba(52,211,153,.
                     <i class="fa-brands fa-whatsapp text-lg"></i>
                     <span id="pwd-whatsapp-number-display" dir="ltr">01067567795</span>
                 </a>
+                <button id="pwd-premium-btn" type="button" onclick="closeContentPasswordModal();try{window.rpOpenAccount();setTimeout(function(){try{window.__rpOpenPremium&&window.__rpOpenPremium()}catch(e){}},150)}catch(e){}" class="w-full bg-gradient-to-l from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-900 font-black py-2.5 px-4 rounded-xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-crown text-base"></i>
+                    <span>اشترك في Premium وافتح كل الروايات</span>
+                </button>
             </div>
         </div>
     </div>
@@ -9448,16 +9452,17 @@ document.addEventListener('click', function (e) {
 
     // الصوت المصري العصبي (لو السيرفر متظبط) — وإلا أو لو فشل بنكمل بصوت الجهاز
     const NXC = window.NXCloudTTS;
-    if (!forceLocal && NXC && NXC.enabled()) {
+    if (!forceLocal && NXC && (NXC.usable ? NXC.usable() : NXC.enabled())) {
       markCurrent();
       updateUI();
       NXC.speak(TTS.chunks, TTS.idx, TTS.rate,
-        function () {
+        function (next) {
           if (my !== TTS.gen) return;
-          const gap = window.SpeechPrep ? window.SpeechPrep.pauseFor(c, TTS.chunks[TTS.idx + 1]) : 0;
+          next = (typeof next === 'number' && next > TTS.idx) ? next : TTS.idx + 1;
+          const gap = window.SpeechPrep ? window.SpeechPrep.pauseFor(TTS.chunks[next - 1] || c, TTS.chunks[next]) : 0;
           setTimeout(function () {
             if (my !== TTS.gen) return;
-            TTS.idx++;
+            TTS.idx = next;
             speakChunk(my);
           }, gap);
         },
@@ -9466,7 +9471,8 @@ document.addEventListener('click', function (e) {
           NXC.noteFail();
           speakChunk(my, true);
         },
-        function () { return my !== TTS.gen || TTS.state !== 'playing'; });
+        function () { return my !== TTS.gen || TTS.state !== 'playing'; },
+        function (i) { if (my !== TTS.gen || i === TTS.idx) return; TTS.idx = i; markCurrent(); updateUI(); });
       return;
     }
 
@@ -9527,6 +9533,8 @@ document.addEventListener('click', function (e) {
   }
 
   function begin(from) {
+    if (window.NXCloudTTS && !window.NXCloudTTS.allowed()) { window.NXCloudTTS.upsell(); return; }
+    if (window.NXCloudTTS && !from) window.NXCloudTTS.resetSession();
     if (!supported) { toast('متصفحك لا يدعم القراءة الصوتية'); return; }
     buildChunks();
     if (!TTS.chunks.length) { toast('مفيش نص للقراءة في الفصل ده'); return; }
@@ -10958,7 +10966,7 @@ document.addEventListener('click', function (e) {
     topicSub: topicSub, topicUnsub: topicUnsub, loadFeed: loadFeed, syncTopics: syncTopics, loadUserNovels: function () { return loadUserNovels(); }, USER_KEY: USER_KEY };
   /* ================== صفحة حسابي ================== */
   var S = fresh();
-  function fresh() { return { view: 'home', tab: 'novels', mode: 'login', forgot: false, mine: [], pending: [], live: [], users: [], usersLoaded: false, ed: null, edTab: 'basic', review: null, loading: false, err: '', dirty: false, reset: null, uq: '', up: 0, premSel: null, premOpen: 0, premMsg: '', premStep: 'plans', premPlan: '', payMethod: '', payProof: '', paySender: '', payNote: '', payBusy: false, myPays: null, payPending: [] }; }
+  function fresh() { return { view: 'home', tab: 'about', mode: 'login', forgot: false, mine: [], pending: [], live: [], users: [], usersLoaded: false, ed: null, edTab: 'basic', review: null, loading: false, err: '', dirty: false, reset: null, uq: '', up: 0, premSel: null, premOpen: 0, premMsg: '', premStep: 'plans', premPlan: '', payMethod: '', payProof: '', paySender: '', payNote: '', payBusy: false, myPays: null, payPending: [] }; }
   var STATUS = { draft: 'مسودة', pending: 'قيد المراجعة', approved: 'منشورة', rejected: 'مرفوضة' };
   function ic(n) { return '<i class="fa-solid fa-' + n + '"></i>'; }
   function body() { return $('rp-ac-body'); }
@@ -11095,14 +11103,15 @@ document.addEventListener('click', function (e) {
     var u = me(); setTitle('حسابي'); var admin = isAdmin(); if (!PREM.info) loadPremInfo();
     var SM = siteMine(), smCh = SM.reduce(function (a, n) { return a + (n.chapters || []).length; }, 0);
     var chs = S.mine.reduce(function (a, n) { return a + (n.chaptersCount || 0); }, 0), liveN = S.mine.filter(function (n) { return n.isLive; }).length;
-    var html = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b style="font-size:1.15rem;display:block">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span> <button type="button" class="rp-pill" data-act="viewprofile" style="margin-top:6px;border:0;cursor:pointer">' + ic('user') + ' صفحتي</button></div></div>' +
+    var hero = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b style="font-size:1.15rem;display:block">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span> <button type="button" class="rp-pill" data-act="viewprofile" style="margin-top:6px;border:0;cursor:pointer">' + ic('user') + ' صفحتي</button></div></div>' +
       '<div class="rp-stats"><div class="rp-stat"><b>' + (S.mine.length + SM.length) + '</b><span>رواياتي</span></div><div class="rp-stat"><b>' + (liveN + SM.length) + '</b><span>منشورة</span></div><div class="rp-stat"><b>' + (chs + smCh) + '</b><span>فصل</span></div><div class="rp-stat"><b>' + S.mine.filter(function (n) { return n.status === 'pending'; }).length + '</b><span>مراجعة</span></div></div></div>';
-    html += premCard();
-    var tabs = [['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات']];
+    hero += premCard();
+    var html = '';
+    var tabs = [['about', 'user', 'عني'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات']];
     if (admin) tabs.push(['pending', 'inbox', 'الطلبات', S.pending.length], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['premium', 'crown', 'Premium', (S.payPending || []).length], ['backup', 'database', 'النسخ الاحتياطي']);
     html += '<div class="rp-tabs">' + tabs.map(function (t) { return '<button type="button" class="rp-tab ' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-t="' + t[0] + '">' + ic(t[1]) + t[2] + (t[3] ? ' <span class="n">' + t[3] + '</span>' : '') + '</button>'; }).join('') + '</div>';
     if (S.err) html += '<div class="rp-card"><div class="rp-err">' + esc(S.err) + '</div></div>';
-    html += tabBody();
+    html += (S.tab === 'about' ? hero : tabBody());
     body().innerHTML = html;
     if (S.tab === 'users' && !S.usersLoaded) loadUsers();
   }
@@ -11295,7 +11304,7 @@ document.addEventListener('click', function (e) {
     if (S.premStep === 'pay') return renderPay();
     var sel = planSel(), act = isPrem(), forever = u && (u.role === 'admin' || (u.premiumUntil || 0) > 3e12);
     var hero = '<div class="rp-ph"><div class="rp-ph-crown">' + ic('crown') + '</div><h2>RadPad Premium</h2><p>' + (act ? (forever ? 'اشتراكك مفتوح 👑' : 'مشترك لحد ' + esc(fdate(u.premiumUntil)) + ' — تقدر تمدّد في أي وقت') : 'اقرأ كل الروايات والفصول المقفولة من غير ما تدخل أي باسورد') + '</p></div>';
-    var feats = ['كل الروايات والفصول المقفولة بتتفتح تلقائي', 'من غير باسوردات ولا واتساب في كل مرة', 'شغّال على كل أجهزتك بنفس الحساب', 'بتدعم الكتّاب اللي بتحبهم'];
+    var feats = ['كل الروايات والفصول المقفولة بتتفتح تلقائي', 'تسمع الروايات بصوت مصري وانت بتقرا 🎧', 'من غير باسوردات ولا واتساب في كل مرة', 'شغّال على كل أجهزتك بنفس الحساب', 'بتدعم الكتّاب اللي بتحبهم'];
     var fh = '<div class="rp-card"><h3>' + ic('gem') + ' هتاخد إيه؟</h3><ul class="rp-feat">' + feats.map(function (t) { return '<li>' + ic('circle-check') + '<span>' + t + '</span></li>'; }).join('') + '</ul></div>';
     var ph = '<div class="rp-card"><h3>' + ic('calendar-check') + ' اختار مدة الاشتراك</h3>' + plans.map(function (p) {
       var pm = perMonth(p);
@@ -11359,6 +11368,79 @@ document.addEventListener('click', function (e) {
         '<div class="rp-row" style="margin-top:8px"><button type="button" class="rp-btn" data-act="payok" data-id="' + p.id + '" style="flex:1">' + ic('check') + ' تفعيل</button><button type="button" class="rp-btn red" data-act="payno" data-id="' + p.id + '" style="flex:1">' + ic('xmark') + ' رفض</button></div></div>';
     }).join('') : '<div class="rp-empty">' + ic('inbox') + 'مفيش طلبات جديدة</div>') + '</div>';
   }
+
+  /* ---------- الصوت المصري (Gemini): لوحة الأدمن ---------- */
+  var TT = { st: null, voices: null, raw: '', msg: '', sync: '' };
+  function loadTts() { api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && S.tab === 'premium') render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
+  function usd(n) { n = +n || 0; return '$' + (n < 1 ? n.toFixed(3) : n.toFixed(2)); }
+  function mins(sec) { return (Math.round((+sec || 0) / 6) / 10).toLocaleString('en') + ' د'; }
+  function ttsAdminCard() {
+    var d = TT.st;
+    if (!d) return '<div class="rp-card"><h3>🎧 الصوت المصري (Gemini)</h3><p class="rp-sub">جاري التحميل…</p></div>';
+    if (d.error) return '<div class="rp-card"><h3>🎧 الصوت المصري (Gemini)</h3><div class="rp-err">' + esc(d.error) + '</div><button type="button" class="rp-btn sm" data-act="ttsload">' + ic('rotate') + ' إعادة المحاولة</button></div>';
+    var c = d.conf || {}, t = d.today || {}, m = d.month || {}, q = d.chapters || {}, rm = d.remain || {};
+    var badge = function (ok, a, b) { return '<span class="rp-ok" style="font-weight:800;margin-inline-end:10px">' + (ok ? '✅ ' + a : '<span class="rp-err">❌ ' + b + '</span>') + '</span>'; };
+    var h = '<div class="rp-card"><h3>🎧 الصوت المصري (Gemini)</h3><p class="rp-sub">الفصول بتتحوّل لصوت مسبقًا بالترتيب، وبحد يومي. المشتركين بيسمعوا الجاهز بس.</p>' +
+      '<p style="margin:6px 0">' + badge(d.hasKey, 'مفتاح Gemini متحط', 'مفتاح Gemini ناقص') + badge(d.hasBucket, 'تخزين R2 شغّال', 'تخزين R2 مش مفعّل') + '</p>';
+    if (d.pausedUntil && d.pausedUntil > Date.now()) h += '<div class="rp-err" style="font-weight:800">⚠️ التحويل واقف مؤقتًا لأن جوجل رفضت الطلبات (الحصة المجانية خلصت أو الضغط عالي). هيكمّل تلقائي الساعة ' + new Date(d.pausedUntil).toLocaleTimeString('ar-EG') + '. لو عايز تكمّل من غير انتظار فعّل الفوترة في Google AI Studio.</div>';
+    else if (d.exhaustedAt && Date.now() - d.exhaustedAt < 24 * 3600000) h += '<div class="rp-err" style="font-weight:800">⚠️ جوجل رفضت طلبات آخر مرة: ' + new Date(d.exhaustedAt).toLocaleString('ar-EG') + '.</div>';
+    h += '<div class="rp-item" style="margin-top:8px"><b>الطابور</b><br>' + (q.queued || 0) + ' فصل مستني · ' + (q.running || 0) + ' شغّال · ' + (q.done || 0) + ' جاهز ✅' + (q.failed ? ' · <span class="rp-err">' + q.failed + ' فشل</span>' : '') + '<br>' +
+      'الباقي: حوالي <b>' + (rm.mins || 0).toLocaleString('en') + ' دقيقة</b> صوت — لو كله اتحوّل بالأسعار دي هيكلف تقريبًا <b>' + usd(rm.cost) + '</b>' + (rm.days ? ' — وبالحد اليومي الحالي ده هياخد حوالي <b>' + rm.days + ' يوم</b>' : '') + '</div>' +
+      '<div class="rp-item" style="margin-top:8px"><b>النهارده</b><br>اتحوّل ' + mins(t.secs) + ' من الحد اليومي (' + (d.dailyMin || 0) + ' دقيقة) — <b>' + d.usedTodayPct + '%</b>' + (d.usedTodayPct >= 100 ? ' ✋ وصل للحد، هيكمّل بكرة تلقائي' : '') + '<br>' + (t.reqs || 0) + ' جزء · ' + (t.fails || 0) + ' فشل · ' + (t.limited || 0) + ' رفض من جوجل<br>التكلفة التقديرية لو كله مدفوع: <b>' + usd(t.cost) + '</b></div>' +
+      '<div class="rp-item" style="margin-top:8px"><b>الحصة المجانية</b><br>' + (d.freeMin ? ('اللي دخلته: ' + d.freeMin + ' دقيقة/يوم — استهلكت <b>' + d.freeUsedPct + '%</b>' + (d.freeUsedPct >= 100 ? '<br>الزيادة عن المجاني النهارده هتكلف تقريبًا: <b>' + usd(d.extraCostToday) + '</b>' : '<br>لسه في المجاني ✅ (الإضافي = $0)')) : 'مش محدد. اكتب تحت عدد الدقايق المجانية اللي جوجل ادّتهالك علشان أحسبلك الإضافي.') + '</div>' +
+      '<div class="rp-item" style="margin-top:8px"><b>الشهر ده</b><br>' + (m.reqs || 0) + ' جزء · ' + mins(m.secs) + ' صوت · تقدير التكلفة لو كله مدفوع: <b>' + usd(m.cost) + '</b><br><span class="rp-sub">السعر المحسوب: $' + (d.prices || {}).outP + ' لكل مليون توكن صوت و$' + (d.prices || {}).inP + ' لكل مليون توكن نص (تقدير، الفاتورة الحقيقية في Google Cloud).</span></div>';
+    h += '<div class="rp-row" style="margin-top:10px;flex-wrap:wrap"><button type="button" class="rp-btn sm gold" data-act="ttssync">' + ic('cloud-arrow-up') + ' ابعت الروايات والفصول الجديدة للطابور</button>' +
+      '<button type="button" class="rp-btn sm" data-act="ttsrun">' + ic('play') + ' شغّل دفعة دلوقتي</button>' + (q.failed || (d.pausedUntil && d.pausedUntil > Date.now()) ? '<button type="button" class="rp-btn sm sec" data-act="ttsretry">' + ic('rotate') + ' إعادة المحاولة</button>' : '') + '</div>' +
+      '<div class="rp-sub" id="rp-tt-sync" style="margin-top:6px">' + esc(TT.sync) + '</div>';
+    if ((d.novels || []).length) h += '<h3 style="margin-top:14px">📚 ترتيب التحويل (من فوق لتحت)</h3>' + d.novels.map(function (n, i) {
+      var pc = n.n ? Math.round(n.d / n.n * 100) : 0;
+      return '<div class="rp-item" style="margin-top:6px"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><b>' + (i + 1) + '. ' + esc(n.title || n.nid) + '</b><div class="rp-sub" style="margin:2px 0">' + n.d + ' / ' + n.n + ' فصل جاهز (' + pc + '%)</div></div><div class="rp-row" style="flex-wrap:nowrap">' +
+        (i ? '<button type="button" class="rp-btn sm sec" data-act="ttsfront" data-n="' + esc(n.nid) + '">' + ic('arrow-up') + ' قدّمها</button>' : '') + '<button type="button" class="rp-btn sm red" data-act="ttsdel" data-n="' + esc(n.nid) + '">' + ic('xmark') + '</button></div></div></div>';
+    }).join('');
+    var inp = function (id, lbl, val, ph, ltr) { return '<label class="rp-lbl">' + lbl + '</label><input id="' + id + '" class="rp-in"' + (ltr ? ' dir="ltr"' : '') + ' value="' + esc(val == null ? '' : val) + '" placeholder="' + (ph || '') + '">'; };
+    h += '<h3 style="margin-top:16px">⚙️ الإعدادات</h3>' + inp('rp-tt-cap', 'الحد اليومي للتحويل (دقيقة صوت في اليوم، 0 = إيقاف)', c.dailyMin, '20') +
+      inp('rp-tt-free', 'دقايق مجانية في اليوم (حسب حصتك من جوجل)', c.freeMin || '', 'مثال: 30') +
+      inp('rp-tt-v', 'اسم الصوت (مصري)', c.voice, 'Kore', 1) + inp('rp-tt-st', 'أسلوب القراءة (بالإنجليزي)', c.style, '', 1) + inp('rp-tt-mod', 'الموديل', c.model, '', 1) + inp('rp-tt-conc', 'طلبات متوازية (1–4)', c.concurrency, '2') +
+      inp('rp-tt-pin', 'سعر النص لكل مليون توكن (فاضي = تلقائي)', c.priceIn || '', '0.5', 1) + inp('rp-tt-pout', 'سعر الصوت لكل مليون توكن (فاضي = تلقائي)', c.priceOut || '', '9', 1) +
+      '<div class="rp-sub">تغيير الصوت مش بيعيد تحويل الفصول اللي خلصت.</div><div class="rp-err" id="rp-tt-out">' + esc(TT.msg) + '</div>' +
+      '<div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttssave">' + ic('floppy-disk') + ' حفظ</button>' +
+      '<button type="button" class="rp-btn sm gold" data-act="ttsvoices">' + ic('list') + ' أصوات جوجل المتاحة</button><button type="button" class="rp-btn sm" data-act="ttstest">' + ic('play') + ' جرّب الصوت</button></div>';
+    if (TT.voices) h += '<div class="rp-item" style="margin-top:8px;max-height:200px;overflow:auto" dir="ltr">' + (TT.voices.length ? TT.voices.map(function (v) { return esc(v.name) + ' <span class="rp-sub">' + esc([].concat(v.lang || '').join(',')) + ' ' + esc(v.gender || '') + '</span>'; }).join('<br>') : esc(TT.raw || 'مفيش قايمة. جرّب الأسماء من توثيق Gemini TTS.')) + '</div>';
+    return h + '</div>';
+  }
+  function ttsTest() {
+    var v = $('rp-tt-v'), o = $('rp-tt-out'); if (o) { o.className = 'rp-err'; o.textContent = 'جاري التوليد…'; }
+    fetch(base() + '/api/admin/tts/test', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() }, body: JSON.stringify({ text: 'أهلاً بيكم في رواية بنت القلب. دي تجربة للصوت المصري، يا ترى عاجبكم؟', voiceName: v ? v.value.trim() : '' }) })
+      .then(function (r) { if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.error || ('خطأ ' + r.status)); }); return r.blob(); })
+      .then(function (b) { var a = new Audio(URL.createObjectURL(b)); a.play().catch(function () {}); if (o) { o.className = 'rp-ok'; o.textContent = 'اشتغل ✅'; } loadTts(); })
+      .catch(function (x) { if (o) { o.className = 'rp-err'; o.textContent = x.message; } });
+  }
+  /* بيبعت الروايات والفصول من الموقع للسيرفر (اللي لسه ما اتبعتش أو اتعدّل) */
+  function ttsClean(t) { return String(t || '').replace(/ـ/g, '').replace(/[«»"“”‹›*_~#|\\]/g, ' ').replace(/^\s*[-–—]+\s*/, '').replace(/\.{2,}|…/g, '،').replace(/\s+/g, ' ').trim(); }
+  function ttsSig(t) { var h = 5381; for (var i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + '.' + t.length.toString(36); }
+  function ttsChapText(c) {
+    var SP = window.SpeechPrep, tmp = document.createElement('div'), out = [];
+    function add(raw) { tmp.innerHTML = String(raw || ''); var t = ttsClean(tmp.textContent); if (!t || !/[؀-ۿa-zA-Z0-9]/.test(t)) return; if (SP && SP.process) { try { t = SP.process(t, { cloud: true }); } catch (e) {} } out.push(t); }
+    add(c.title); String(c.content || '').split('\n').filter(function (p) { return p.trim() !== ''; }).forEach(add);
+    return out.join('\n');
+  }
+  function ttsSync() {
+    var set = function (m) { TT.sync = m; var e = $('rp-tt-sync'); if (e) e.textContent = m; };
+    try { if (isReaderOnlyMode) { set('افتح الموقع بوضع الأدمن (زي ما بتعدّل رواياتك) وادخل «حسابي» من هناك.'); return; } } catch (e) {}
+    set('جاري مقارنة الروايات…');
+    api('/api/admin/tts/known').then(function (d) {
+      var known = d.sigs || {}, items = [], list = novels.slice();
+      list.forEach(function (n, ni) { (n.chapters || []).forEach(function (c, i) { var t = ttsChapText(c); if (!t) return; var sig = ttsSig(t); if (known[n.id + '#' + i] === sig) return; items.push({ nid: String(n.id), idx: i, ntitle: String(n.title || ''), ctitle: String(c.title || ''), ord: list.length - ni, sig: sig, text: t }); }); });
+      if (!items.length) { set('كله متبعت قبل كده ✅ مفيش جديد.'); return; }
+      var total = items.length, sent = 0, added = 0, upd = 0;
+      function next() {
+        if (!items.length) { set('تم ✅ اتضاف ' + added + ' فصل جديد' + (upd ? ' وتحدّث ' + upd : '') + ' للطابور.'); loadTts(); return; }
+        var batch = [], size = 0; while (items.length && batch.length < 25 && size < 250000) { var it = items.shift(); batch.push(it); size += it.text.length; }
+        api('/api/admin/tts/enqueue', { method: 'POST', body: { items: batch } }).then(function (r) { added += r.added || 0; upd += r.updated || 0; sent += batch.length; set('جاري الإرسال… ' + sent + ' / ' + total); next(); }).catch(function (x) { set('وقف: ' + x.message); });
+      }
+      next();
+    }).catch(function (x) { set(x.message); });
+  }
   function premAdminTab() {
     var i = PREM.info || {}, plans = i.plans || [], M = methodsOf();
     var adminMode = false; try { adminMode = !isReaderOnlyMode; } catch (e) {}
@@ -11366,7 +11448,7 @@ document.addEventListener('click', function (e) {
     if (!adminMode) st = '<span class="rp-err">⚠️ أنت في وضع القارئ. افتح الموقع بوضع الأدمن (زي ما بتعدّل رواياتك) وادخل «حسابي» من هناك علشان تتزامن الباسوردات.</span>';
     else if (v.sealed && !v.novels) st = '<span class="rp-err">⚠️ باسورداتك لسه مقفولة بالـ PIN. افتح لوحة التحكم وادخل كلمة سر الكاتب (PIN) علشان تتفك، وبعدها دوس «مزامنة الآن».</span>';
     else st = '<span class="rp-ok" style="font-weight:800">' + (PREM.syncAt ? '✅ اتزامنت الآن — ' : '') + v.novels + ' رواية و' + v.chapters + ' فصل مقفول جاهزين للمشتركين.' + (v.sealed ? ' (' + v.sealed + ' باسورد لسه مقفول بالـ PIN)' : '') + '</span>';
-    return payAdminCard() + '<div class="rp-card"><h3>🔑 باسوردات رواياتك للمشتركين</h3><p class="rp-sub">علشان حسابات Premium تفتح رواياتك المقفولة تلقائي، باسورداتها لازم تتبعت للسيرفر (بتتبعت لوحدها، وتقدر تعملها يدوي من هنا).</p>' + st +
+    return payAdminCard() + ttsAdminCard() + '<div class="rp-card"><h3>🔑 باسوردات رواياتك للمشتركين</h3><p class="rp-sub">علشان حسابات Premium تفتح رواياتك المقفولة تلقائي، باسورداتها لازم تتبعت للسيرفر (بتتبعت لوحدها، وتقدر تعملها يدوي من هنا).</p>' + st +
       '<div class="rp-err" id="rp-sync-out"></div><button type="button" class="rp-btn sm gold" data-act="syncv" style="margin-top:8px">' + ic('rotate') + ' مزامنة الآن</button></div>' +
       '<div class="rp-card"><h3>👑 الباقات وطرق الدفع</h3><p class="rp-sub">بتتحفظ فورًا ومش محتاجة تصدير الموقع. الفاضي من الباقات بيتشال.</p>' +
       (plans.concat([{}, {}]).slice(0, 5)).map(function (p, ix) { return '<div class="rp-item" style="margin-top:8px"><div class="rp-row" style="flex-wrap:nowrap"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="name" placeholder="الاسم (شهر)" value="' + esc(p.name || '') + '" maxlength="30"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="months" placeholder="شهور" inputmode="numeric" style="width:78px" value="' + esc(p.months || '') + '"></div><div class="rp-row" style="flex-wrap:nowrap;margin-top:6px"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="price" placeholder="السعر" inputmode="decimal" value="' + esc(p.price || '') + '"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="old" placeholder="قبل الخصم" inputmode="decimal" value="' + esc(p.old || '') + '"></div><input class="rp-in rp-pl" data-i="' + ix + '" data-k="badge" placeholder="شارة (مثال: الأوفر)" style="margin-top:6px" maxlength="24" value="' + esc(p.badge || '') + '"></div>'; }).join('') +
@@ -11412,7 +11494,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'eye') { var inp = $(b.getAttribute('data-t')); if (inp) { inp.type = inp.type === 'password' ? 'text' : 'password'; b.innerHTML = ic(inp.type === 'password' ? 'eye' : 'eye-slash'); } }
     else if (a === 'auth') doAuth();
     else if (a === 'logout') { dropTopics(); window.__rpFeed = []; try { window.__rpPaintBell && window.__rpPaintBell(); } catch (x) {} lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); S = fresh(); render(); flash('تم تسجيل الخروج'); }
-    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.err = ''; render(); if (S.tab === 'premium') { loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
+    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.err = ''; render(); if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
     else if (a === 'vis') { var hide = v === '1'; if (hide && !confirm('تخفي الرواية؟ مش هتظهر لأي حد في الموقع ولا التطبيق لحد ما تظهرها تاني.')) return; api('/api/my/novels/' + id + '/visibility', { method: 'PUT', body: { hidden: hide } }).then(function () { flash(hide ? 'الرواية اتخبّت عن الناس 🙈' : 'الرواية ظهرت للناس ✅'); refresh(); try { loadUserNovels(); } catch (x) {} }).catch(function (x) { flash(x.message); }); }
     else if (a === 'siteread') { close(); try { requestNovelAccess(id, 'details'); } catch (x) {} }
     else if (a === 'sitectl') { close(); try { openControlPanel('novels'); } catch (x) { try { openControlPanel(); } catch (y) {} } }
@@ -11459,6 +11541,18 @@ document.addEventListener('click', function (e) {
     else if (a === 'payok') { if (confirm('تفعّل الاشتراك للمستخدم ده؟')) api('/api/admin/payments/' + id + '/approve', { method: 'POST' }).then(function () { flash('تم التفعيل ✅'); loadPays(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'payno') { var rs = document.querySelector('.rp-pay-reason[data-id="' + id + '"]'); api('/api/admin/payments/' + id + '/reject', { method: 'POST', body: { reason: rs ? rs.value : '' } }).then(function () { flash('تم الرفض'); loadPays(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'wa') { openExt(waLink((PREM.info || {}).whatsapp || '01067567795', 'السلام عليكم، محتاج مساعدة في اشتراك Premium.\nحسابي على RadPad: ' + (me() || {}).email)); }
+    else if (a === 'ttsload') { TT.st = null; render(); loadTts(); }
+    else if (a === 'ttssync') ttsSync();
+    else if (a === 'ttsrun') { var so2 = $('rp-tt-sync'); if (so2) so2.textContent = 'جاري التحويل… (ممكن ياخد نص دقيقة)'; api('/api/admin/tts/run', { method: 'POST' }).then(function (d) { TT.st = d; TT.sync = d.step && d.step.idle ? ({ daily_limit: 'وصلت للحد اليومي ✋ هيكمّل بكرة.', paused: 'واقف مؤقتًا بسبب رفض جوجل.', empty: 'مفيش حاجة في الطابور.', not_configured: 'المفتاح أو R2 ناقص.' }[d.step.idle] || '') : 'اتحوّل ' + ((d.step || {}).made || 0) + ' جزء.'; render(); }).catch(function (x) { if (so2) so2.textContent = x.message; }); }
+    else if (a === 'ttsretry') api('/api/admin/tts/retry', { method: 'POST' }).then(function (d) { TT.st = d; flash('تمام'); render(); }).catch(function (x) { flash(x.message); });
+    else if (a === 'ttsfront') api('/api/admin/tts/front', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); });
+    else if (a === 'ttsdel') { if (confirm('تشيل الرواية دي من طابور الصوت وتمسح الصوت المتخزّن لها؟')) api('/api/admin/tts/remove', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'ttssave') {
+      var g = function (i) { var e = $(i); return e ? e.value.trim() : ''; };
+      api('/api/admin/tts', { method: 'PUT', body: { dailyMin: g('rp-tt-cap'), freeMin: g('rp-tt-free'), voice: g('rp-tt-v'), style: g('rp-tt-st'), model: g('rp-tt-mod'), concurrency: g('rp-tt-conc'), priceIn: g('rp-tt-pin'), priceOut: g('rp-tt-pout') } }).then(function (d) { TT.st = d; TT.msg = ''; render(); flash('اتحفظ ✅'); }).catch(function (x) { var o = $('rp-tt-out'); if (o) o.textContent = x.message; });
+    }
+    else if (a === 'ttsvoices') { api('/api/admin/tts/voices').then(function (d) { TT.voices = d.voices || []; TT.raw = d.raw || ''; render(); }).catch(function (x) { TT.voices = []; TT.raw = x.message; render(); }); }
+    else if (a === 'ttstest') ttsTest();
     else if (a === 'savepa') {
       var pls = {}; [].forEach.call(document.querySelectorAll('.rp-pl'), function (x) { var ix = x.getAttribute('data-i'); (pls[ix] = pls[ix] || {})[x.getAttribute('data-k')] = x.value.trim(); });
       var plans = Object.keys(pls).map(function (k, n) { var o = pls[k]; return o.name && +o.months > 0 ? { id: 'p' + (+k + 1), name: o.name, months: +o.months, price: o.price, old: o.old, badge: o.badge } : null; }).filter(Boolean);
@@ -12040,97 +12134,114 @@ document.addEventListener('click', function (e) {
 window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
 </script>
 <script id="nx-cloud-tts-module">
+/* RadPad: الصوت المصري (Gemini) لمشتركي Premium فقط — بيشغّل الفصول المجهّزة مسبقًا من السيرفر */
 (function () {
   'use strict';
-  var ENDPOINT = String(window.NX_CLOUD_TTS_URL || '').trim();
   function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-  var opt = { cloud: lsGet('tts_cloud', '1') !== '0', voice: lsGet('tts_cloud_voice', 'female') === 'male' ? 'male' : 'female' };
-  var fails = 0, sessionOff = false;
-  var audio = new Audio(); audio.preload = 'auto';
-  var cache = {};
-
-  function available() { return !!ENDPOINT; }
-  function enabled() { return available() && opt.cloud && !sessionOff; }
-
-  function build(c, baseRate) {
-    var SP = window.SpeechPrep, st = SP ? SP.styleFor(c.kind, c.text) : { rate: 1, pitch: 1 };
-    var text = SP ? SP.process(c.text, { cloud: true }) : c.text;
-    var rate = Math.max(0.5, Math.min(2, (baseRate || 1) * st.rate));
-    return { text: text, voice: opt.voice, rate: Math.round(rate * 100) / 100, pitch: Math.round(st.pitch * 100) / 100 };
+  var opt = { cloud: lsGet('tts_cloud', '1') !== '0' };
+  var stat = {}, sessionOff = false, audio = new Audio(), man = {}, blobs = {}, forced = null, lastUnavail = false;
+  audio.preload = 'auto';
+  function R() { return window.__rp || null; }
+  function base() { var r = R(); return r ? r.base() : ''; }
+  function isPrem() { var r = R(); try { return !!(r && r.isPrem()); } catch (e) { return false; } }
+  function available() { return !!base(); }
+  function allowed() { return isPrem(); }
+  function enabled() { return available() && allowed() && opt.cloud && !sessionOff; }
+  function toast(m) { try { if (typeof showToast === 'function') showToast(m); } catch (e) {} }
+  function hint(m) { var h = document.getElementById('tts-hint'); if (h) h.textContent = m; }
+  function upsell() {
+    var r = R(), logged = !!(r && r.token());
+    toast(logged ? 'الاستماع للروايات لمشتركي Premium 👑' : 'سجّل دخولك واشترك في Premium علشان تسمع الروايات بصوت مصري 🎧');
+    try { if (logged && window.__rpOpenPremium) { window.rpOpenAccount(); setTimeout(function () { try { window.__rpOpenPremium(); } catch (e) {} }, 150); } else if (window.rpOpenAccount) window.rpOpenAccount(); } catch (e) {}
   }
-  function load(c, baseRate) {
-    var p = build(c, baseRate), key = JSON.stringify(p);
-    if (cache[key]) return cache[key];
-    var req = fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) })
-      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.blob(); })
-      .then(function (b) { return URL.createObjectURL(b); });
-    req.catch(function () { delete cache[key]; });
-    cache[key] = req;
-    return req;
+  function curKey() { try { return String(currentNovelId) + '#' + currentChapterIndex; } catch (e) { return ''; } }
+  function auth() { return { Authorization: 'Bearer ' + R().token() }; }
+  function getMan(key) {
+    if (man[key]) return man[key];
+    var p = key.split('#'), idx = p.pop(), nid = p.join('#');
+    var pr = fetch(base() + '/api/tts/chapter?nid=' + encodeURIComponent(nid) + '&idx=' + encodeURIComponent(idx), { headers: auth() })
+      .then(function (r) { if (r.status === 403) { var e = new Error('prem'); e.status = 403; throw e; } if (!r.ok) throw new Error('http'); return r.json(); });
+    man[key] = pr; pr.catch(function () { delete man[key]; });
+    return pr;
   }
-  function prefetch(chunks, i, baseRate) {
-    var c = chunks[i]; if (c) load(c, baseRate).catch(function () {});
+  // true لو الفصل الحالي صوته مجهّز (أو لسه مش معروف)
+  function usable() { if (!enabled()) return false; var k = curKey(), x = stat[k]; if (x && x.st !== 'ready') { if (Date.now() - x.t > 45000) { delete stat[k]; delete man[k]; return true; } return false; } return true; }
+  function partBlob(id, p) {
+    var k = id + '/' + p; if (blobs[k]) return blobs[k];
+    var pr = fetch(base() + '/api/tts/part/' + id + '/' + p, { headers: auth() }).then(function (r) { if (!r.ok) throw new Error('part'); return r.blob(); }).then(function (b) { return URL.createObjectURL(b); });
+    blobs[k] = pr; pr.catch(function () { delete blobs[k]; });
+    var ks = Object.keys(blobs); if (ks.length > 4) { var old = ks[0]; blobs[old].then(function (u) { try { URL.revokeObjectURL(u); } catch (e) {} }).catch(function () {}); delete blobs[old]; }
+    return pr;
   }
-  function trim() {
-    var keys = Object.keys(cache);
-    if (keys.length > 8) keys.slice(0, keys.length - 8).forEach(function (k) {
-      cache[k].then(function (u) { try { URL.revokeObjectURL(u); } catch (e) {} }).catch(function () {});
-      delete cache[k];
+  function stop() { audio.onended = null; audio.onerror = null; audio.ontimeupdate = null; try { audio.pause(); } catch (e) {} }
+  // موضع الحرف في الفقرة → رقم الجملة (chunk) والعكس
+  function cum(chunks) { var a = [0], t = 0; for (var i = 0; i < chunks.length; i++) { t += chunks[i].text.length + 1; a.push(t); } return a; }
+  function chunkAt(c, pos) { var lo = 0, hi = c.length - 2; while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (c[mid] <= pos) lo = mid; else hi = mid - 1; } return lo; }
+  function speak(chunks, idx, baseRate, onEnd, onFail, cancelled, onTick) {
+    if (!chunks[idx]) return;
+    var key = curKey(), C = cum(chunks), CT = C[C.length - 1] || 1;
+    hint('🎧 جاري تحميل الصوت…');
+    getMan(key).then(function (m) {
+      if (cancelled()) return;
+      if (m.status !== 'ready') {
+        stat[key] = { st: m.status, t: Date.now() }; lastUnavail = true;
+        toast(m.status === 'pending' ? 'الصوت المصري للفصل ده لسه بيتجهّز — هنقرأ بصوت الجهاز دلوقتي' : 'الصوت المصري للفصل ده لسه ما اتضافش — هنقرأ بصوت الجهاز');
+        hint(m.status === 'pending' ? 'الصوت المصري للفصل ده بيتجهّز (' + (m.done || 0) + '/' + (m.n || '؟') + ')، لحد ما يخلص بنقرأ بصوت الجهاز.' : '');
+        onFail(); return;
+      }
+      stat[key] = { st: 'ready', t: Date.now() }; hint('');
+      var P = m.parts, T = m.total || 1, p, sf = 0;
+      if (forced !== null && forced.idx === idx && forced.key === key) { p = forced.p; sf = 0; }
+      else { var g = (C[idx] / CT) * T; p = 0; for (var i = 0; i < P.length; i++) { if (g >= P[i][0]) p = i; } var span = Math.max(1, P[p][1] - P[p][0]); sf = Math.max(0, Math.min(0.98, (g - P[p][0]) / span)); }
+      forced = null;
+      partBlob(m.id, p).then(function (src) {
+        if (cancelled()) return;
+        var lastI = idx;
+        audio.onended = function () {
+          audio.onended = null; audio.ontimeupdate = null;
+          if (p + 1 >= P.length) { onEnd(chunks.length); return; }
+          var nxt = chunkAt(C, (P[p + 1][0] / T) * CT);
+          if (nxt <= idx) nxt = Math.min(chunks.length, idx + 1);
+          forced = { key: key, idx: nxt, p: p + 1 }; onEnd(nxt);
+        };
+        audio.onerror = function () { audio.onended = null; audio.ontimeupdate = null; onFail(); };
+        audio.ontimeupdate = function () {
+          if (!audio.duration || cancelled()) return;
+          var gpos = P[p][0] + (audio.currentTime / audio.duration) * (P[p][1] - P[p][0]), i = chunkAt(C, (gpos / T) * CT);
+          if (i !== lastI && i >= idx) { lastI = i; if (onTick) onTick(i); }
+        };
+        audio.src = src;
+        var rate = Math.max(0.5, Math.min(2, baseRate || 1)); audio.playbackRate = rate; audio.defaultPlaybackRate = rate;
+        if (sf > 0.01) audio.onloadedmetadata = function () { audio.onloadedmetadata = null; try { audio.currentTime = sf * audio.duration; } catch (e) {} };
+        var pr = audio.play();
+        if (pr && pr.catch) pr.catch(function () { if (!cancelled()) { audio.onended = null; audio.onerror = null; onFail(); } });
+        if (p + 1 < P.length) partBlob(m.id, p + 1).catch(function () {});
+      }).catch(function () { if (!cancelled()) onFail(); });
+    }).catch(function (e) {
+      if (cancelled()) return;
+      if (e && e.status === 403) { sessionOff = true; upsell(); }
+      onFail();
     });
   }
-  function stop() {
-    audio.onended = null; audio.onerror = null;
-    try { audio.pause(); } catch (e) {}
-  }
-  function speak(chunks, idx, baseRate, onEnd, onFail, cancelled) {
-    var c = chunks[idx]; if (!c) return;
-    prefetch(chunks, idx + 1, baseRate); prefetch(chunks, idx + 2, baseRate);
-    load(c, baseRate).then(function (src) {
-      if (cancelled()) return;
-      audio.onended = function () { audio.onended = null; audio.onerror = null; fails = 0; trim(); onEnd(); };
-      audio.onerror = function () { audio.onended = null; audio.onerror = null; onFail(); };
-      audio.src = src;
-      var pr = audio.play();
-      if (pr && pr.catch) pr.catch(function () { if (!cancelled()) { audio.onended = null; audio.onerror = null; onFail(); } });
-    }).catch(function () { if (!cancelled()) onFail(); });
-  }
-  function noteFail() {
-    fails++;
-    if (fails >= 2 && !sessionOff) {
-      sessionOff = true;
-      try { if (typeof showToast === 'function') showToast('سيرفر الصوت المصري مش متاح دلوقتي — رجعنا لصوت الجهاز'); } catch (e) {}
-    }
-  }
+  function noteFail() { if (lastUnavail) { lastUnavail = false; return; } }
+  try { var oc = window.speechSynthesis.cancel.bind(window.speechSynthesis); window.speechSynthesis.cancel = function () { stop(); return oc(); }; } catch (e) {}
 
-  // أي إيقاف للقراءة (إيقاف مؤقت / إيقاف / تغيير الفصل) لازم يوقّف الصوت السحابي كمان
-  try {
-    var origCancel = window.speechSynthesis.cancel.bind(window.speechSynthesis);
-    window.speechSynthesis.cancel = function () { stop(); return origCancel(); };
-  } catch (e) {}
-
-  /* ---------- إعدادات داخل شريط الاستماع ---------- */
   var BOX = 'display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.12);padding:4px 10px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);cursor:pointer;';
   function ensureUi() {
-    if (!available()) return;
-    var row = document.getElementById('tts-settings');
-    if (!row || document.getElementById('tts-cloud-toggle')) return;
-    var hint = document.getElementById('tts-hint');
+    var row = document.getElementById('tts-settings'), has = document.getElementById('tts-cloud-toggle');
+    if (!row) return;
+    if (!(available() && allowed())) { if (has) has.parentNode.remove(); return; }
+    if (has) return;
+    var h = document.getElementById('tts-hint');
     var lab = document.createElement('label'); lab.style.cssText = BOX;
     var cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = 'tts-cloud-toggle'; cb.checked = opt.cloud;
-    cb.addEventListener('change', function () { opt.cloud = cb.checked; lsSet('tts_cloud', cb.checked ? '1' : '0'); if (cb.checked) { sessionOff = false; fails = 0; } });
-    var sp = document.createElement('span'); sp.textContent = '🎧 صوت Gemini الطبيعي';
-    lab.appendChild(cb); lab.appendChild(sp);
-    var sel = document.createElement('select'); sel.id = 'tts-cloud-voice';
-    sel.style.cssText = 'background:rgba(16,185,129,0.12);padding:4px 8px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);font-size:12px;';
-    sel.innerHTML = '<option value="female">صوت أنثوي</option><option value="male">صوت ذكوري</option>';
-    sel.value = opt.voice;
-    sel.addEventListener('change', function () { opt.voice = sel.value; lsSet('tts_cloud_voice', sel.value); });
-    if (hint && hint.parentNode === row) { row.insertBefore(lab, hint); row.insertBefore(sel, hint); } else { row.appendChild(lab); row.appendChild(sel); }
+    cb.addEventListener('change', function () { opt.cloud = cb.checked; lsSet('tts_cloud', cb.checked ? '1' : '0'); if (cb.checked) sessionOff = false; });
+    var sp = document.createElement('span'); sp.textContent = '🎧 الصوت المصري (Premium)'; lab.appendChild(cb); lab.appendChild(sp);
+    if (h && h.parentNode === row) row.insertBefore(lab, h); else row.appendChild(lab);
   }
   setInterval(ensureUi, 800);
-
-  window.NXCloudTTS = { available: available, enabled: enabled, speak: speak, stop: stop, noteFail: noteFail, _opt: opt };
+  window.NXCloudTTS = { available: available, enabled: enabled, usable: usable, allowed: allowed, upsell: upsell, speak: speak, stop: stop, noteFail: noteFail, resetSession: function () { sessionOff = false; lastUnavail = false; forced = null; }, _opt: opt };
 })();
 </script>
 
