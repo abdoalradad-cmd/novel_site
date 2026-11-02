@@ -212,7 +212,7 @@ html.dark .rp-au-n{color:#f1f5f9}
 .rp-soc.fb{background:#2563eb}.rp-soc.wp{background:#ff500a}.rp-soc.yt{background:#dc2626}
 .rp-pf-bio{margin:10px auto 0;max-width:520px;font-size:.88rem;line-height:2;color:#475569}
 html.dark .rp-pf-bio{color:#94a3b8}
-.rp-pf-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.rp-pf-st{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:16px 0}
 .rp-pf-st div{background:#f3f6f4;border-radius:16px;padding:12px 4px}
 html.dark .rp-pf-st div{background:#0a1322}
 .rp-pf-st b{display:block;font:900 1.3rem Cairo,sans-serif;color:var(--brand-primary,#065f46)}
@@ -382,6 +382,30 @@ html.dark .rp-plan{background:#0b1422;border-color:#1c2b44}html.dark .rp-plan.on
 html.dark .rp-plan-p b{color:#6ee7b7}html.dark .rp-seg{background:#0b1422}html.dark .rp-seg button{color:#94a3b8}html.dark .rp-seg button.on{background:#13243a;color:#6ee7b7}
 html.dark .rp-paybox{background:rgba(16,185,129,.08);border-color:rgba(52,211,153,.4)}html.dark .rp-paynum{color:#6ee7b7}html.dark .rp-paysum{background:rgba(16,185,129,.18);color:#6ee7b7}
 html.dark .rp-upz{background:rgba(16,185,129,.06);border-color:rgba(52,211,153,.35);color:#6ee7b7}html.dark .rp-steps{color:#94a3b8}html.dark .rp-proofl img{background:#0b1422;border-color:#1c2b44}
+.rp-win{position:relative;overflow:hidden;border-radius:26px;padding:20px 14px 22px;text-align:center;color:#3b2a00;background:linear-gradient(135deg,#fef3c7,#fcd34d 45%,#f59e0b);box-shadow:0 14px 34px rgba(245,158,11,.38);margin-bottom:14px;isolation:isolate}
+.rp-win:before{content:"";position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent 0 60%,rgba(255,255,255,.65) 75%,transparent 90%);animation:rpspin 7s linear infinite;z-index:-1}
+.rp-win .lbl{display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(6,95,70,.92);color:#fde68a;font:900 .8rem Cairo,sans-serif}
+.rp-win .trophy{font-size:2.4rem;line-height:1.1;margin-top:6px;animation:rpbounce 1.7s ease-in-out infinite;display:inline-block}
+.rp-win .av{width:96px;height:96px;border-radius:50%;margin:8px auto 4px;border:4px solid #fff;overflow:hidden;background:linear-gradient(135deg,#0f6a52,#06241c);color:#fff;display:flex;align-items:center;justify-content:center;font:900 2.2rem Cairo,sans-serif;animation:rpglow 2.2s ease-in-out infinite}
+.rp-win .av img{width:100%;height:100%;object-fit:cover}
+.rp-win h2{font:900 1.4rem Cairo,sans-serif;margin:2px 0}
+.rp-win .sub{font-weight:800;font-size:.85rem;opacity:.85}
+.rp-win .prize{display:inline-block;margin-top:8px;padding:7px 22px;border-radius:999px;background:linear-gradient(135deg,#065f46,#022c22);color:#fde68a;font:900 1.2rem Cairo,sans-serif;animation:rppulse 1.8s ease-in-out infinite;box-shadow:0 8px 18px rgba(6,95,70,.4)}
+.rp-win .sp{position:absolute;top:100%;font-size:1.05rem;opacity:0;animation:rpfloat 4s ease-in infinite}
+@keyframes rpspin{to{transform:rotate(360deg)}}
+@keyframes rpbounce{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-8px) rotate(6deg)}}
+@keyframes rpglow{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.7),0 8px 20px rgba(0,0,0,.25)}50%{box-shadow:0 0 0 12px rgba(255,255,255,0),0 8px 26px rgba(0,0,0,.3)}}
+@keyframes rppulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes rpfloat{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(-260px) scale(1.15) rotate(25deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rp-win:before,.rp-win .trophy,.rp-win .av,.rp-win .prize,.rp-win .sp{animation:none}}
+.rp-ctq{background:#f3f6f4;border-radius:18px;padding:12px;margin-top:10px}.rp-ctq b{display:block;margin-bottom:6px;line-height:1.7}
+.rp-ctq textarea{min-height:64px;resize:vertical}
+.rp-chip{display:inline-block;padding:4px 12px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:900;font-size:.82rem;margin:2px}
+.rp-lb{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:#f3f6f4;margin-top:6px}.rp-lb.me{outline:2px solid #10b981}
+.rp-lb .rk{width:26px;text-align:center;font:900 1rem Cairo,sans-serif;color:#b45309}.rp-lb .a{width:38px;height:38px;border-radius:50%;overflow:hidden;background:#065f46;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none}.rp-lb .a img{width:100%;height:100%;object-fit:cover}.rp-lb .nm{flex:1;min-width:0;font-weight:800}.rp-lb .pt{font:900 .95rem Cairo,sans-serif;color:#065f46}
+.rp-subtabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.rp-subtabs button{border:0;border-radius:999px;padding:8px 14px;font:800 .82rem Cairo,sans-serif;background:#e8efeb;color:#334155;white-space:nowrap}.rp-subtabs button.on{background:linear-gradient(135deg,#0f6a52,#06241c);color:#fff}
+.rp-ans{border:1px solid #e2e8f0;border-radius:16px;padding:10px;margin-top:8px}.rp-ans.win{border-color:#f59e0b;background:#fffbeb}.rp-ans .q{font-size:.8rem;color:#64748b;margin-top:6px}.rp-ans .t{white-space:pre-wrap;line-height:1.7}
+html.dark .rp-ctq,html.dark .rp-lb{background:#0b1422}html.dark .rp-subtabs button{background:#13243a;color:#cbd5e1}html.dark .rp-ans{border-color:#1c2b44}html.dark .rp-ans.win{background:rgba(245,158,11,.12)}html.dark .rp-lb .pt{color:#6ee7b7}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <symbol id="rp-logo-sym" viewBox="0 0 100 100">
@@ -11146,10 +11170,11 @@ document.addEventListener('click', function (e) {
     var chs = S.mine.reduce(function (a, n) { return a + (n.chaptersCount || 0); }, 0), liveN = S.mine.filter(function (n) { return n.isLive; }).length;
     var hero = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b style="font-size:1.15rem;display:block">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span> <button type="button" class="rp-pill" data-act="viewprofile" style="margin-top:6px;border:0;cursor:pointer">' + ic('user') + ' صفحتي</button></div></div>' +
       '<div class="rp-stats"><div class="rp-stat"><b>' + (S.mine.length + SM.length) + '</b><span>رواياتي</span></div><div class="rp-stat"><b>' + (liveN + SM.length) + '</b><span>منشورة</span></div><div class="rp-stat"><b>' + (chs + smCh) + '</b><span>فصل</span></div><div class="rp-stat"><b>' + S.mine.filter(function (n) { return n.status === 'pending'; }).length + '</b><span>مراجعة</span></div></div></div>';
-    hero += premCard() + libraryCard() + earnCard();
+    if (S.myPts == null && !S._pt) { S._pt = 1; api('/api/me/points').then(function (d) { S.myPts = d.points || 0; if (S.view === 'home' && S.tab === 'about') render(); }).catch(function () {}); }
+    hero += premCard() + libraryCard() + earnCard() + ptsMini();
     var html = '';
-    var tabs = [['about', 'user', 'عني'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات']];
-    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', S.pending.length], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', (S.orders || []).length], ['premium', 'crown', 'Premium', (S.payPending || []).length], ['backup', 'database', 'النسخ الاحتياطي']);
+    var tabs = [['about', 'user', 'عني'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز']];
+    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', S.pending.length], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', (S.orders || []).length], ['premium', 'crown', 'Premium', (S.payPending || []).length], ['actest', 'gavel', 'إدارة المسابقات'], ['backup', 'database', 'النسخ الاحتياطي']);
     html += '<div class="rp-tabs">' + tabs.map(function (t) { return '<button type="button" class="rp-tab ' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-t="' + t[0] + '">' + ic(t[1]) + t[2] + (t[3] ? ' <span class="n">' + t[3] + '</span>' : '') + '</button>'; }).join('') + '</div>';
     if (S.err) html += '<div class="rp-card"><div class="rp-err">' + esc(S.err) + '</div></div>';
     html += (S.tab === 'about' ? hero : tabBody());
@@ -11159,6 +11184,8 @@ document.addEventListener('click', function (e) {
   function tabBody() {
     var t = S.tab;
     if (t === 'settings') return settingsTab();
+    if (t === 'contest') return contestTab();
+    if (t === 'points') return pointsTab();
     if (admin_only(t) && !isAdmin()) return '';
     if (t === 'pending') return '<div class="rp-card"><h3>' + ic('inbox') + ' طلبات النشر</h3><p class="rp-sub">الروايات اللي مستنية موافقتك.</p>' + (S.pending.length ? S.pending.map(function (n) {
       return '<div class="rp-item"><div class="rp-nv">' + coverBox(n) + '<div class="rp-nv-main"><b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:2px 0">بقلم: ' + esc(n.owner) + ' — ' + esc(n.ownerEmail) + '</div><div class="rp-meta">' + (n.lockAll ? '<span class="rp-pill lock">' + ic('lock') + ' مقفولة</span>' : '') + (n.promoUrl ? '<span class="rp-pill lock">' + ic('film') + ' برومو</span>' : '') + '</div><button type="button" class="rp-btn sm" data-act="review" data-id="' + n.id + '">' + ic('magnifying-glass') + ' مراجعة</button></div></div></div>';
@@ -11168,12 +11195,13 @@ document.addEventListener('click', function (e) {
     }).join('') : '<div class="rp-empty">' + ic('book') + 'لا يوجد روايات منشورة من المستخدمين</div>') + '<div class="rp-err" id="rp-imp-msg"></div></div>';
     if (t === 'users') return usersTab();
     if (t === 'premium') return premAdminTab();
+    if (t === 'actest') return contestAdminTab();
     if (t === 'sales') return salesTab();
     if (t === 'backup') return '<div class="rp-card"><h3>' + ic('database') + ' النسخ الاحتياطي</h3><p class="rp-sub">روايات الناس وحساباتهم محفوظة على Cloudflare. حمّل نسخة احتياطية كل فترة واحتفظ بيها في مكان آمن (فيها بيانات الحسابات، فما تشاركهاش مع حد) وتقدر ترجّعها لو حصلت مشكلة.</p><div class="rp-row"><button type="button" class="rp-btn" data-act="backup">' + ic('download') + ' تحميل نسخة</button><button type="button" class="rp-btn sec" data-act="restore">' + ic('upload') + ' استعادة من ملف</button></div><input id="rp-restore-file" type="file" accept=".json,application/json" style="display:none"><div class="rp-err" id="rp-bk-msg" style="color:' + (S.bkColor || '#047857') + '">' + esc(S.bkMsg || '') + '</div></div>';
     return '<div class="rp-card"><h3>' + ic('feather-pointed') + ' انشر روايتك</h3><p class="rp-sub">اكتب روايتك وفصولها، اقفلها بباسورد لو عايز، حط برومو، وابعتها للمراجعة. بعد ما الأدمن يوافق هتظهر للناس في الموقع والتطبيق.</p><button type="button" class="rp-btn block" data-act="new">' + ic('plus') + ' رواية جديدة</button></div>' +
       siteCard() + (S.mine.length ? S.mine.map(novelRow).join('') : siteMine().length ? '' : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
   }
-  function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium'; }
+  function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium' || t === 'actest'; }
   function settingsTab() {
     var u = me();
     var cld = cldReady();
@@ -11568,6 +11596,75 @@ document.addEventListener('click', function (e) {
     }).catch(function (x) { set(x.message); });
   }
 
+  /* ---------- مسابقات بفلوس + نقاط الفوز ---------- */
+  var CT = { d: null, draft: [], busy: false, msg: '' }, PT = { d: null }, CA = { d: null, sub: 'q', week: '', msg: '', pts: null };
+  function nfmt(n) { return (Math.round((+n || 0) * 10) / 10).toLocaleString('en'); }
+  function leftTxt(ms) { var m = Math.max(0, ms - Date.now()), d = Math.floor(m / 86400000), h = Math.floor(m % 86400000 / 3600000); return d ? d + ' يوم و' + h + ' ساعة' : h + ' ساعة'; }
+  function loadContest() { api('/api/contest').then(function (d) { CT.d = d; if (S.view === 'home' && S.tab === 'contest') render(); }).catch(function (x) { CT.d = { error: x.message }; if (S.view === 'home' && S.tab === 'contest') render(); }); }
+  function loadPoints() { api('/api/points').then(function (d) { PT.d = d; if (S.view === 'home' && S.tab === 'points') render(); }).catch(function (x) { PT.d = { error: x.message }; if (S.view === 'home' && S.tab === 'points') render(); }); }
+  function avBox(name, av) { return av ? '<img src="' + esc(av) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : esc((name || '?').charAt(0)); }
+  function winBanner(w, label, sub) {
+    var sp = ['✨', '⭐', '🎉', '💰', '✨', '🌟', '🎊', '💚'].map(function (e, i) { return '<span class="sp" style="left:' + (6 + i * 12) + '%;animation-delay:' + (i * .45).toFixed(2) + 's">' + e + '</span>'; }).join('');
+    return '<div class="rp-win">' + sp + '<div class="lbl">' + esc(label) + '</div><div><span class="trophy">🏆</span></div><div class="av">' + avBox(w.name, w.avatar) + '</div><h2>' + esc(w.name) + '</h2>' + (sub ? '<div class="sub">' + esc(sub) + '</div>' : '') +
+      '<div class="sub">فاز بجايزة</div><div class="prize">' + nfmt(w.prize) + ' جنيه</div></div>';
+  }
+  function histList(h, ptsMode) { return (h || []).length ? '<h3 style="margin-top:14px">🏅 فائزين سابقين</h3>' + h.map(function (w) { return '<div class="rp-lb"><div class="a">' + avBox(w.name, w.avatar) + '</div><div class="nm">' + esc(w.name) + '<div class="rp-sub" style="margin:0">أسبوع ' + esc(w.week) + '</div></div><div class="pt">' + nfmt(w.prize) + ' ج</div></div>'; }).join('') : ''; }
+  function contestTab() {
+    var d = CT.d; if (!d) return '<div class="rp-card"><p class="rp-sub">جاري التحميل…</p></div>';
+    if (d.error) return '<div class="rp-card"><div class="rp-err">' + esc(d.error) + '</div></div>';
+    var h = d.winner ? winBanner(d.winner, d.thisWeekWinner ? '🎉 فائز مسابقة الأسبوع ده' : 'آخر فائز بالمسابقة', d.thisWeekWinner ? '' : 'أسبوع ' + d.winner.week) : '';
+    h += '<div class="rp-card"><h3>' + ic('trophy') + ' مسابقات بفلوس</h3><p class="rp-sub">كل أسبوع 5 أسئلة جديدة. جاوب عليهم وابعت إجابتك، والإدارة بتختار إجابة فايزة وبتكسب جايزة فلوس.</p>' +
+      '<div><span class="rp-chip">💰 الجايزة: ' + (d.prize ? nfmt(d.prize) + ' جنيه' : 'هتتحدد قريب') + '</span><span class="rp-chip">⏳ باقي ' + leftTxt(d.endsAt) + '</span></div>';
+    if (!d.questions.length) h += '<div class="rp-empty">' + ic('hourglass-half') + 'أسئلة الأسبوع هتنزل قريب، استنانا!</div>';
+    else {
+      h += d.questions.map(function (q, i) {
+        var a = d.answered ? ((d.mine && d.mine.answers || [])[i] || '') : (CT.draft[i] || '');
+        return '<div class="rp-ctq"><b>' + (i + 1) + '. ' + esc(q) + '</b>' + (d.answered ? '<div class="rp-ans t" style="background:#fff">' + esc(a) + '</div>' : '<textarea id="rp-ct-a' + i + '" class="rp-in" rows="2" maxlength="700" placeholder="اكتب إجابتك هنا…">' + esc(a) + '</textarea>') + '</div>';
+      }).join('');
+      if (d.answered) h += '<div class="rp-ok" style="font-weight:800;margin-top:10px">✅ إجابتك اتبعتت. استنى إعلان الفايز.</div>';
+      else if (d.closed) h += '<div class="rp-err" style="margin-top:10px">المسابقة اتقفلت واتختار الفايز.</div>';
+      else h += '<div class="rp-err" id="rp-ct-msg">' + esc(CT.msg) + '</div><button type="button" class="rp-btn block gold" data-act="ctsend"' + (CT.busy ? ' disabled' : '') + '>' + ic('paper-plane') + ' إرسال الإجابة</button><div class="rp-sub">تقدر تبعت إجابة واحدة بس في الأسبوع، فراجعها كويس قبل الإرسال.</div>';
+    }
+    return h + histList(d.history) + '</div>';
+  }
+  function pointsTab() {
+    var d = PT.d; if (!d) return '<div class="rp-card"><p class="rp-sub">جاري التحميل…</p></div>';
+    if (d.error) return '<div class="rp-card"><div class="rp-err">' + esc(d.error) + '</div></div>';
+    var h = d.latest ? winBanner(d.latest, d.thisWeek ? '🎉 كاتب الأسبوع ده (قرعة النقاط)' : 'آخر فايز بقرعة النقاط', (d.thisWeek ? '' : 'أسبوع ' + d.latest.week + ' — ') + (d.latest.points ? nfmt(d.latest.points) + ' نقطة' : '')) : '';
+    var myId = (me() || {}).id;
+    h += '<div class="rp-card"><h3>' + ic('star') + ' نقاط الفوز</h3><p class="rp-sub">كل تصويت من قارئ على فصل من رواياتك بيزوّد نقاطك 0.1. وكل أسبوع بتتسحب قرعة تلقائية بين أعلى 10 كتّاب نقاط، وواحد منهم بيكسب الجايزة.</p>' +
+      '<div><span class="rp-chip">💰 جايزة الأسبوع: ' + (d.prize ? nfmt(d.prize) + ' جنيه' : 'هتتحدد قريب') + '</span><span class="rp-chip">⏳ القرعة بعد ' + leftTxt(d.endsAt) + '</span></div>' +
+      (d.me ? '<div class="rp-item" style="margin-top:10px"><b>⭐ نقاطك: ' + nfmt(d.me.points) + '</b><div class="rp-sub" style="margin:2px 0 0">زوّد نقاطك بنشر فصول حلوة تخلي القرّاء يصوتوا عليها.</div></div>' : '') +
+      '<h3 style="margin-top:14px">🔟 أعلى 10 كتّاب نقاط (مرشحين للقرعة)</h3>' + (d.top.length ? d.top.map(function (u, i) { return '<div class="rp-lb' + (u.id === myId ? ' me' : '') + '"><div class="rk">' + (i + 1) + '</div><div class="a">' + avBox(u.name, u.avatar) + '</div><div class="nm">' + esc(u.name) + '</div><div class="pt">' + nfmt(u.points) + ' ⭐</div></div>'; }).join('') : '<div class="rp-empty">' + ic('star') + 'لسه مفيش نقاط. أول تصويت على فصل هيبدأ الترتيب.</div>') + histList(d.history, 1) + '</div>';
+    return h;
+  }
+  /* لوحة الأدمن: المسابقة بتبويباتها */
+  function loadCA(week) { api('/api/admin/contest' + (week ? '?week=' + encodeURIComponent(week) : '')).then(function (d) { CA.d = d; CA.week = d.week; if (S.view === 'home' && S.tab === 'actest') render(); }).catch(function (x) { CA.msg = x.message; if (S.view === 'home' && S.tab === 'actest') render(); }); }
+  function loadCP() { api('/api/admin/points').then(function (d) { CA.pts = d; if (S.view === 'home' && S.tab === 'actest') render(); }).catch(function () {}); }
+  function contestAdminTab() {
+    var d = CA.d, sub = CA.sub, h = '<div class="rp-card"><h3>' + ic('trophy') + ' إدارة المسابقات</h3><div class="rp-subtabs">' +
+      [['q', 'الأسئلة'], ['a', 'الإجابات' + (d ? ' (' + d.count + ')' : '')], ['p', 'نقاط الفوز'], ['w', 'الفائزون']].map(function (t) { return '<button type="button" data-act="casub" data-s="' + t[0] + '" class="' + (sub === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div class="rp-err" id="rp-ca-msg">' + esc(CA.msg) + '</div>';
+    if (sub === 'p') { var p = CA.pts; if (!p) return h + '<p class="rp-sub">جاري التحميل…</p></div>';
+      return h + '<label class="rp-lbl">جايزة قرعة نقاط الفوز (جنيه)</label><input id="rp-pt-prize" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(p.prize || '') + '" placeholder="مثال: 300"><div class="rp-sub">القرعة بتتعمل لوحدها أول كل أسبوع (بعد أول أسبوع من التفعيل) لو الجايزة أكبر من صفر. تقدر كمان تسحب دلوقتي.</div>' +
+        '<div class="rp-row" style="margin-top:8px"><button type="button" class="rp-btn sm" data-act="ptsave">' + ic('floppy-disk') + ' حفظ الجايزة</button><button type="button" class="rp-btn sm gold" data-act="ptdraw">' + ic('dice') + ' اسحب القرعة دلوقتي</button></div>' +
+        '<h3 style="margin-top:14px">أعلى 10 نقاط</h3>' + (p.top.length ? p.top.map(function (u, i) { return '<div class="rp-lb"><div class="rk">' + (i + 1) + '</div><div class="a">' + avBox(u.name, u.avatar) + '</div><div class="nm">' + esc(u.name) + '<div class="rp-sub" style="margin:0" dir="ltr">' + esc(u.email) + '</div></div><div class="pt">' + nfmt(u.points) + ' ⭐</div></div>'; }).join('') : '<div class="rp-empty">مفيش نقاط لسه</div>') +
+        '<h3 style="margin-top:14px">آخر قرعات</h3>' + (p.draws.length ? p.draws.map(function (w) { return '<div class="rp-item">أسبوع ' + esc(w.week) + ': ' + (w.user_id ? '<b>' + esc(w.name) + '</b> — ' + nfmt(w.points) + ' نقطة — جايزة ' + nfmt(w.prize) + ' ج' : 'مفيش مرشحين') + '</div>'; }).join('') : '<div class="rp-sub">لسه مفيش قرعات.</div>') + '</div>'; }
+    if (!d) return h + '<p class="rp-sub">جاري التحميل…</p></div>';
+    var wk = '<label class="rp-lbl">الأسبوع</label><select id="rp-ca-week" class="rp-in" data-act="caweek">' + (function () { var l = (d.weeks || []).map(function (w) { return w.week; }); if (l.indexOf(d.current) < 0) l.unshift(d.current); if (l.indexOf(d.week) < 0) l.push(d.week); return l.map(function (w) { return '<option value="' + w + '"' + (w === d.week ? ' selected' : '') + '>' + w + (w === d.current ? ' (الأسبوع ده)' : '') + '</option>'; }).join(''); })() + '</select>';
+    if (sub === 'q') { var qs = d.questions || [], inps = ''; for (var i = 0; i < 5; i++) inps += '<label class="rp-lbl">السؤال ' + (i + 1) + '</label><textarea id="rp-cq' + i + '" class="rp-in" rows="2" maxlength="400">' + esc(qs[i] || '') + '</textarea>';
+      return h + wk + inps + '<label class="rp-lbl">جايزة المسابقة (جنيه)</label><input id="rp-cprize" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(d.prize || '') + '" placeholder="مثال: 500"><div class="rp-row" style="margin-top:8px"><button type="button" class="rp-btn sm" data-act="cqsave">' + ic('floppy-disk') + ' حفظ الأسئلة والجايزة</button></div></div>'; }
+    if (sub === 'a') return h + wk + '<div class="rp-sub" style="margin-top:6px">عدد الإجابات: <b>' + d.count + '</b>' + (d.winnerId ? ' — تم اختيار فائز ✅' : '') + '</div>' + (d.answers.length ? d.answers.map(function (a) {
+      var win = d.winnerId === a.userId; return '<div class="rp-ans' + (win ? ' win' : '') + '"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><b>' + esc(a.name) + (win ? ' 🏆' : '') + '</b><div class="rp-sub" style="margin:0" dir="ltr">' + esc(a.email) + '</div></div><span class="rp-sub" style="margin:0">' + esc(new Date(a.ts).toLocaleString('ar-EG')) + '</span></div>' +
+        (d.questions || []).map(function (q, i) { return '<div class="q">' + (i + 1) + '. ' + esc(q) + '</div><div class="t">' + esc((a.answers || [])[i] || '') + '</div>'; }).join('') +
+        '<div class="rp-row" style="margin-top:8px">' + (win ? '<button type="button" class="rp-btn sm red" data-act="caunwin">إلغاء الفوز</button>' : '<button type="button" class="rp-btn sm gold" data-act="cawin" data-id="' + a.id + '">' + ic('trophy') + ' اختيار كفائز</button>') + '</div></div>';
+    }).join('') : '<div class="rp-empty">' + ic('inbox') + 'مفيش إجابات لسه</div>') + '</div>';
+    return h + (d.weeks || []).map(function (w) { return '<div class="rp-item">أسبوع <b>' + esc(w.week) + '</b> — ' + w.n + ' إجابة — جايزة ' + nfmt(w.prize) + ' ج — ' + (w.winner_id ? 'الفائز: <b>' + esc(w.wname) + '</b> 🏆' : 'لسه ما اتحددش فايز') + '</div>'; }).join('') + ((d.weeks || []).length ? '' : '<div class="rp-sub">لسه مفيش مسابقات.</div>') + '</div>';
+  }
+  function ptsMini() {
+    if (S.myPts == null) return '';
+    return '<div class="rp-card"><h3>' + ic('star') + ' نقاطي: ' + nfmt(S.myPts) + '</h3><p class="rp-sub">كل تصويت على فصل من رواياتك = 0.1 نقطة، وكل أسبوع قرعة بين أعلى 10 كتّاب.</p><button type="button" class="rp-btn sm gold" data-act="tab" data-t="points">' + ic('trophy') + ' نقاط الفوز</button></div>';
+  }
+
   /* ---------- المبيعات (أدمن) ---------- */
   function loadSales() {
     api('/api/admin/orders').then(function (d) { S.orders = d.orders || []; if (S.view === 'home' && (S.tab === 'sales' || true)) render(); }).catch(function () {});
@@ -11651,7 +11748,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'eye') { var inp = $(b.getAttribute('data-t')); if (inp) { inp.type = inp.type === 'password' ? 'text' : 'password'; b.innerHTML = ic(inp.type === 'password' ? 'eye' : 'eye-slash'); } }
     else if (a === 'auth') doAuth();
     else if (a === 'logout') { dropTopics(); window.__rpFeed = []; try { window.__rpPaintBell && window.__rpPaintBell(); } catch (x) {} lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); S = fresh(); render(); flash('تم تسجيل الخروج'); }
-    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.err = ''; render(); if (S.tab === 'sales') loadSales(); if (S.tab === 'about') { loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); loadEarn(); } if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
+    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.err = ''; render(); if (S.tab === 'sales') loadSales(); if (S.tab === 'contest') loadContest(); if (S.tab === 'points') loadPoints(); if (S.tab === 'actest') { loadCA(CA.week); loadCP(); } if (S.tab === 'about') { loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); loadEarn(); } if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
     else if (a === 'vis') { var hide = v === '1'; if (hide && !confirm('تخفي الرواية؟ مش هتظهر لأي حد في الموقع ولا التطبيق لحد ما تظهرها تاني.')) return; api('/api/my/novels/' + id + '/visibility', { method: 'PUT', body: { hidden: hide } }).then(function () { flash(hide ? 'الرواية اتخبّت عن الناس 🙈' : 'الرواية ظهرت للناس ✅'); refresh(); try { loadUserNovels(); } catch (x) {} }).catch(function (x) { flash(x.message); }); }
     else if (a === 'siteread') { close(); try { requestNovelAccess(id, 'details'); } catch (x) {} }
     else if (a === 'sitectl') { close(); try { openControlPanel('novels'); } catch (x) { try { openControlPanel(); } catch (y) {} } }
@@ -11728,6 +11825,21 @@ document.addEventListener('click', function (e) {
     }
     else if (a === 'ttsvoices') { api('/api/admin/tts/voices?prov=' + (b.getAttribute('data-p') || 'gemini')).then(function (d) { TT.voices = d.voices || []; TT.raw = d.raw || ''; render(); }).catch(function (x) { TT.voices = []; TT.raw = x.message; render(); }); }
     else if (a === 'ttstest') ttsTest(b.getAttribute('data-p') || 'gemini');
+    else if (a === 'ctsend') {
+      var ans = [], qn = (CT.d && CT.d.questions || []).length; for (var qi = 0; qi < qn; qi++) { var te = $('rp-ct-a' + qi); ans.push(te ? te.value.trim() : (CT.draft[qi] || '')); CT.draft[qi] = ans[qi]; }
+      if (ans.some(function (x) { return !x; })) { CT.msg = 'جاوب على كل الأسئلة الأول'; var m0 = $('rp-ct-msg'); if (m0) m0.textContent = CT.msg; return; }
+      CT.busy = true; CT.msg = ''; render();
+      api('/api/contest/answer', { method: 'POST', body: { answers: ans } }).then(function () { CT.busy = false; CT.draft = []; flash('اتبعتت إجابتك ✅ بالتوفيق'); loadContest(); }).catch(function (x) { CT.busy = false; CT.msg = x.message; render(); });
+    }
+    else if (a === 'casub') { CA.sub = b.getAttribute('data-s'); CA.msg = ''; render(); if (CA.sub === 'p') loadCP(); else loadCA(CA.week); }
+    else if (a === 'cqsave') {
+      var g2 = function (i) { var e = $(i); return e ? e.value.trim() : ''; }, qs2 = []; for (var k = 0; k < 5; k++) qs2.push(g2('rp-cq' + k));
+      api('/api/admin/contest', { method: 'PUT', body: { week: CA.week, questions: qs2.filter(Boolean), prize: g2('rp-cprize') } }).then(function () { flash('اتحفظت ✅'); loadCA(CA.week); }).catch(function (x) { CA.msg = x.message; render(); });
+    }
+    else if (a === 'cawin') { if (confirm('تختار الإجابة دي كفايزة؟ هيوصل لصاحبها إشعار وهيظهر اسمه وجايزته للكل.')) api('/api/admin/contest/winner', { method: 'POST', body: { answerId: +b.getAttribute('data-id') } }).then(function () { flash('تم اختيار الفائز 🏆'); loadCA(CA.week); }).catch(function (x) { CA.msg = x.message; render(); }); }
+    else if (a === 'caunwin') { if (confirm('تلغي فوز الإجابة دي؟')) api('/api/admin/contest/unwin', { method: 'POST', body: { week: CA.week } }).then(function () { loadCA(CA.week); }).catch(function (x) { CA.msg = x.message; render(); }); }
+    else if (a === 'ptsave') { var pe = $('rp-pt-prize'); api('/api/admin/points', { method: 'PUT', body: { prize: pe ? pe.value.trim() : 0 } }).then(function () { flash('اتحفظت ✅'); loadCP(); }).catch(function (x) { CA.msg = x.message; render(); }); }
+    else if (a === 'ptdraw') { if (confirm('تسحب القرعة دلوقتي بين أعلى 10 كتّاب؟')) api('/api/admin/points/draw', { method: 'POST' }).then(function (d) { flash(d.winner ? 'الفايز: ' + d.winner.name + ' 🏆' : 'مفيش مرشحين لسه'); loadCP(); }).catch(function (x) { CA.msg = x.message; render(); }); }
     else if (a === 'savepa') {
       var pls = {}; [].forEach.call(document.querySelectorAll('.rp-pl'), function (x) { var ix = x.getAttribute('data-i'); (pls[ix] = pls[ix] || {})[x.getAttribute('data-k')] = x.value.trim(); });
       var plans = Object.keys(pls).map(function (k, n) { var o = pls[k]; return o.name && +o.months > 0 ? { id: 'p' + (+k + 1), name: o.name, months: +o.months, price: o.price, old: o.old, badge: o.badge } : null; }).filter(Boolean);
@@ -11755,7 +11867,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'restore') { var fi = $('rp-restore-file'); if (fi) fi.click(); }
   }
   function onInput(ev) {
-    var t = ev.target; if (t && t.id === 'rp-pay-sender') { S.paySender = t.value; return; } if (t && t.id === 'rp-pay-note') { S.payNote = t.value; return; }
+    var t = ev.target; if (t && /^rp-ct-a\d$/.test(t.id || '')) { CT.draft[+t.id.slice(7)] = t.value; return; } if (t && t.id === 'rp-pay-sender') { S.paySender = t.value; return; } if (t && t.id === 'rp-pay-note') { S.payNote = t.value; return; }
     if (!t || !S.ed) return;
     if (t.id === 'rp-u-q') { S.uq = t.value; var l = $('rp-u-list'); if (l) { var q = S.uq.toLowerCase(); l.innerHTML = usersList(S.users.filter(function (u) { return !q || (u.name + ' ' + u.email).toLowerCase().indexOf(q) > -1; })); } return; }
     var f = t.getAttribute && t.getAttribute('data-f'), ci = t.getAttribute && t.getAttribute('data-ci');
@@ -11768,6 +11880,7 @@ document.addEventListener('click', function (e) {
       pg.__rp = 1; pg.addEventListener('click', onClick); pg.addEventListener('input', onInput);
       pg.addEventListener('change', function (e) {
         var t = e.target; if (!t) return;
+        if (t.id === 'rp-ca-week') { CA.week = t.value; CA.d = null; render(); loadCA(CA.week); return; }
         if (t.getAttribute && t.getAttribute('data-f') === 'genre') { S.ed.genre = t.value; markDirty(); return; }
         if (t.id === 'rp-cv-file' && t.files[0]) { uploadCover(t.files[0]); t.value = ''; return; }
         if (t.id === 'rp-av-file' && t.files[0]) {
@@ -12024,7 +12137,7 @@ document.addEventListener('click', function (e) {
       '<div class="rp-pf-name">' + esc(a.name) + (a.isAdmin ? ' <i class="fa-solid fa-circle-check rp-ver" title="الصفحة الرسمية"></i>' : '') + '</div>' +
       '<span class="rp-pf-tag">' + (a.isAdmin ? '👑 الصفحة الرسمية' : '✍️ كاتب') + '</span>' +
       (bio ? '<p class="rp-pf-bio">' + esc(bio).replace(/\n/g, '<br>') + '</p>' : '') + socials +
-      '<div class="rp-pf-st"><div><b>' + list.length + '</b><span>رواية</span></div><div><b id="rp-pf-fc">' + fnum(a.followers) + '</b><span>متابع</span></div><div><b>' + fnum(totalReads) + '</b><span>قراءة</span></div></div>' +
+      '<div class="rp-pf-st"><div><b>' + list.length + '</b><span>رواية</span></div><div><b id="rp-pf-fc">' + fnum(a.followers) + '</b><span>متابع</span></div><div><b>' + fnum(totalReads) + '</b><span>قراءة</span></div>' + (a.isAdmin ? '' : '<div><b>' + (Math.round((+a.points || 0) * 10) / 10) + '</b><span>⭐ نقطة</span></div>') + '</div>' +
       btn + (note ? '<div class="rp-pf-note">' + note + '</div>' : '') +
       '<div class="rp-pf-note" style="margin-top:12px"><i class="fa-regular fa-calendar"></i> على RadPad منذ ' + esc(fdate(a.joinedAt)) + ' <button type="button" class="rp-rall" data-rp-share="1" style="margin-right:10px"><i class="fa-solid fa-share-nodes"></i> مشاركة</button></div></div></div>' +
       '<div class="rp-pf-sec"><i class="fa-solid fa-book" style="color:var(--brand-primary,#065f46)"></i> روايات ' + esc(a.name) + ' (' + list.length + ')</div>' +
@@ -12268,7 +12381,7 @@ document.addEventListener('click', function (e) {
     var res = oAdd.apply(this, arguments);
     if (text && novel && R.base()) {
       var rating = text.indexOf(VOTE) === 0;
-      try { R.api('/api/notify', { method: 'POST', body: { novel: String(novel.id), kind: rating ? 'rating' : 'comment', title: plain(novel.title), stars: stars, snippet: rating ? '' : text, authorUid: novel.authorUid || (novel.isUser ? novel.uid : 0) } }).catch(function () {}); } catch (x) {}
+      try { R.api('/api/notify', { method: 'POST', body: { novel: String(novel.id), chapter: (function () { try { return currentChapterIndex; } catch (x) { return -1; } })(), kind: rating ? 'rating' : 'comment', title: plain(novel.title), stars: stars, snippet: rating ? '' : text, authorUid: novel.authorUid || (novel.isUser ? novel.uid : 0) } }).catch(function () {}); } catch (x) {}
     }
     return res;
   };
