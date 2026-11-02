@@ -10713,18 +10713,20 @@ document.addEventListener('click', function (e) {
   function lsSet(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
   function flash(m) { try { if (typeof showToast === 'function') showToast(m); } catch (e) {} }
   function token() { return lsGet(TOKEN_KEY); }
+  /* معرّف الجهاز: بيتولّد مرة واحدة ويتحفظ، والسيرفر بيستخدمه لحد الأجهزة وحد الحسابات */
+  function devId() { var d = lsGet('rp_dev'); if (!/^[A-Za-z0-9_-]{8,64}$/.test(d)) { d = ''; try { var a = new Uint8Array(18); (window.crypto || window.msCrypto).getRandomValues(a); for (var i = 0; i < a.length; i++) d += (a[i] % 36).toString(36); } catch (e) { d = Math.random().toString(36).slice(2) + Date.now().toString(36); } d = 'd' + d; lsSet('rp_dev', d); } return d; }
   function me() { try { return JSON.parse(lsGet(USER_KEY) || 'null'); } catch (e) { return null; } }
 
   function api(path, opts) {
     opts = opts || {};
-    var h = {}; if (opts.body) h['Content-Type'] = 'application/json';
+    var h = {}; if (opts.body) h['Content-Type'] = 'application/json'; h['X-Device'] = devId();
     var t = token(); if (t && !opts.noAuth) h.Authorization = 'Bearer ' + t;
     return fetch(base() + path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
       .catch(function () { throw new Error('مفيش اتصال بالسيرفر، تأكد من النت'); })
       .then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) {
           if (!r.ok) {
-            if (r.status === 401 && t && !opts.noAuth) { lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); }
+            if (r.status === 401 && t && !opts.noAuth) { lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); if (/جهاز|أجهزة/.test(j.error || '')) flash(j.error); }
             var e = new Error(j.error || 'حصل خطأ، جرّب تاني'); e.status = r.status; throw e;
           }
           return j;
@@ -11075,7 +11077,12 @@ document.addEventListener('click', function (e) {
       .catch(function (e) { if (e.status !== 401) S.err = e.message; })
       .then(function () { S.loading = false; if (S.view === 'home') render(); });
   }
-  function render() {
+  function render() { /* بنحافظ على مكان شريط التبويبات علشان ما يرجعش للأول لوحده */
+    var el0 = body(), ts = el0 && el0.querySelector('.rp-tabs'), sl = ts ? ts.scrollLeft : null;
+    render0();
+    if (sl != null) { var n = body() && body().querySelector('.rp-tabs'); if (n) { n.scrollLeft = sl; if (n.scrollLeft !== sl) requestAnimationFrame(function () { n.scrollLeft = sl; }); } }
+  }
+  function render0() {
     var el = body(); if (!el) return;
     var pg = $('rp-acct-page'); if (pg) pg.classList.toggle('editing', S.view === 'editor' && !!token());
     if (!base()) { setTitle('حسابي'); el.innerHTML = '<div class="rp-card"><div class="rp-empty">' + ic('plug-circle-xmark') + 'الحسابات مش متاحة دلوقتي.<br>' + (function () { try { return isReaderOnlyMode ? 'جرّب بعد شوية.' : 'حط رابط سيرفر الحسابات في لوحة التحكم (تبويب «التطبيق والإشعارات»).'; } catch (e) { return ''; } })() + '</div></div>' + themeCard(); return; }
@@ -11085,6 +11092,13 @@ document.addEventListener('click', function (e) {
     if (S.view === 'premium') return renderPremium();
     if (S.view === 'buy') return renderBuy();
     renderHome();
+  }
+  function devCard() {
+    if (S.devs == null && !S._dv) { S._dv = 1; api('/api/devices').then(function (d) { S.devs = d; if (S.view === 'home' && S.tab === 'settings') render(); }).catch(function () { S._dv = 0; }); }
+    var d = S.devs; if (!d) return '';
+    var lim = d.limit, list = d.devices || [];
+    return '<div class="rp-card"><h3>' + ic('mobile-screen') + ' أجهزتي</h3><p class="rp-sub">' + (lim ? 'حسابك يشتغل على ' + lim + (lim === 1 ? ' جهاز' : ' أجهزة') + ' في نفس الوقت' + (lim === 1 ? ' (Premium بيفتح 3 أجهزة).' : '.') : 'الأدمن من غير حد للأجهزة.') + '</p>' +
+      list.map(function (v, i) { return '<div class="rp-item"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div><b>' + (v.current ? 'الجهاز ده' : 'جهاز ' + (i + 1)) + '</b><div class="rp-sub" style="margin:2px 0">آخر استخدام ' + fdate(v.seen) + '</div></div>' + (v.current ? '' : '<button type="button" class="rp-btn sm red" data-act="rmdev" data-d="' + esc(v.id) + '">إلغاء تسجيل الجهاز</button>') + '</div></div>'; }).join('') + '</div>';
   }
   function themeCard() {
     return '<div class="rp-card"><div class="rp-row" style="justify-content:space-between"><div><h3>' + ic('palette') + ' المظهر</h3><p class="rp-sub" style="margin:0">' + (isDark() ? 'الوضع الليلي شغّال' : 'الوضع النهاري شغّال') + '</p></div><button type="button" class="rp-btn sec" data-act="theme">' + (isDark() ? '☀️ نهاري' : '🌙 ليلي') + '</button></div></div>';
@@ -11215,7 +11229,7 @@ document.addEventListener('click', function (e) {
       '<label class="rp-lbl">رابط يوتيوب (اختياري)</label><input id="rp-s-yt" class="rp-in" dir="ltr" placeholder="https://youtube.com/@..." value="' + esc((u.links || {}).youtube || '') + '">' +
       '<div class="rp-row" style="margin-top:10px"><button type="button" class="rp-btn sm" data-act="rename">' + ic('floppy-disk') + ' حفظ</button><button type="button" class="rp-btn sm sec" data-act="viewprofile">' + ic('user') + ' شوف صفحتي</button></div></div>' +
       '<div class="rp-card"><h3>' + ic('shield-halved') + ' تغيير الباسورد</h3><label class="rp-lbl">الباسورد الحالي</label>' + field('rp-p-old', 'password', 'lock', '', 'dir="ltr"') + '<label class="rp-lbl">الباسورد الجديد (8 حروف أو أكتر)</label>' + field('rp-p-new', 'password', 'key', '', 'dir="ltr"') + '<div class="rp-err" id="rp-p-err"></div><button type="button" class="rp-btn" data-act="savepass" style="margin-top:6px">حفظ الباسورد</button></div>' +
-      themeCard() + '<button type="button" class="rp-btn red block" data-act="logout">' + ic('right-from-bracket') + ' تسجيل الخروج</button>';
+      devCard() + themeCard() + '<button type="button" class="rp-btn red block" data-act="logout">' + ic('right-from-bracket') + ' تسجيل الخروج</button>';
   }
   function usersTab() {
     var q = (S.uq || '').toLowerCase(), list = S.users.filter(function (u) { return !q || (u.name + ' ' + u.email).toLowerCase().indexOf(q) > -1; });
@@ -11227,7 +11241,7 @@ document.addEventListener('click', function (e) {
   function usersList(list) {
     if (!S.usersLoaded) return '<div class="rp-empty">جاري التحميل…</div>';
     return list.length ? list.map(function (u) {
-      return '<div class="rp-item"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><b>' + esc(u.name) + '</b> <span class="rp-pill ' + (u.role === 'admin' ? 'live' : 'approved') + '">' + (u.role === 'admin' ? 'أدمن' : 'كاتب') + '</span><div class="rp-sub" dir="ltr" style="margin:2px 0;text-align:right">' + esc(u.email) + '</div><div class="rp-sub" style="margin:0">' + u.novels + ' رواية · انضم ' + fdate(u.createdAt) + '</div>' + (u.premium && u.role !== 'admin' ? '<div style="margin-top:4px"><span class="rp-pill pending">👑 Premium ' + (u.premiumUntil > 3e12 ? 'دائم' : 'حتى ' + fdate(u.premiumUntil)) + '</span></div>' : '') + '</div><div class="rp-row" style="flex-direction:column;align-items:stretch"><button type="button" class="rp-btn sm gold" data-act="premopen" data-id="' + u.id + '">👑 اشتراك</button><button type="button" class="rp-btn sm sec" data-act="resetpw" data-id="' + u.id + '" data-e="' + esc(u.email) + '">' + ic('key') + ' باسورد مؤقت</button></div></div>' +
+      return '<div class="rp-item"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><b>' + esc(u.name) + '</b> <span class="rp-pill ' + (u.role === 'admin' ? 'live' : 'approved') + '">' + (u.role === 'admin' ? 'أدمن' : 'كاتب') + '</span><div class="rp-sub" dir="ltr" style="margin:2px 0;text-align:right">' + esc(u.email) + '</div><div class="rp-sub" style="margin:0">' + u.novels + ' رواية · انضم ' + fdate(u.createdAt) + '</div>' + (u.premium && u.role !== 'admin' ? '<div style="margin-top:4px"><span class="rp-pill pending">👑 Premium ' + (u.premiumUntil > 3e12 ? 'دائم' : 'حتى ' + fdate(u.premiumUntil)) + '</span></div>' : '') + '</div><div class="rp-row" style="flex-direction:column;align-items:stretch"><button type="button" class="rp-btn sm gold" data-act="premopen" data-id="' + u.id + '">👑 اشتراك</button><button type="button" class="rp-btn sm sec" data-act="resetpw" data-id="' + u.id + '" data-e="' + esc(u.email) + '">' + ic('key') + ' باسورد مؤقت</button><button type="button" class="rp-btn sm sec" data-act="resetdev" data-id="' + u.id + '" data-e="' + esc(u.email) + '">' + ic('mobile-screen') + ' تفريغ الأجهزة</button></div></div>' +
         (S.premOpen === u.id ? '<div class="rp-row" style="margin-top:8px"><span class="rp-sub" style="margin:0">فعّل Premium لمدة:</span>' + [['1', 'شهر'], ['3', '3 شهور'], ['6', '6 شهور'], ['12', 'سنة'], ['forever', 'دائم'], ['0', 'إلغاء']].map(function (m) { return '<button type="button" class="rp-btn sm ' + (m[0] === '0' ? 'red' : '') + '" data-act="setprem" data-id="' + u.id + '" data-m="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</div>' : '') + '</div>';
     }).join('') : '<div class="rp-empty">مفيش نتائج</div>';
   }
@@ -11573,8 +11587,15 @@ document.addEventListener('click', function (e) {
   /* بيرجّع النص (بعلامات الحوار علشان السيرفر يفرّق الأصوات) + بصمة بالطريقة القديمة، علشان الفصول اللي اتحوّلت قبل كده ما تتحوّلش تاني */
   function ttsChapText(c) {
     var SP = window.SpeechPrep, tmp = document.createElement('div'), out = [], outOld = [];
-    function prep(t) { if (SP && SP.process) { try { t = SP.process(t, { cloud: true }); } catch (e) {} } return t; }
-    function add(raw) { tmp.innerHTML = String(raw || ''); var src = tmp.textContent, t = ttsClean(src), o = ttsClean(src, true); if (!o || !/[؀-ۿa-zA-Z0-9]/.test(o)) return; out.push(prep(t)); outOld.push(prep(o)); }
+    function prep0(t) { if (SP && SP.process) { try { t = SP.process(t, { cloud: true }); } catch (e) {} } return t; }
+    /* بنحافظ على علامات الحوار (« » " " والشرطة) علشان السيرفر يفرّق الأصوات */
+    function prepKeep(t) {
+      var d = /^\s*[-–—]+\s*/.exec(t);
+      if (d) return '- ' + t.slice(d[0].length).split(/\s[-–—]+\s/).map(prep0).join(' - ');
+      return t.split(/(«[^»]+»|"[^"]+"|“[^”]+”)/).map(function (p) { return /^(«|"|“)/.test(p) && p.length > 2 ? '«' + prep0(p.slice(1, -1)) + '»' : prep0(p); }).join(' ').replace(/\s+/g, ' ').trim();
+    }
+    function prep(t, keep) { return keep ? prepKeep(t) : prep0(t); }
+    function add(raw) { tmp.innerHTML = String(raw || ''); var src = tmp.textContent, t = ttsClean(src), o = ttsClean(src, true); if (!o || !/[؀-ۿa-zA-Z0-9]/.test(o)) return; out.push(prep(t, true)); outOld.push(prep(o)); }
     add(c.title); String(c.content || '').split('\n').filter(function (p) { return p.trim() !== ''; }).forEach(add);
     return { text: out.join('\n'), sig: ttsSig(outOld.join('\n')) };
   }
@@ -11747,7 +11768,9 @@ document.addEventListener('click', function (e) {
     else if (a === 'forgot') { S.forgot = v === '1'; render(); }
     else if (a === 'eye') { var inp = $(b.getAttribute('data-t')); if (inp) { inp.type = inp.type === 'password' ? 'text' : 'password'; b.innerHTML = ic(inp.type === 'password' ? 'eye' : 'eye-slash'); } }
     else if (a === 'auth') doAuth();
-    else if (a === 'logout') { dropTopics(); window.__rpFeed = []; try { window.__rpPaintBell && window.__rpPaintBell(); } catch (x) {} lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); S = fresh(); render(); flash('تم تسجيل الخروج'); }
+    else if (a === 'rmdev') { if (confirm('تلغي تسجيل الجهاز ده؟')) api('/api/devices/remove', { method: 'POST', body: { id: b.getAttribute('data-d') } }).then(function () { S.devs = null; S._dv = 0; render(); flash('اتلغى تسجيل الجهاز ✅'); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'resetdev') { if (confirm('تفرّغ أجهزة ' + b.getAttribute('data-e') + ' علشان يقدر يسجّل من جهاز جديد؟')) api('/api/admin/users/' + id + '/devices/reset', { method: 'POST' }).then(function () { flash('اتفرّغت الأجهزة ✅'); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'logout') { try { api('/api/logout', { method: 'POST', body: {} }).catch(function () {}); } catch (x) {} dropTopics(); window.__rpFeed = []; try { window.__rpPaintBell && window.__rpPaintBell(); } catch (x) {} lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); S = fresh(); render(); flash('تم تسجيل الخروج'); }
     else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.err = ''; render(); if (S.tab === 'sales') loadSales(); if (S.tab === 'contest') loadContest(); if (S.tab === 'points') loadPoints(); if (S.tab === 'actest') { loadCA(CA.week); loadCP(); } if (S.tab === 'about') { loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); loadEarn(); } if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
     else if (a === 'vis') { var hide = v === '1'; if (hide && !confirm('تخفي الرواية؟ مش هتظهر لأي حد في الموقع ولا التطبيق لحد ما تظهرها تاني.')) return; api('/api/my/novels/' + id + '/visibility', { method: 'PUT', body: { hidden: hide } }).then(function () { flash(hide ? 'الرواية اتخبّت عن الناس 🙈' : 'الرواية ظهرت للناس ✅'); refresh(); try { loadUserNovels(); } catch (x) {} }).catch(function (x) { flash(x.message); }); }
     else if (a === 'siteread') { close(); try { requestNovelAccess(id, 'details'); } catch (x) {} }
@@ -11816,7 +11839,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttsfront') api('/api/admin/tts/front', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); });
     else if (a === 'ttsdel') { if (confirm('تشيل الرواية دي من طابور الصوت وتمسح الصوت المتخزّن لها؟')) api('/api/admin/tts/remove', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsprov') { var pp = b.getAttribute('data-p'); if (confirm('تحوّل الرواية دي لـ ' + (pp === 'azure' ? 'Azure' : (pp === 'gemini2' ? 'جوجل 2' : 'جوجل')) + '؟ الصوت الجاهز لها هيتمسح وتتحوّل من الأول.')) api('/api/admin/tts/provider', { method: 'POST', body: { nid: b.getAttribute('data-n'), prov: pp } }).then(function (d) { TT.st = d; render(); flash('تمام ✅'); }).catch(function (x) { flash(x.message); }); }
-    else if (a === 'ttsredo') { if (confirm('تمسح الصوت الجاهز للرواية دي وتحوّلها من الأول؟')) api('/api/admin/tts/provider', { method: 'POST', body: { nid: b.getAttribute('data-n'), prov: b.getAttribute('data-p'), redo: true } }).then(function (d) { TT.st = d; render(); flash('اتحطت في الطابور من الأول ✅'); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'ttsredo') { if (confirm('تمسح الصوت الجاهز للرواية دي وتحوّلها من الأول؟')) api('/api/admin/tts/provider', { method: 'POST', body: { nid: b.getAttribute('data-n'), prov: b.getAttribute('data-p'), redo: true } }).then(function (d) { TT.st = d; render(); flash('اتحطت في الطابور من الأول ✅'); ttsSync(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttssave') {
       var g = function (i) { var e = $(i); return e ? e.value.trim() : ''; }, RL = ['narrator', 'man', 'woman', 'boy', 'girl'], gv = {}, azv = {};
       RL.forEach(function (r) { gv[r] = g('rp-gv-' + r); azv[r] = { v: g('rp-azv-' + r), pitch: g('rp-azp-' + r), rate: g('rp-azr-' + r) }; });
