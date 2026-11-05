@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="scroll-smooth is-native-app" style="--brand-primary: #065f46; --brand-primary-dark: #022c22; --brand-primary-rgb: 6, 95, 70; --brand-accent: #f59e0b; --ui-font: 'Cairo', sans-serif; --card-radius: 1.5rem; --sat: 40px;" data-view="home"><head>
+<html lang="ar" dir="rtl" class="scroll-smooth is-native-app" style="--brand-primary: #065f46; --brand-primary-dark: #022c22; --brand-primary-rgb: 6, 95, 70; --brand-accent: #f59e0b; --ui-font: 'Cairo', sans-serif; --card-radius: 1.5rem; --sat: 40px;" data-view="home"><head><script id="rp-nolink">try{var u=new URL(location.href);if(u.searchParams.has("chapter")){u.searchParams.delete("novel");u.searchParams.delete("chapter");history.replaceState(null,"",u.pathname+u.search+u.hash)}}catch(e){}</script>
     <meta charset="UTF-8">
     <meta id="main-viewport" name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="RadPad — منصة الروايات العربية: اقرأ واستمع وحمّل أحدث الروايات والأعمال الأدبية، واكتب روايتك بنفسك.">
@@ -742,6 +742,14 @@ html.dark .rp-fmt button{background:#0f1a2c;color:#94a3b8}html.dark .rp-fmt butt
 .rp-qcard .q{font-size:1.15rem;font-weight:800;line-height:2;text-align:center;white-space:pre-wrap;max-height:42vh;overflow:auto}
 .rp-qcard .m{text-align:center;opacity:.85;font-size:.78rem;margin-top:12px}
 .rp-qact{display:flex;gap:8px;margin-top:16px}.rp-qact button{flex:1;border:0;border-radius:14px;padding:11px 4px;font:800 .8rem Cairo,sans-serif;background:rgba(255,255,255,.2);color:#fff;cursor:pointer}.rp-qact button.p{background:#fff;color:#be123c}
+
+@keyframes rpBoot{from{opacity:0;transform:translateY(34px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes rpBootTab{from{transform:translateY(120%)}to{transform:none}}
+html.rp-boot #view-home>*{animation:rpBoot .8s cubic-bezier(.2,.9,.3,1) both}
+html.rp-boot #view-home>*:nth-child(2){animation-delay:.12s}html.rp-boot #view-home>*:nth-child(3){animation-delay:.24s}html.rp-boot #view-home>*:nth-child(4){animation-delay:.36s}html.rp-boot #view-home>*:nth-child(5){animation-delay:.48s}html.rp-boot #view-home>*:nth-child(n+6){animation-delay:.6s}
+html.rp-boot #rp-tabbar,html.rp-boot .rp-tabbar,html.rp-boot [id*="tabbar"]{animation:rpBootTab .7s .3s cubic-bezier(.2,.9,.3,1) both}
+@media (prefers-reduced-motion:reduce){html.rp-boot *{animation:none!important}}
+#rp-acct-page.rp-still *{animation:none!important}#rp-acct-page.rp-still .rp-mi{opacity:1!important;transform:none!important}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <symbol id="rp-logo-sym" viewBox="0 0 100 100">
@@ -2297,7 +2305,7 @@ html.dark .rp-fmt button{background:#0f1a2c;color:#94a3b8}html.dark .rp-fmt butt
                     </button>
                 </div>
             </article>
-        <div id="rp-wp-bar"><div id="rp-wp-pill" aria-hidden="true"><button type="button" data-wp-rate="1" aria-label="1 نجوم"><i class="fa-solid fa-star"></i><em>1</em></button><button type="button" data-wp-rate="2" aria-label="2 نجوم"><i class="fa-solid fa-star"></i><em>2</em></button><button type="button" data-wp-rate="3" aria-label="3 نجوم"><i class="fa-solid fa-star"></i><em>3</em></button><button type="button" data-wp-rate="4" aria-label="4 نجوم"><i class="fa-solid fa-star"></i><em>4</em></button><button type="button" data-wp-rate="5" aria-label="5 نجوم"><i class="fa-solid fa-star"></i><em>5</em></button></div><button type="button" id="rp-wp-star" data-wp="star"><i class="fa-solid fa-star"></i><b id="rp-wp-sn">قيّم</b></button><button type="button" data-wp="cm"><i class="fa-regular fa-comment"></i><b id="rp-wp-cn"></b></button><button type="button" id="rp-wp-copy" data-wp="copy" style="display: none;"><i class="fa-regular fa-paper-plane"></i><b>نسخ الرابط</b></button></div><div id="chapter-comments-section" class="bg-white dark:bg-slate-900 dynamic-card-radius p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-800 space-y-6 mt-8">
+        <div id="rp-wp-bar"><div id="rp-wp-pill" aria-hidden="true"><button type="button" data-wp-rate="1" aria-label="1 نجوم"><i class="fa-solid fa-star"></i><em>1</em></button><button type="button" data-wp-rate="2" aria-label="2 نجوم"><i class="fa-solid fa-star"></i><em>2</em></button><button type="button" data-wp-rate="3" aria-label="3 نجوم"><i class="fa-solid fa-star"></i><em>3</em></button><button type="button" data-wp-rate="4" aria-label="4 نجوم"><i class="fa-solid fa-star"></i><em>4</em></button><button type="button" data-wp-rate="5" aria-label="5 نجوم"><i class="fa-solid fa-star"></i><em>5</em></button></div><button type="button" id="rp-wp-star" data-wp="star"><i class="fa-solid fa-star"></i><b id="rp-wp-sn">قيّم</b></button><button type="button" data-wp="cm"><i class="fa-regular fa-comment"></i><b id="rp-wp-cn"></b></button><button type="button" id="rp-wp-copy" data-wp="copy" style="display: none;"><i class="fa-solid fa-share-nodes"></i><b>مشاركة</b></button></div><div id="chapter-comments-section" class="bg-white dark:bg-slate-900 dynamic-card-radius p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-800 space-y-6 mt-8">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-2xl theme-bg-gradient text-amber-300 flex items-center justify-center text-xl shadow-md">
@@ -3258,7 +3266,7 @@ html.dark .rp-fmt button{background:#0f1a2c;color:#94a3b8}html.dark .rp-fmt butt
                         <span>السماح بنسخ ومشاركة الروابط المباشرة لفصول هذه الرواية؟</span>
                     </span>
                 </label><label class="flex items-center gap-2.5 cursor-pointer" style="margin-top: 8px;"><input type="checkbox" id="form-novel-paper" class="w-4 h-4 accent-amber-500 rounded"><span class="text-xs sm:text-sm font-black text-amber-800 dark:text-amber-300">📖 رواية ورقية (تظهر في صف «الروايات الورقية» ولا يمكن تحميلها PDF)</span></label>
-                <p class="text-[11px] text-slate-500 pr-6">إذا قامت بإلغاء التحديد، فلن يظهر زر "نسخ الرابط" في فصول هذه الرواية لحماية الفصول المحمية.</p>
+                <p class="text-[11px] text-slate-500 pr-6">إذا قامت بإلغاء التحديد، فلن يظهر زر "مشاركة" في فصول هذه الرواية لحماية الفصول المحمية.</p>
             </div></div>
 
                         <div>
@@ -3633,15 +3641,15 @@ html.dark .rp-fmt button{background:#0f1a2c;color:#94a3b8}html.dark .rp-fmt butt
         </div>
     </div>
     <div class="rp-adm-card">
-        <h4><i class="fa-solid fa-fire theme-text-primary"></i><span>الروايات المشهورة (الصف الأول في الرئيسية)</span> <span id="rp-pop-count" class="text-xs font-bold text-slate-500">(11/15)</span></h4>
+        <h4><i class="fa-solid fa-fire theme-text-primary"></i><span>الروايات المشهورة (الصف الأول في الرئيسية)</span> <span id="rp-pop-count" class="text-xs font-bold text-slate-500"></span></h4>
         <p class="rp-adm-note">اختار لحد 15 رواية تظهر في أول صف في الصفحة الرئيسية بالترتيب اللي تحدده. التغيير بيظهر للناس بعد ما تصدّر الموقع وترفعه.</p>
-        <div class="flex gap-2 flex-wrap"><select id="rp-pop-add" class="rp-adm-in" style="flex:1;min-width:180px"><option value="">— اختار رواية تضيفها —</option></select><button type="button" class="rp-adm-btn" onclick="rpAdmPopAdd()">➕ إضافة</button></div>
-        <div id="rp-pop-list" class="space-y-2.5 mt-3"><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">1. قريبًا: معرض القاهرة الدولي للكتاب 2027</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="0">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="0">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="0">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">2. الترياق الفاسد: هباءً منثورا</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="1">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="1">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="1">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">3. بنت القلب: سلسلة عالم المافيا الجزء الأول</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="2">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="2">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="2">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">4. كن ملاكي: سلسلة عالم المافيا الجزء الثاني</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="3">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="3">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="3">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">5. خط أحمر: سلسلة عالم المافيا الجزء الثالث</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="4">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="4">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="4">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">6. سفراء الظلام: سلسلة عالم المافيا الجزء الرابع</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="5">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="5">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="5">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">7. الأصفاد: سلسلة عالم المافيا الجزء الخامس</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="6">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="6">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="6">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">8. شمس إلياس: الجزء الأول</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="7">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="7">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="7">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">9. شمس إلياس: الجزء الثاني</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="8">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="8">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="8">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">10. عمو الظابط</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="9">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="9">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="9">حذف</button></div></div><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">11. شركة المنقذين المحدودة</b></div><div class="flex gap-1.5"><button type="button" class="rp-adm-edit" data-act="popup" data-i="10">↑</button><button type="button" class="rp-adm-edit" data-act="popdn" data-i="10">↓</button><button type="button" class="rp-adm-del" data-act="popdel" data-i="10">حذف</button></div></div></div>
+        <div class="flex gap-2 flex-wrap"><select id="rp-pop-add" class="rp-adm-in" style="flex:1;min-width:180px"></select><button type="button" class="rp-adm-btn" onclick="rpAdmPopAdd()">➕ إضافة</button></div>
+        <div id="rp-pop-list" class="space-y-2.5 mt-3"></div>
     </div>
     <div class="rp-adm-card">
         <h4><i class="fa-solid fa-id-card theme-text-primary"></i><span>بروفايلات الكُتّاب (نسخة للموقع الأصلي)</span></h4>
         <p class="rp-adm-note">بتحفظ صور الكُتّاب ونبذهم وروابطهم وعدد متابعينهم جوه ملف الموقع علشان صفحاتهم تظهر للناس فورًا حتى لو السيرفر بطيء أو فيه مشكلة. بتتحدّث لوحدها كل ما تفتح الموقع كأدمن، وتقدر تحدّثها بإيدك. بعدها صدّر الموقع وارفعه على GitHub.</p>
-        <div id="rp-prof-info" class="rp-adm-note" style="font-weight:800">محفوظ 2 بروفايل — آخر تحديث: ٣‏/١١‏/٢٠٢٦، ٨:١٤:٥٨ ص</div>
+        <div id="rp-prof-info" class="rp-adm-note" style="font-weight:800"></div>
         <button type="button" class="rp-adm-btn" onclick="rpAdmSyncProfiles()">🔄 تحديث البروفايلات الآن</button>
     </div>
     <div class="rp-adm-card">
@@ -3655,23 +3663,18 @@ html.dark .rp-fmt button{background:#0f1a2c;color:#94a3b8}html.dark .rp-fmt butt
         <input id="rp-app-url" type="url" dir="ltr" class="rp-adm-in" placeholder="https://..." autocomplete="off">
     </div>
     <div class="rp-adm-card">
-        <h4><i class="fa-solid fa-bell theme-text-primary"></i><span>الإشعارات</span> <span id="rp-adm-count" class="text-xs font-bold text-slate-500">(1)</span></h4>
+        <h4><i class="fa-solid fa-bell theme-text-primary"></i><span>الإشعارات</span> <span id="rp-adm-count" class="text-xs font-bold text-slate-500"></span></h4>
         <p class="rp-adm-note">أضف إشعارات كتير زي ما بتضيف فصول، وامسح أي واحد في أي وقت. أي رابط تكتبه (يبدأ بـ http أو https) هيظهر للناس رابط قابل للضغط. التغييرات بتظهر للناس بعد ما تصدّر الموقع وترفعه على جيت هب.</p>
         <div class="space-y-2.5">
             <input id="rp-n-title" type="text" class="rp-adm-in" placeholder="عنوان الإشعار" autocomplete="off">
             <textarea id="rp-n-text" rows="3" class="rp-adm-in" placeholder="نص الإشعار (ممكن تحط لينك)"></textarea>
-            <label class="flex items-center gap-2 text-xs font-bold cursor-pointer"><input type="checkbox" id="rp-n-push" checked=""> <span>📲 ابعته كمان كإشعار على موبايلات مستخدمي التطبيق (فوري، من غير ما تصدّر الموقع)</span></label>
+            <label class="flex items-center gap-2 text-xs font-bold cursor-pointer"><input type="checkbox" id="rp-n-push" checked> <span>📲 ابعته كمان كإشعار على موبايلات مستخدمي التطبيق (فوري، من غير ما تصدّر الموقع)</span></label>
             <div class="flex gap-2 flex-wrap">
                 <button type="button" id="rp-n-save" class="rp-adm-btn" onclick="rpAdmSaveNotif()">➕ إضافة الإشعار</button>
                 <button type="button" id="rp-n-cancel" class="rp-adm-btn sec" style="display:none" onclick="rpAdmCancelEdit()">إلغاء التعديل</button>
             </div>
         </div>
-        <div id="rp-adm-list" class="space-y-2.5 mt-4"><div class="rp-adm-item"><div style="min-width:0;flex:1"><b class="text-sm">تحديث جديد⚡</b><div class="text-xs text-slate-500 mt-1" style="white-space:pre-wrap;word-break:break-word">تحديث جديد للتطبيق يتضمن الكثير من التطويرات والتحديثات والإصلاحات:
-التحميل من خلال: 
-https://drive.google.com/file/d/1ObudMZXZyJohdoy_X0ilwZHOavANeRv6/view?usp=drivesdk
-
-أو التحميل من خلال:
-https://www.mediafire.com/file/b620hrzzuoucssw/RadPad-v3.5-50.apk/file</div><div class="text-[11px] text-slate-400 mt-1">٤ نوفمبر ٢٠٢٦ في ٣:١٠ م</div></div><div class="flex flex-col gap-1.5"><button type="button" class="rp-adm-edit" data-act="edit" data-id="n1793797804256bc0b">تعديل</button><button type="button" class="rp-adm-del" data-act="del" data-id="n1793797804256bc0b">حذف</button></div></div></div>
+        <div id="rp-adm-list" class="space-y-2.5 mt-4"></div>
     </div>
 </div>
 <div id="cp-pane-stats" class="space-y-6 nx-el hidden"><div class="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-4 text-sm font-bold text-slate-600 dark:text-slate-300 leading-relaxed">ملحوظة: التعليقات والتقييمات بتتزامن سحابيًا فبتشمل كل القرّاء. أما <b>عدّاد فتح الفصول</b> فبيتسجّل على هذا الجهاز بس، لأن الموقع ملف ثابت من غير سيرفر. لو عايز عدّاد لكل الزوار نحتاج سيرفر صغير.</div><div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><div class="rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-4 text-center"><i class="fa-solid fa-book theme-text-primary"></i><div class="text-2xl font-black text-slate-900 dark:text-white mt-1">11</div><div class="text-[11px] font-bold text-slate-500 mt-0.5">الروايات</div></div><div class="rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-4 text-center"><i class="fa-solid fa-file-lines theme-text-primary"></i><div class="text-2xl font-black text-slate-900 dark:text-white mt-1">219</div><div class="text-[11px] font-bold text-slate-500 mt-0.5">إجمالي الفصول</div></div><div class="rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-4 text-center"><i class="fa-solid fa-comments theme-text-primary"></i><div class="text-2xl font-black text-slate-900 dark:text-white mt-1">8</div><div class="text-[11px] font-bold text-slate-500 mt-0.5">إجمالي التعليقات</div></div><div class="rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-4 text-center"><i class="fa-solid fa-star theme-text-primary"></i><div class="text-2xl font-black text-slate-900 dark:text-white mt-1">5.0</div><div class="text-[11px] font-bold text-slate-500 mt-0.5">متوسط التقييم</div></div></div><div><h4 class="font-black text-sm mb-2">فتح الفصول آخر 14 يوم (هذا الجهاز) — الإجمالي: 35</h4><div class="flex items-end gap-1.5 h-24"><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-15: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">15</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-16: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">16</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-17: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">17</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-18: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">18</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-19: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">19</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-20: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">20</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-21: 18"><div style="height:80px;width:100%;border-radius:4px;background:#10b981"></div><span class="text-[9px] text-slate-400">21</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-22: 7"><div style="height:31px;width:100%;border-radius:4px;background:#10b981"></div><span class="text-[9px] text-slate-400">22</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-23: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">23</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-24: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">24</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-25: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">25</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-26: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">26</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-27: 10"><div style="height:44px;width:100%;border-radius:4px;background:#10b981"></div><span class="text-[9px] text-slate-400">27</span></div><div class="flex-1 flex flex-col items-center justify-end gap-1" title="2026-10-28: 0"><div style="height:3px;width:100%;border-radius:4px;background:#cbd5e1"></div><span class="text-[9px] text-slate-400">28</span></div></div></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-xs text-slate-500"><th class="py-2 px-2 text-right">الرواية</th><th class="py-2 px-2">فصول</th><th class="py-2 px-2">تعليقات</th><th class="py-2 px-2">التقييم</th><th class="py-2 px-2">فتحات (هذا الجهاز)</th><th class="py-2 px-2 text-right">أكثر فصل</th></tr></thead><tbody><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">قريبًا: معرض القاهرة الدولي للكتاب 2027</td><td class="py-2 px-2 text-center">1</td><td class="py-2 px-2 text-center">2</td><td class="py-2 px-2 text-center">5.0</td><td class="py-2 px-2 text-center">6</td><td class="py-2 px-2 text-xs">الفصل الأول</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">الترياق الفاسد: هباءً منثورا</td><td class="py-2 px-2 text-center">12</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">11</td><td class="py-2 px-2 text-xs">الفصل الثاني</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">بنت القلب: سلسلة عالم المافيا الجزء الأول</td><td class="py-2 px-2 text-center">31</td><td class="py-2 px-2 text-center">1</td><td class="py-2 px-2 text-center">5.0</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-xs">—</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">كن ملاكي: سلسلة عالم المافيا الجزء الثاني</td><td class="py-2 px-2 text-center">40</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-xs">—</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">خط أحمر: سلسلة عالم المافيا الجزء الثالث</td><td class="py-2 px-2 text-center">23</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-xs">—</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">سفراء الظلام: سلسلة عالم المافيا الجزء الرابع</td><td class="py-2 px-2 text-center">32</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-xs">—</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">الأصفاد: سلسلة عالم المافيا الجزء الخامس</td><td class="py-2 px-2 text-center">30</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-xs">—</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">شمس إلياس: الجزء الأول</td><td class="py-2 px-2 text-center">15</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-xs">—</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">شمس إلياس: الجزء الثاني</td><td class="py-2 px-2 text-center">15</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">1</td><td class="py-2 px-2 text-xs">الفصل الثالث عشر</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">عمو الظابط</td><td class="py-2 px-2 text-center">10</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-center">—</td><td class="py-2 px-2 text-center">0</td><td class="py-2 px-2 text-xs">—</td></tr><tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2 px-2 font-black">شركة المنقذين المحدودة</td><td class="py-2 px-2 text-center">10</td><td class="py-2 px-2 text-center">5</td><td class="py-2 px-2 text-center">5.0</td><td class="py-2 px-2 text-center">11</td><td class="py-2 px-2 text-xs">الفصل الأول</td></tr></tbody></table></div><div><h4 class="font-black text-sm mb-2">آخر آراء القرّاء</h4><div class="grid sm:grid-cols-2 gap-2.5"><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>Asmaa</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">متشوقة جدااااا</p><div class="text-[11px] text-slate-400 mt-1">قريبًا: معرض القاهرة الدولي للكتاب 2027 — الفصل الأول</div></div><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>Hanaa</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">في الانتظار</p><div class="text-[11px] text-slate-400 mt-1">قريبًا: معرض القاهرة الدولي للكتاب 2027 — الفصل الأول</div></div><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>sera</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">hhhhhh</p><div class="text-[11px] text-slate-400 mt-1">شركة المنقذين المحدودة — الفصل الأول</div></div><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>mena</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">ما شاء الله</p><div class="text-[11px] text-slate-400 mt-1">شركة المنقذين المحدودة — الفصل الأول</div></div><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>Waleed</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">تحفة</p><div class="text-[11px] text-slate-400 mt-1">شركة المنقذين المحدودة — الفصل الأول</div></div><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>israa</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">فين الفصول اللي بعد كدا تحفة</p><div class="text-[11px] text-slate-400 mt-1">شركة المنقذين المحدودة — الفصل الأول</div></div><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>Asmaa</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">رائع بجد</p><div class="text-[11px] text-slate-400 mt-1">شركة المنقذين المحدودة — الفصل الأول</div></div><div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3"><div class="flex items-center justify-between gap-2 flex-wrap text-xs"><b>هاني</b><span class="inline-flex items-center gap-0.5"><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i></span> <span class="mr-1">5.0</span></div><p class="text-sm mt-1">تحفة بجد</p><div class="text-[11px] text-slate-400 mt-1">بنت القلب: سلسلة عالم المافيا الجزء الأول — الفصل الثاني</div></div></div></div></div><div id="cp-pane-backup" class="space-y-6"><div id="cloud-github-auto-box" class="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-500/50 shadow-2xl space-y-5 mb-6">
@@ -9309,10 +9312,10 @@ https://www.mediafire.com/file/b620hrzzuoucssw/RadPad-v3.5-50.apk/file</div><div
             const shareBtn = document.createElement('button');
             shareBtn.id = 'btn-easy-copy';
             shareBtn.className = 'bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition-colors cursor-pointer';
-            shareBtn.title = 'نسخ رابط الفصل بضغطة واحدة';
+            shareBtn.title = 'مشاركة الفصل';
             shareBtn.innerHTML = `
-                <i class="fa-solid fa-clone"></i>
-                <span>نسخ الرابط</span>
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>مشاركة</span>
             `;
             shareBtn.onclick = (e) => {
                 e.preventDefault();
@@ -9466,7 +9469,7 @@ https://www.mediafire.com/file/b620hrzzuoucssw/RadPad-v3.5-50.apk/file</div><div
                         <span>السماح بنسخ ومشاركة الروابط المباشرة لفصول هذه الرواية؟</span>
                     </span>
                 </label>
-                <p class="text-[11px] text-slate-500 pr-6">إذا قمت بإلغاء التحديد، فلن يظهر زر "نسخ الرابط" في فصول هذه الرواية.</p>
+                <p class="text-[11px] text-slate-500 pr-6">إذا قمت بإلغاء التحديد، فلن يظهر زر "مشاركة" في فصول هذه الرواية.</p>
             `;
             novelLockWrapper.appendChild(shareControlDiv);
         }
@@ -9489,10 +9492,10 @@ https://www.mediafire.com/file/b620hrzzuoucssw/RadPad-v3.5-50.apk/file</div><div
             const shareBtn = document.createElement('button');
             shareBtn.id = 'btn-easy-copy';
             shareBtn.className = 'bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition-colors cursor-pointer';
-            shareBtn.title = 'نسخ رابط الفصل بضغطة واحدة';
+            shareBtn.title = 'مشاركة الفصل';
             shareBtn.innerHTML = `
-                <i class="fa-solid fa-clone"></i>
-                <span>نسخ الرابط</span>
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>مشاركة</span>
             `;
             shareBtn.onclick = (e) => {
                 e.preventDefault();
@@ -11411,6 +11414,7 @@ document.addEventListener('click', function (e) {
   window.rpOpenFeedNovel = function (nid) {
     try { window.rpCloseNotifications && window.rpCloseNotifications(); } catch (e) {}
     if (nid === 'ord' || nid === 'ordadm') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { if (nid === 'ordadm' && window.__rpOpenSales) window.__rpOpenSales(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
+    if (nid === 'msgs' || nid === 'pend') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { (nid === 'msgs' ? window.__rpOpenMsgs : window.__rpOpenPending)(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
     if (nid === 'pay') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { if (window.__rpOpenPremium) window.__rpOpenPremium(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
     setTimeout(function () { try { requestNovelAccess(nid, 'details'); } catch (e) { flash('الرواية مش متاحة دلوقتي'); } }, 150);
   };
@@ -11430,6 +11434,7 @@ document.addEventListener('click', function (e) {
   function top() { var p = $('rp-acct-page'); if (p) p.scrollTop = 0; }
 
   window.rpOpenAccount = function () {
+    try { var pg0 = $('rp-acct-page'); if (pg0) pg0.__key = null; } catch (e) {}
     var pg = $('rp-acct-page'); if (!pg) return;
     if (S.view !== 'editor') S.view = 'home';
     S.err = ''; if (S.view === 'home') S.menu = true;
@@ -11444,8 +11449,10 @@ document.addEventListener('click', function (e) {
     try { if (window.__appAfterOverlay) window.__appAfterOverlay(); } catch (e) {}
   }
   window.__rpBuyNovel = function (id) { try { window.rpOpenAccount(); } catch (e) {} S.view = 'buy'; S.buy = { nid: id }; S.buyStep = ''; S.payProof = ''; S.paySender = ''; S.payNote = ''; loadPremInfo(function () { if (S.view === 'buy') render(); }); render(); top(); };
-  window.__rpOpenSales = function () { if (!isAdmin()) return; S.view = 'home'; S.tab = 'sales'; S.menu = false; loadSales(); render(); };
-  window.__rpOpenPremium = function () { if (isAdmin()) { S.view = 'home'; S.tab = 'premium'; S.menu = false; loadPays(); loadPremInfo(function () { render(); }); render(); } else { S.view = 'premium'; S.premStep = 'plans'; loadPremInfo(function () { if (S.view === 'premium') render(); }); loadMyPays(); render(); } top(); };
+  window.__rpOpenMsgs = function () { if (!isAdmin()) return; S.view = 'home'; S.tab = 'msgs'; S.menu = false; markSeen('msgs'); render(); };
+  window.__rpOpenPending = function () { if (!isAdmin()) return; S.view = 'home'; S.tab = 'pending'; S.menu = false; markSeen('pending'); render(); };
+  window.__rpOpenSales = function () { if (!isAdmin()) return; S.view = 'home'; S.tab = 'sales'; markSeen('sales'); S.menu = false; loadSales(); render(); };
+  window.__rpOpenPremium = function () { if (isAdmin()) { S.view = 'home'; S.tab = 'premium'; markSeen('premium'); S.menu = false; loadPays(); loadPremInfo(function () { render(); }); render(); } else { S.view = 'premium'; S.premStep = 'plans'; loadPremInfo(function () { if (S.view === 'premium') render(); }); loadMyPays(); render(); } top(); };
   window.__rpAcctIsOpen = function () { var pg = $('rp-acct-page'); return !!(pg && pg.classList.contains('open')); };
   window.__rpAcctBack = function () {
     if (!window.__rpAcctIsOpen()) return false;
@@ -11465,7 +11472,24 @@ document.addEventListener('click', function (e) {
       .then(function (d) { S.mine = d.novels || []; })
       .then(function () { if (isAdmin()) return Promise.all([api('/api/admin/pending'), api('/api/admin/live'), api('/api/admin/payments').catch(function () { return { payments: [] }; })]).then(function (a) { S.pending = a[0].novels || []; S.live = a[1].novels || []; S.payPending = a[2].payments || []; }); })
       .catch(function (e) { if (e.status !== 401) S.err = e.message; })
-      .then(function () { S.loading = false; if (S.view === 'home') render(); });
+      .then(function () { S.loading = false; loadAdminBadges(); if (S.view === 'home') render(); });
+  }
+  /* علامات حمراء للأدمن: اللي لسه ما اتشافش */
+  function seenGet(k) { try { return JSON.parse(lsGet('rp_seen_' + k) || '[]'); } catch (e) { return []; } }
+  function listFor(k) { return k === 'pending' ? S.pending : k === 'sales' ? S.orders : k === 'premium' ? S.payPending : k === 'msgs' ? CTX.list : null; }
+  function unseenN(k) { var L = listFor(k); if (!L) return 0; var sn = seenGet(k); return L.filter(function (x) { return sn.indexOf(String(x.id)) < 0; }).length; }
+  function markSeen(k) { var L = listFor(k); if (!L) return; try { lsSet('rp_seen_' + k, JSON.stringify(L.map(function (x) { return String(x.id); }).slice(-300))); } catch (e) {} }
+  function loadAdminBadges() {
+    if (!isAdmin()) return;
+    api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
+    api('/api/admin/orders').then(function (d) { S.orders = d.orders || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
+  }
+  function achCard() {
+    var A = window.__rpAch; if (!A) return ''; var s = A.get(); try { A.check(); } catch (e) {}
+    var got = A.defs.filter(function (d) { return s.got[d.id]; }).length, m = Math.floor(s.sec / 60), hrs = m >= 60 ? (Math.floor(m / 60) + ' س ' + (m % 60) + ' د') : m + ' د';
+    return '<div class="rp-card"><h3>' + ic('trophy') + ' إنجازاتي <small style="font-weight:600;opacity:.7">' + got + '/' + A.defs.length + '</small></h3>' +
+      '<div class="rp-stats"><div class="rp-stat"><b>' + s.ch + '</b><span>فصل اتقرا</span></div><div class="rp-stat"><b>' + hrs + '</b><span>وقت القراءة</span></div><div class="rp-stat"><b>' + A.streak(s) + '</b><span>أيام ورا بعض</span></div></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:12px">' + A.defs.map(function (d) { var ok = !!s.got[d.id]; return '<div title="' + esc(d.d) + '" style="text-align:center;padding:10px 4px;border-radius:14px;background:' + (ok ? 'linear-gradient(135deg,rgba(245,158,11,.18),rgba(236,72,153,.15))' : 'rgba(148,163,184,.12)') + ';opacity:' + (ok ? 1 : .55) + ';' + (ok ? '' : 'filter:grayscale(1)') + '"><div style="font-size:1.7rem">' + d.ic + '</div><div style="font-weight:800;font-size:.72rem;margin-top:2px">' + esc(d.t) + '</div><div style="font-size:.62rem;opacity:.75">' + esc(d.d) + '</div></div>'; }).join('') + '</div></div>';
   }
   function render() { /* بنحافظ على مكان شريط التبويبات علشان ما يرجعش للأول لوحده */
     var el0 = body(), ts = el0 && el0.querySelector('.rp-tabs'), sl = ts ? ts.scrollLeft : null;
@@ -11476,6 +11500,7 @@ document.addEventListener('click', function (e) {
     var el = body(); if (!el) return;
     try { if (window.RadPadSecure) window.RadPadSecure.set(!isAdmin()); } catch (e) {}
     var pg = $('rp-acct-page'); if (pg) pg.classList.toggle('editing', S.view === 'editor' && !!token());
+    if (pg) { var ak = (S.menu ? 'menu' : S.view + ':' + S.tab); pg.classList.toggle('rp-still', pg.__key === ak); pg.__key = ak; }
     if (!base()) { setTitle('حسابي'); el.innerHTML = '<div class="rp-card"><div class="rp-empty">' + ic('plug-circle-xmark') + 'الحسابات مش متاحة دلوقتي.<br>' + (function () { try { return isReaderOnlyMode ? 'جرّب بعد شوية.' : 'حط رابط سيرفر الحسابات في لوحة التحكم (تبويب «التطبيق والإشعارات»).'; } catch (e) { return ''; } })() + '</div></div>' + themeCard(); return; }
     if (!token() || !me()) return renderAuth();
     if (S.view === 'editor') return renderEditor();
@@ -11577,10 +11602,10 @@ document.addEventListener('click', function (e) {
     var hero = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b style="font-size:1.15rem;display:block">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span> <button type="button" class="rp-pill" data-act="viewprofile" style="margin-top:6px;border:0;cursor:pointer">' + ic('user') + ' صفحتي</button></div></div>' +
       '<div class="rp-stats"><div class="rp-stat"><b>' + (S.mine.length + SM.length) + '</b><span>رواياتي</span></div><div class="rp-stat"><b>' + (liveN + SM.length) + '</b><span>منشورة</span></div><div class="rp-stat"><b>' + (chs + smCh) + '</b><span>فصل</span></div><div class="rp-stat"><b>' + S.mine.filter(function (n) { return n.status === 'pending'; }).length + '</b><span>مراجعة</span></div></div></div>';
     if (S.myPts == null && !S._pt) { S._pt = 1; api('/api/me/points').then(function (d) { S.myPts = d.points || 0; if (S.view === 'home' && S.tab === 'about') render(); }).catch(function () {}); }
-    hero += streakCard() + premCard() + libraryCard() + earnCard() + ptsMini();
+    hero += streakCard() + achCard() + premCard() + libraryCard() + earnCard() + ptsMini();
     var html = '';
     var tabs = [['about', 'user', 'عني'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز'], ['news', 'newspaper', 'الأخبار الأدبية'], ['quotes', 'quote-right', 'اقتباساتي'], ['contact', 'envelope', 'تواصل معنا']];
-    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', S.pending.length], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', (S.orders || []).length], ['premium', 'crown', 'Premium', (S.payPending || []).length], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل'], ['actest', 'gavel', 'إدارة المسابقات'], ['backup', 'database', 'النسخ الاحتياطي']);
+    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['actest', 'gavel', 'إدارة المسابقات'], ['backup', 'database', 'النسخ الاحتياطي']);
     var MI = { about: ['#0f766e', 'اللي يخصك: بياناتك ومحفظتك ومكتبتك'], novels: ['#7c3aed', 'اكتب وانشر رواياتك'], settings: ['#475569', 'الصوت، الأجهزة، الحساب'], contest: ['#d97706', 'اشترك واكسب جوايز'], points: ['#ca8a04', 'نقاطك وقرعة الأسبوع'], pending: ['#dc2626', 'روايات مستنية موافقتك'], live: ['#059669', 'اللي نزل من الناس'], users: ['#2563eb', 'الحسابات والزوار والـ IP'], sales: ['#db2777', 'الطلبات والأرباح'], premium: ['#9333ea', 'الاشتراكات والصوت'], bc: ['#ea580c', 'ابعت إشعار لكل الناس'], news: ['#0d9488', 'آخر أخبار عالم الأدب'], quotes: ['#e11d48', 'جمل حفظتها من الروايات'], contact: ['#4f46e5', 'استفسار أو شكوى أو اقتراح'], msgs: ['#7c3aed', 'رسائل المستخدمين'], actest: ['#0891b2', 'أسئلة وجوايز المسابقات'], backup: ['#64748b', 'نسخة احتياطية'] };
     if (S.menu) {
       var av = u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : '<span>' + esc((u.name || '؟').trim().charAt(0)) + '</span>';
@@ -12052,6 +12077,7 @@ document.addEventListener('click', function (e) {
     h += '<h3 style="margin-top:16px">⚙️ الإعدادات العامة</h3><label class="rp-lbl">المزوّد الافتراضي للروايات الجديدة</label><select id="rp-tt-dp" class="rp-in"><option value="gemini"' + (c.defProv !== 'azure' && c.defProv !== 'gemini2' && c.defProv !== 'gemini3' ? ' selected' : '') + '>جوجل Gemini</option><option value="gemini2"' + (c.defProv === 'gemini2' ? ' selected' : '') + '>جوجل Gemini 2 (حساب تاني)</option><option value="gemini3"' + (c.defProv === 'gemini3' ? ' selected' : '') + '>جوجل Gemini 3 (حساب تالت)</option><option value="azure"' + (c.defProv === 'azure' ? ' selected' : '') + '>مايكروسوفت Azure</option></select>' +
       '<label class="rp-lbl">أصوات متعددة</label><select id="rp-tt-multi" class="rp-in"><option value="1"' + (c.multi !== false ? ' selected' : '') + '>شغّالة: راوي + راجل + ست + ولد + بنت</option><option value="0"' + (c.multi === false ? ' selected' : '') + '>مقفولة: صوت الراوي بس</option></select>' +
       '<label class="rp-lbl">زرار «استمع للفصل» عند المستخدمين</label><select id="rp-tt-hide" class="rp-in"><option value="0"' + (c.hideListen ? '' : ' selected') + '>ظاهر</option><option value="1"' + (c.hideListen ? ' selected' : '') + '>مخفي من التطبيق والموقع كله (محدش يشوفه ولا يسمع)</option></select>' +
+      '<label class="rp-lbl">السرعة (أصوات اتنين في طلب واحد)</label><select id="rp-tt-mm" class="rp-in"><option value="1"' + (c.mm !== false ? ' selected' : '') + '>سريع (زي أول نسخة): الراوي والشخصية في طلب واحد — فصول أكتر في اليوم</option><option value="0"' + (c.mm === false ? ' selected' : '') + '>جودة أعلى: كل صوت في طلب لوحده — فصول أقل في اليوم</option></select>' +
       '<label class="rp-lbl">وضع توفير الطلبات (للحساب المجاني: 10 طلبات في اليوم بس)</label><select id="rp-tt-econ" class="rp-in"><option value="1"' + (c.econ !== false ? ' selected' : '') + '>شغّال: أجزاء أكبر وطلبات أقل (فصول أكتر في اليوم، وتغيير الأصوات أقل)</option><option value="0"' + (c.econ === false ? ' selected' : '') + '>مقفول: أجزاء صغيرة وأصوات أدق (محتاج حساب جوجل بفوترة)</option></select>' +
       '<label class="rp-lbl">التفكير الذكي في تحديد المتكلم (راجل/ست/ولد/بنت)</label><select id="rp-tt-smart" class="rp-in"><option value="1"' + (c.smart !== false ? ' selected' : '') + '>شغّال: نموذج جوجل بيقرا الفقرة ويحدد مين بيتكلم</option><option value="0"' + (c.smart === false ? ' selected' : '') + '>مقفول: تقدير بسيط بالكلمات</option></select>' +
       inp('rp-tt-ann', 'موديل التفكير (نصي)', c.annModel, 'gemini-2.5-flash', 1) +
@@ -12269,7 +12295,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'resetdev') { if (confirm('تفرّغ أجهزة ' + b.getAttribute('data-e') + ' علشان يقدر يسجّل من جهاز جديد؟')) api('/api/admin/users/' + id + '/devices/reset', { method: 'POST' }).then(function () { flash('اتفرّغت الأجهزة ✅'); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'logout') { try { api('/api/logout', { method: 'POST', body: {} }).catch(function () {}); } catch (x) {} dropTopics(); window.__rpFeed = []; try { window.__rpPaintBell && window.__rpPaintBell(); } catch (x) {} lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); S = fresh(); render(); flash('تم تسجيل الخروج'); }
     else if (a === 'menu') { S.menu = true; S.err = ''; render(); top(); }
-    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.menu = false; S.err = ''; render(); if (S.tab === 'sales') loadSales(); if (S.tab === 'contest') loadContest(); if (S.tab === 'points') loadPoints(); if (S.tab === 'actest') { loadCA(CA.week); loadCP(); } if (S.tab === 'about') { loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); loadEarn(); } if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
+    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.menu = false; S.err = ''; markSeen(S.tab); if (S.tab === 'msgs' && isAdmin()) api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; markSeen('msgs'); if (S.view === 'home' && S.tab === 'msgs') render(); }).catch(function () {}); render(); if (S.tab === 'sales') loadSales(); if (S.tab === 'contest') loadContest(); if (S.tab === 'points') loadPoints(); if (S.tab === 'actest') { loadCA(CA.week); loadCP(); } if (S.tab === 'about') { loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); loadEarn(); } if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
     else if (a === 'qpaper') { var pv = b.getAttribute('data-v') === '1'; api('/api/my/novels/' + id + '/paper', { method: 'PUT', body: { paper: pv } }).then(function () { flash(pv ? 'اتنقلت لصف الروايات الورقية 📖' : 'اتنقلت للروايات الإلكترونية 📱'); refresh(); try { loadUserNovels(); } catch (x) {} }).catch(function (x) { flash(x.message); }); }
     else if (a === 'vis') { var hide = v === '1'; if (hide && !confirm('تخفي الرواية؟ مش هتظهر لأي حد في الموقع ولا التطبيق لحد ما تظهرها تاني.')) return; api('/api/my/novels/' + id + '/visibility', { method: 'PUT', body: { hidden: hide } }).then(function () { flash(hide ? 'الرواية اتخبّت عن الناس 🙈' : 'الرواية ظهرت للناس ✅'); refresh(); try { loadUserNovels(); } catch (x) {} }).catch(function (x) { flash(x.message); }); }
     else if (a === 'siteread') { close(); try { requestNovelAccess(id, 'details'); } catch (x) {} }
@@ -12353,7 +12379,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttssave') {
       var g = function (i) { var e = $(i); return e ? e.value.trim() : ''; }, RL = ['narrator', 'man', 'woman', 'boy', 'girl'], gv = {}, azv = {};
       RL.forEach(function (r) { gv[r] = g('rp-gv-' + r); azv[r] = { v: g('rp-azv-' + r), pitch: g('rp-azp-' + r), rate: g('rp-azr-' + r) }; });
-      api('/api/admin/tts', { method: 'PUT', body: { defProv: g('rp-tt-dp'), multi: g('rp-tt-multi') !== '0', smart: g('rp-tt-smart') !== '0', econ: g('rp-tt-econ') !== '0', hideListen: g('rp-tt-hide') === '1', annModel: g('rp-tt-ann'), dict: ($('rp-tt-dict') || { value: '' }).value, dailyMin: g('rp-tt-cap'), freeMin: g('rp-tt-free'), style: g('rp-tt-st'), model: g('rp-tt-mod'), concurrency: g('rp-tt-conc'), priceIn: g('rp-tt-pin'), priceOut: g('rp-tt-pout'), gv: gv,
+      api('/api/admin/tts', { method: 'PUT', body: { defProv: g('rp-tt-dp'), multi: g('rp-tt-multi') !== '0', smart: g('rp-tt-smart') !== '0', econ: g('rp-tt-econ') !== '0', mm: g('rp-tt-mm') !== '0', hideListen: g('rp-tt-hide') === '1', annModel: g('rp-tt-ann'), dict: ($('rp-tt-dict') || { value: '' }).value, dailyMin: g('rp-tt-cap'), freeMin: g('rp-tt-free'), style: g('rp-tt-st'), model: g('rp-tt-mod'), concurrency: g('rp-tt-conc'), priceIn: g('rp-tt-pin'), priceOut: g('rp-tt-pout'), gv: gv,
         g2: { dailyMin: g('rp-g2-cap'), freeMin: g('rp-g2-free'), concurrency: g('rp-g2-conc') }, g3: { dailyMin: g('rp-g3-cap'), freeMin: g('rp-g3-free'), concurrency: g('rp-g3-conc') }, az: { region: g('rp-az-region'), dailyMin: g('rp-az-cap'), freeChars: g('rp-az-free'), price: g('rp-az-price'), concurrency: g('rp-az-conc'), voices: azv } } }).then(function (d) { TT.st = d; TT.msg = ''; render(); flash('اتحفظ ✅'); }).catch(function (x) { var o = $('rp-tt-out'); if (o) o.textContent = x.message; });
     }
     else if (a === 'ttsvoices') { api('/api/admin/tts/voices?prov=' + (b.getAttribute('data-p') || 'gemini')).then(function (d) { TT.voices = d.voices || []; TT.raw = d.raw || ''; render(); }).catch(function (x) { TT.voices = []; TT.raw = x.message; render(); }); }
@@ -12768,7 +12794,7 @@ document.addEventListener('click', function (e) {
   /* ظهور الكروت تدريجيًا مع السكرول (الصفوف + صفحة كل الروايات + الكتّاب) */
   (function () {
     if (!('IntersectionObserver' in window)) return;
-    var seen = {}, io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }); }, { threshold: 0.08 });
+    var seen = {}, io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('on'); if (e.target.__k) seen[e.target.__k] = 1; io.unobserve(e.target); } }); }, { threshold: 0.08 });
     function scan(root) {
       var cs = root.querySelectorAll('.rp-bk,.rp-li,.rp-au,.rp-rsec .rp-rhead'); var n = 0;
       for (var i = 0; i < cs.length; i++) {
@@ -12776,7 +12802,7 @@ document.addEventListener('click', function (e) {
         var k = (root.id || 'r') + ':' + ((c.querySelector('[data-rp-read]') || c).getAttribute('data-rp-read') || c.getAttribute('data-rp-author') || ('i' + i)) + ':' + c.className;
         c.classList.add('rp-rv');
         if (seen[k]) { c.classList.add('now'); continue; }
-        seen[k] = 1; c.style.setProperty('--d', (Math.min(n++, 6) * 0.06).toFixed(2) + 's'); io.observe(c);
+        c.__k = k; c.style.setProperty('--d', (Math.min(n++, 6) * 0.06).toFixed(2) + 's'); io.observe(c);
       }
     }
     function watch(id) { var w = setInterval(function () { var g = document.getElementById(id); if (!g) return; clearInterval(w); var t = null; new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { scan(g); }, 30); }).observe(g, { childList: true, subtree: true }); scan(g); }, 600); }
@@ -12861,7 +12887,7 @@ document.addEventListener('click', function (e) {
       bar.innerHTML = '<div id="rp-wp-pill" aria-hidden="true"></div>' +
         '<button type="button" id="rp-wp-star" data-wp="star"><i class="fa-solid fa-star"></i><b id="rp-wp-sn">قيّم</b></button>' +
         '<button type="button" data-wp="cm"><i class="fa-regular fa-comment"></i><b id="rp-wp-cn">0</b></button>' +
-        '<button type="button" id="rp-wp-copy" data-wp="copy"><i class="fa-regular fa-paper-plane"></i><b>نسخ الرابط</b></button>';
+        '<button type="button" id="rp-wp-copy" data-wp="copy"><i class="fa-solid fa-share-nodes"></i><b>مشاركة</b></button>';
       var pill = bar.querySelector('#rp-wp-pill');
       pill.innerHTML = [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" data-wp-rate="' + n + '" aria-label="' + n + ' نجوم"><i class="fa-solid fa-star"></i><em>' + n + '</em></button>'; }).join('');
       anchor.parentNode.insertBefore(bar, anchor);
@@ -12953,7 +12979,7 @@ document.addEventListener('click', function (e) {
     var a = b.getAttribute('data-wp');
     if (a === 'star') { if (!logged()) return needLogin('سجّل دخول الأول علشان تقيّم'); var bar0 = document.getElementById('rp-wp-bar'), pw = pill.offsetWidth || 240, bw = bar0.clientWidth, cx = b.offsetLeft + b.offsetWidth / 2; cx = Math.max(pw / 2 + 4, Math.min(bw - pw / 2 - 4, cx)); pill.style.left = cx + 'px'; pill.classList.toggle('open'); loadCm().then(function () { try { refreshBar(); } catch (x) {} }); }
     else if (a === 'cm') { if (pill) pill.classList.remove('open'); openSheet(); loadCm().then(function () { try { refreshBar(); } catch (x) {} }); }
-    else if (a === 'copy') { try { window.easyCopyLink(); } catch (x) { toast('تعذّر نسخ الرابط'); } }
+    else if (a === 'copy') { try { window.easyCopyLink(); } catch (x) { toast('تعذّرت المشاركة'); } }
     else if (a === 'close') closeSheet();
     else if (a === 'send') send();
     else if (a === 'login') { closeSheet(); try { window.rpOpenAccount(); } catch (x) {} }
@@ -13051,7 +13077,19 @@ document.addEventListener('click', function (e) {
     var wb = setInterval(function () { var b = $('reader-chapter-body'); if (!b) return; clearInterval(wb); var t = null; new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { var p = $('reader-paper'); if (p) { p.classList.remove('rp-chin'); void p.offsetWidth; p.classList.add('rp-chin'); } }, 20); }).observe(b, { childList: true }); }, 900);
   } catch (e) {}
 
-  /* ---------- 4) الاقتباسات ---------- */
+
+  /* ---------- أنيميشن أول فتح: يبدأ لما شاشة البداية تختفي ---------- */
+  (function () {
+    var done = false, t0 = Date.now();
+    function go() { if (done) return; done = true; var h = document.documentElement; h.classList.add('rp-boot'); setTimeout(function () { h.classList.remove('rp-boot'); }, 2800); }
+    var iv = setInterval(function () {
+      var sp = $('rp-splash'), ready = document.readyState === 'complete' && !!$('rp-rows');
+      if (!sp ? ready || Date.now() - t0 > 4000 : sp.style.opacity === '0') { clearInterval(iv); go(); }
+      if (Date.now() - t0 > 12000) { clearInterval(iv); go(); }
+    }, 60);
+  })();
+
+  /* ---------- 4) حماية المحتوى + المشاركة + الاقتباسات (حد 3 يوميًا / 5 سطور) ---------- */
   var QK = 'rp_quotes_v1';
   function qGet() { try { var a = JSON.parse(localStorage.getItem(QK) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
   function qSet(a) { try { localStorage.setItem(QK, JSON.stringify(a.slice(0, 200))); } catch (e) {} }
@@ -13093,31 +13131,152 @@ document.addEventListener('click', function (e) {
     list: qGet, del: function (id) { qSet(qGet().filter(function (q) { return q.id !== id; })); },
     copy: function (id) { var q = qById(id); if (q) copy(qText(q)); }, share: function (id) { var q = qById(id); if (q) share(q); }
   };
-  var btn = null, sel = '';
-  function ensureBtn() {
-    if (btn) return; btn = document.createElement('button'); btn.id = 'rp-quote-btn'; btn.type = 'button'; btn.textContent = '❝ اقتباس'; document.body.appendChild(btn);
-    btn.addEventListener('mousedown', function (e) { e.preventDefault(); }); btn.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
-    btn.addEventListener('click', function () { openQuote(sel); btn.style.display = 'none'; });
+
+  function isAdm() { try { return window.__alradadAdmin === true || (window.__rp && window.__rp.me() && window.__rp.me().role === 'admin'); } catch (e) { return false; } }
+  var QMAX = 3, QCH = 240;
+  function dayKey() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function qUsed() { try { var o = JSON.parse(localStorage.getItem('rp_qday_v1') || '{}'); return o.d === dayKey() ? (o.n | 0) : 0; } catch (e) { return 0; } }
+  function qBump() { try { localStorage.setItem('rp_qday_v1', JSON.stringify({ d: dayKey(), n: qUsed() + 1 })); } catch (e) {} }
+
+  /* منع نسخ نص الفصول */
+  (function () {
+    var st = document.createElement('style');
+    st.textContent = '#reader-chapter-body,#reader-paper,#reader-chapter-body *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important}' +
+      '@media print{#view-reader,#reader-paper{display:none!important}body:before{content:"المحتوى محمي";display:block;text-align:center;padding:40px;font:700 20px sans-serif}}';
+    document.head.appendChild(st);
+    function inReader(t) { try { var n = t && t.nodeType === 3 ? t.parentNode : t; return !!(n && n.closest && n.closest('#view-reader,#reader-paper,#reader-chapter-body')); } catch (e) { return false; } }
+    ['copy', 'cut', 'dragstart', 'contextmenu', 'selectstart'].forEach(function (ev) {
+      document.addEventListener(ev, function (e) { if (isAdm()) return; if (inReader(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);
+    });
+    document.addEventListener('copy', function (e) {
+      if (isAdm()) return; var s = window.getSelection && window.getSelection(); if (s && s.anchorNode && inReader(s.anchorNode)) { e.preventDefault(); try { e.clipboardData.setData('text/plain', ''); } catch (x) {} }
+    }, true);
+    document.addEventListener('keydown', function (e) {
+      if (isAdm()) return; var v = $('view-reader'); if (!v || v.classList.contains('hidden')) return;
+      var k = (e.key || '').toLowerCase(); if ((e.ctrlKey || e.metaKey) && (k === 'c' || k === 'x' || k === 'p' || k === 's' || k === 'u' || k === 'a')) e.preventDefault();
+    }, true);
+  })();
+
+  /* المشاركة بدل نسخ الرابط (نص فقط بدون أي رابط فصل) */
+  function shareText() {
+    var m = meta(), idx = 0; try { idx = parseInt(($('reader-chapter-select-top') || {}).value, 10); if (isNaN(idx)) idx = currentChapterIndex || 0; } catch (e) { idx = 0; }
+    var url = ''; try { url = (siteConfig && siteConfig.appDownloadUrl) || ''; } catch (e) {}
+    return '📖 رواية: ' + m.n + '\n📌 الفصل ' + (idx + 1) + (m.c ? ' — ' + m.c : '') + '\n✍️ بقلم: ' + (m.a || '—') + '\n📱 تطبيق: RadPad' + (url ? '\n\nلتحميل التطبيق من هنا:\n' + url : '');
   }
-  function onSel() {
-    var s = window.getSelection ? window.getSelection() : null, body = $('reader-chapter-body'); ensureBtn();
-    if (!s || s.isCollapsed || !body || !s.anchorNode || !body.contains(s.anchorNode) || $('view-reader').classList.contains('hidden')) { btn.style.display = 'none'; return; }
-    var t = String(s.toString()).replace(/\s+/g, ' ').trim(); if (t.length < 8) { btn.style.display = 'none'; return; }
-    sel = t.slice(0, 600);
-    var r = s.getRangeAt(0).getBoundingClientRect(); btn.style.display = 'block';
-    var top = Math.min(window.innerHeight - 60, r.bottom + 14); btn.style.top = Math.max(70, top) + 'px'; btn.style.left = Math.max(10, Math.min(window.innerWidth - 120, r.left + r.width / 2 - 50)) + 'px';
+  window.rpShareChapter = function () {
+    var t = shareText();
+    try { if (navigator.share) { navigator.share({ text: t }).catch(function () {}); return; } } catch (e) {}
+    copy(t);
+  };
+  window.easyCopyLink = window.rpShareChapter;
+  window.updateBlogUrl = function () {};
+  try { var u0 = new URL(location.href); if (u0.searchParams.has('chapter')) { u0.searchParams.delete('novel'); u0.searchParams.delete('chapter'); history.replaceState(null, '', u0.pathname + (u0.search || '') + u0.hash); } } catch (e) {}
+
+  /* اختيار الاقتباس: ضغطة مطوّلة (أو لمستين) على أي جملة */
+  function sentencesOf(txt) {
+    var out = [], re = /[^.!؟?…\n]+[.!؟?…]*["»”)]?\s*/g, m;
+    while ((m = re.exec(txt))) { var x = m[0].replace(/\s+/g, ' ').trim(); if (x) out.push(x); }
+    return out;
   }
-  var st = null; document.addEventListener('selectionchange', function () { clearTimeout(st); st = setTimeout(onSel, 160); });
-  function openQuote(t) {
-    var m = meta(), q = { id: 'q' + Date.now().toString(36), t: t, n: m.n, c: m.c, a: m.a, ts: Date.now() };
+  function pointInfo(x, y) {
+    var node = null, off = 0, r;
+    if (document.caretRangeFromPoint) { r = document.caretRangeFromPoint(x, y); if (r) { node = r.startContainer; off = r.startOffset; } }
+    else if (document.caretPositionFromPoint) { var p = document.caretPositionFromPoint(x, y); if (p) { node = p.offsetNode; off = p.offset; } }
+    if (!node) return null;
+    var el = node.nodeType === 3 ? node.parentNode : node, body = $('reader-chapter-body');
+    if (!el || !body || !body.contains(el)) return null;
+    var blk = el; while (blk && blk !== body && !/^(P|DIV|LI|BLOCKQUOTE|H[1-6])$/.test(blk.tagName)) blk = blk.parentNode;
+    if (!blk || blk === body) blk = el;
+    var txt = blk.textContent || '', pre = 0;
+    try { var rr = document.createRange(); rr.selectNodeContents(blk); rr.setEnd(node, off); pre = rr.toString().length; } catch (e) {}
+    var ss = sentencesOf(txt), acc = 0, k = 0;
+    for (var i = 0; i < ss.length; i++) { acc += ss[i].length + 1; if (pre <= acc) { k = i; break; } k = i; }
+    return ss.length ? { ss: ss, k: k } : null;
+  }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function clip(t) { if (t.length <= QCH) return t; var c = t.slice(0, QCH); var sp = c.lastIndexOf(' '); return (sp > 120 ? c.slice(0, sp) : c) + '…'; }
+  function openPicker(info) {
+    if (qUsed() >= QMAX) { toast('خلّصت اقتباساتك النهارده (' + QMAX + ' في اليوم) ❝ ارجع بكرة'); return; }
+    var a = info.k, b = info.k, ss = info.ss, q = null, counted = false;
     var ov = $('rp-quote-ov'); if (!ov) { ov = document.createElement('div'); ov.id = 'rp-quote-ov'; document.body.appendChild(ov); ov.addEventListener('click', function (e) { if (e.target === ov) ov.classList.remove('open'); }); }
-    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-    ov.innerHTML = '<div class="rp-qcard"><div class="q">❝ ' + esc(t) + ' ❞</div><div class="m">' + esc(q.n) + (q.c ? ' · ' + esc(q.c) : '') + '</div><div class="rp-qact"><button class="p" id="rp-q-save">⭐ حفظ</button><button id="rp-q-share">مشاركة</button><button id="rp-q-copy">نسخ</button><button id="rp-q-x">إغلاق</button></div></div>';
-    ov.classList.add('open');
-    $('rp-q-save').onclick = function () { var a = qGet(); a.unshift(q); qSet(a); toast('اتحفظ في اقتباساتي ⭐'); ov.classList.remove('open'); };
-    $('rp-q-share').onclick = function () { share(q); }; $('rp-q-copy').onclick = function () { copy(qText(q)); }; $('rp-q-x').onclick = function () { ov.classList.remove('open'); };
-    try { window.getSelection().removeAllRanges(); } catch (e) {}
+    function cur() { return clip(ss.slice(a, b + 1).join(' ')); }
+    function draw() {
+      var t = cur(), m = meta(), left = QMAX - qUsed();
+      q = { id: 'q' + Date.now().toString(36), t: t, n: m.n, c: m.c, a: m.a, ts: Date.now() };
+      ov.innerHTML = '<div class="rp-qcard"><div class="q">❝ ' + esc(t) + ' ❞</div><div class="m">' + esc(m.n) + (m.c ? ' · ' + esc(m.c) : '') + '</div>' +
+        '<div class="rp-qact"><button id="rp-q-pv">⬆ جملة قبل</button><button id="rp-q-nx">جملة بعد ⬇</button><button id="rp-q-sh">تقليل</button></div>' +
+        '<div class="rp-qact"><button class="p" id="rp-q-save">⭐ حفظ</button><button id="rp-q-share">مشاركة</button><button id="rp-q-copy">نسخ</button><button id="rp-q-x">إغلاق</button></div>' +
+        '<div class="m" style="margin-top:8px;font-size:11px">باقي ' + left + ' اقتباس النهارده · الحد الأقصى 5 سطور</div></div>';
+      $('rp-q-pv').onclick = function () { if (a > 0 && clip(ss.slice(a - 1, b + 1).join(' ')).length >= 0 && ss.slice(a - 1, b + 1).join(' ').length <= QCH) { a--; draw(); } else toast('وصلت للحد الأقصى (5 سطور)'); };
+      $('rp-q-nx').onclick = function () { if (b < ss.length - 1 && ss.slice(a, b + 2).join(' ').length <= QCH) { b++; draw(); } else toast('وصلت للحد الأقصى (5 سطور)'); };
+      $('rp-q-sh').onclick = function () { if (b > a) { b--; draw(); } else if (a < b) { a++; draw(); } };
+      function use() { if (!ov.classList.contains('open')) return false; if (!counted) { if (qUsed() >= QMAX) { toast('خلّصت اقتباساتك النهارده'); return false; } qBump(); counted = true; } return true; }
+      $('rp-q-save').onclick = function () { if (!use()) return; var l = qGet(); l.unshift(q); qSet(l); toast('اتحفظ في اقتباساتي ⭐'); ov.classList.remove('open'); };
+      $('rp-q-share').onclick = function () { if (!use()) return; share(q); };
+      $('rp-q-copy').onclick = function () { if (!use()) return; copy(qText(q)); };
+      $('rp-q-x').onclick = function () { ov.classList.remove('open'); };
+    }
+    draw(); ov.classList.add('open');
   }
+  (function () {
+    var timer = null, sx = 0, sy = 0, lastTap = 0;
+    function start(x, y) { clearTimeout(timer); sx = x; sy = y; timer = setTimeout(function () { var i = pointInfo(x, y); if (i) { try { navigator.vibrate && navigator.vibrate(15); } catch (e) {} openPicker(i); } }, 520); }
+    function cancel() { clearTimeout(timer); }
+    document.addEventListener('touchstart', function (e) { var t = e.target; if (!t.closest || !t.closest('#reader-chapter-body') || !e.touches[0]) return; start(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    document.addEventListener('touchmove', function (e) { if (e.touches[0] && (Math.abs(e.touches[0].clientX - sx) > 10 || Math.abs(e.touches[0].clientY - sy) > 10)) cancel(); }, { passive: true });
+    document.addEventListener('touchend', cancel, { passive: true }); document.addEventListener('touchcancel', cancel, { passive: true });
+    document.addEventListener('mousedown', function (e) { if (e.button === 0 && e.target.closest && e.target.closest('#reader-chapter-body')) start(e.clientX, e.clientY); });
+    document.addEventListener('mouseup', cancel); document.addEventListener('mousemove', function (e) { if (Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10) cancel(); });
+  })();
+
+  /* ---------- 5) الإنجازات وإحصائيات القراءة + كونفيتي ---------- */
+  var AK = 'rp_ach_v1';
+  var DEFS = [
+    { id: 'c1', ic: '📖', t: 'أول فصل', d: 'افتح أول فصل ليك', f: function (s) { return s.ch >= 1; } },
+    { id: 'c10', ic: '📚', t: 'قارئ نشيط', d: '10 فصول', f: function (s) { return s.ch >= 10; } },
+    { id: 'c50', ic: '🏅', t: 'دودة كتب', d: '50 فصل', f: function (s) { return s.ch >= 50; } },
+    { id: 'c200', ic: '👑', t: 'أسطورة القراءة', d: '200 فصل', f: function (s) { return s.ch >= 200; } },
+    { id: 't60', ic: '⏱️', t: 'ساعة قراءة', d: '60 دقيقة قراءة', f: function (s) { return s.sec >= 3600; } },
+    { id: 't600', ic: '⌛', t: 'عاشق الحكايات', d: '10 ساعات قراءة', f: function (s) { return s.sec >= 36000; } },
+    { id: 'n3', ic: '🧭', t: 'مستكشف', d: 'اقرا من 3 روايات مختلفة', f: function (s) { return Object.keys(s.nov).length >= 3; } },
+    { id: 's3', ic: '🔥', t: '3 أيام ورا بعض', d: 'ادخل وإنت بتقرا 3 أيام', f: function (s) { return streak(s) >= 3; } },
+    { id: 's7', ic: '🌟', t: 'أسبوع كامل', d: '7 أيام ورا بعض', f: function (s) { return streak(s) >= 7; } },
+    { id: 'q1', ic: '❝', t: 'صائد الاقتباسات', d: 'احفظ أول اقتباس', f: function () { return qGet().length >= 1; } },
+    { id: 'q5', ic: '✨', t: 'جامع الدرر', d: 'احفظ 5 اقتباسات', f: function () { return qGet().length >= 5; } },
+    { id: 'ow', ic: '🦉', t: 'بومة الليل', d: 'اقرا بعد منتصف الليل', f: function (s) { return !!s.owl; } }
+  ];
+  function aGet() { try { var o = JSON.parse(localStorage.getItem(AK) || '{}'); o.ch = o.ch | 0; o.sec = o.sec | 0; o.days = o.days || []; o.nov = o.nov || {}; o.got = o.got || {}; o.seen = o.seen || {}; return o; } catch (e) { return { ch: 0, sec: 0, days: [], nov: {}, got: {}, seen: {} }; } }
+  function aSet(o) { try { o.days = o.days.slice(-90); localStorage.setItem(AK, JSON.stringify(o)); } catch (e) {} }
+  function dkey(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function streak(s) { var n = 0, d = new Date(); if (s.days.indexOf(dkey(d)) < 0) d.setDate(d.getDate() - 1); while (s.days.indexOf(dkey(d)) >= 0) { n++; d.setDate(d.getDate() - 1); } return n; }
+  function confetti() {
+    try {
+      if (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+      var c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:2147483000;pointer-events:none'; c.width = innerWidth; c.height = innerHeight; document.body.appendChild(c);
+      var x = c.getContext('2d'), cols = ['#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#a855f7', '#fde047'], P = [];
+      for (var i = 0; i < 110; i++) P.push({ x: c.width / 2, y: c.height * .55, vx: (Math.random() - .5) * 15, vy: -Math.random() * 16 - 5, s: 5 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[i % cols.length] });
+      var t0 = Date.now();
+      (function f() { var el = Date.now() - t0; x.clearRect(0, 0, c.width, c.height); P.forEach(function (p) { p.vy += .35; p.x += p.vx; p.y += p.vy; p.r += p.vr; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.globalAlpha = Math.max(0, 1 - el / 2600); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); x.restore(); }); if (el < 2600) requestAnimationFrame(f); else c.remove(); })();
+    } catch (e) {}
+  }
+  function check() {
+    var s = aGet(), fresh = [];
+    DEFS.forEach(function (d) { if (!s.got[d.id] && d.f(s)) { s.got[d.id] = Date.now(); fresh.push(d); } });
+    if (fresh.length) { aSet(s); confetti(); fresh.forEach(function (d, i) { setTimeout(function () { toast('🎉 إنجاز جديد: ' + d.ic + ' ' + d.t); }, i * 1800); }); }
+    return s;
+  }
+  window.__rpAch = { get: aGet, defs: DEFS, streak: streak, check: check };
+  (function () {
+    function visible() { var v = $('view-reader'); return v && !v.classList.contains('hidden') && !document.hidden; }
+    var lastKey = '';
+    function onChapter() {
+      if (!visible()) return; var k = ''; try { k = currentNovelId + ':' + currentChapterIndex; } catch (e) { return; } if (k === lastKey) return; lastKey = k;
+      var s = aGet(); if (s.seen[k]) return; s.seen[k] = 1; var ks = Object.keys(s.seen); if (ks.length > 600) delete s.seen[ks[0]];
+      s.ch++; try { s.nov[String(currentNovelId)] = 1; } catch (e) {} var dk = dkey(new Date()); if (s.days.indexOf(dk) < 0) s.days.push(dk); if (new Date().getHours() < 4) s.owl = 1; aSet(s); check();
+    }
+    var wait = setInterval(function () { var b = $('reader-chapter-body'); if (!b) return; clearInterval(wait); var t = null; new MutationObserver(function () { clearTimeout(t); t = setTimeout(onChapter, 1500); }).observe(b, { childList: true, subtree: true }); }, 500);
+    setInterval(function () { if (!visible()) return; var s = aGet(); s.sec += 10; var dk = dkey(new Date()); if (s.days.indexOf(dk) < 0) s.days.push(dk); if (new Date().getHours() < 4) s.owl = 1; aSet(s); if (s.sec % 600 === 0 || s.sec === 3600) check(); }, 10000);
+  })();
 })();
 </script>
 <!-- ==================== الصوت المصري العصبي من سيرفر خارجي (اختياري) ==================== -->
@@ -13242,23 +13401,21 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     st.textContent = READY.hide ? '#tts-start-btn,#tts-hint,.rp-aud{display:none!important}' : '.rp-aud{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;border-radius:999px;font:800 .7rem Cairo,sans-serif;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.35);animation:rpAudIn .5s ease backwards}@keyframes rpAudIn{from{opacity:0;transform:translateY(6px) scale(.9)}to{opacity:1;transform:none}}';
   }
   function paintAud() {
-    if (READY.hide) return; var g = document.getElementById('novels-grid'); if (!g) return;
-    var hs = g.querySelectorAll('h3[onclick*="requestNovelAccess"]');
+    if (READY.hide) return;
+    var hs = document.querySelectorAll('h3[onclick*="requestNovelAccess"],.rp-bk-t[data-rp-read]');
     for (var i = 0; i < hs.length; i++) {
-      var h = hs[i], m = /requestNovelAccess\('([^']+)'/.exec(h.getAttribute('onclick') || ''); if (!m) continue;
-      var v = READY.novels[m[1]], nx = h.nextElementSibling;
-      if (nx && nx.classList && nx.classList.contains('rp-aud')) { if (!v) nx.remove(); else nx.textContent = '🎧 صوتية · ' + v.d + ' فصل جاهز'; continue; }
+      var h = hs[i], id = h.getAttribute('data-rp-read'); if (!id) { var m = /requestNovelAccess\('([^']+)'/.exec(h.getAttribute('onclick') || ''); id = m && m[1]; } if (!id) continue;
+      var v = READY.novels[id], nx = h.nextElementSibling, txt = v ? '🎧 صوتية · ' + v.d + ' فصل جاهز' : '';
+      if (nx && nx.classList && nx.classList.contains('rp-aud')) { if (!v) nx.remove(); else if (nx.textContent !== txt) nx.textContent = txt; continue; }
       if (!v) continue;
-      var b = document.createElement('div'); b.className = 'rp-aud'; b.textContent = '🎧 صوتية · ' + v.d + ' فصل جاهز'; h.parentNode.insertBefore(b, h.nextSibling);
+      var b = document.createElement('div'); b.className = 'rp-aud'; b.textContent = txt; h.parentNode.insertBefore(b, h.nextSibling);
     }
   }
   function loadReady() {
     if (!base()) return;
     fetch(base() + '/api/tts/ready').then(function (r) { return r.json(); }).then(function (d) { READY = { hide: !!d.hide, novels: d.novels || {} }; applyHide(); paintAud(); }).catch(function () {});
   }
-  try {
-    var gridWait = setInterval(function () { var g = document.getElementById('novels-grid'); if (!g) return; clearInterval(gridWait); var t = null; new MutationObserver(function () { clearTimeout(t); t = setTimeout(paintAud, 80); }).observe(g, { childList: true }); paintAud(); }, 700);
-  } catch (e) {}
+  try { var at = null; new MutationObserver(function () { clearTimeout(at); at = setTimeout(paintAud, 150); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
   setTimeout(loadReady, 1500); setInterval(loadReady, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) loadReady(); });
   window.NXCloudTTS = { available: available, enabled: enabled, usable: usable, allowed: allowed, upsell: upsell, speak: speak, stop: stop, noteFail: noteFail, resetSession: function () { sessionOff = false; lastUnavail = false; forced = null; }, _opt: opt };
 })();
