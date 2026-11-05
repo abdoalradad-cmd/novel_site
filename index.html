@@ -479,6 +479,7 @@ html.dark .rp-fbtn.on{background:#1a2740;color:#cbd5e1}
 .rp-pf-sec{margin:20px 2px 10px;font:900 1.05rem Cairo,sans-serif;display:flex;align-items:center;gap:8px}
 .rp-pf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:14px}
 .rp-pf-grid .rp-bk{width:auto}
+.rp-bk-m{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rp-bbs{display:flex;flex-direction:row;gap:5px;margin-top:auto}.rp-bbs .rp-bb{flex:1 1 0;width:auto;min-width:0;padding:8px 2px;font-size:.68rem;gap:4px;margin:0}.rp-bbs .rp-bb i{font-size:.72rem}.rp-bbs .rp-bb+.rp-bb{margin-top:0}
 </style>
 <style id="rp-acct-style">
 #rp-acct-page{display:none;position:fixed;left:0;right:0;top:var(--sat,0px);bottom:0;z-index:9310;overflow-y:auto;background:#eef1ee;color:#0f172a;direction:rtl;font-family:var(--ui-font,Cairo,sans-serif);-webkit-overflow-scrolling:touch}
@@ -11670,6 +11671,7 @@ document.addEventListener('click', function (e) {
     if (t === 'sales') return salesTab();
     if (t === 'backup') return '<div class="rp-card"><h3>' + ic('database') + ' النسخ الاحتياطي</h3><p class="rp-sub">روايات الناس وحساباتهم محفوظة على Cloudflare. حمّل نسخة احتياطية كل فترة واحتفظ بيها في مكان آمن (فيها بيانات الحسابات، فما تشاركهاش مع حد) وتقدر ترجّعها لو حصلت مشكلة.</p><div class="rp-row"><button type="button" class="rp-btn" data-act="backup">' + ic('download') + ' تحميل نسخة</button><button type="button" class="rp-btn sec" data-act="restore">' + ic('upload') + ' استعادة من ملف</button></div><input id="rp-restore-file" type="file" accept=".json,application/json" style="display:none"><div class="rp-err" id="rp-bk-msg" style="color:' + (S.bkColor || '#047857') + '">' + esc(S.bkMsg || '') + '</div></div>';
     return '<div class="rp-card"><h3>' + ic('feather-pointed') + ' انشر روايتك</h3><p class="rp-sub">اكتب روايتك وفصولها، اقفلها بباسورد لو عايز، حط برومو، وابعتها للمراجعة. بعد ما الأدمن يوافق هتظهر للناس في الموقع والتطبيق.</p><button type="button" class="rp-btn block" data-act="new">' + ic('plus') + ' رواية جديدة</button></div>' +
+      (isAdmin() ? '<div class="rp-card"><h3>' + ic('cloud-arrow-down') + ' استيراد رواية من واتباد (أدمن)</h3><p class="rp-sub">حط لينك الرواية على واتباد، والتطبيق يجيب كل فصولها وينشئ الرواية وينشرها علطول بدون مراجعة.</p><input id="rp-wp-url" class="rp-in" dir="ltr" placeholder="https://www.wattpad.com/story/..."><label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-weight:700;font-size:.82rem"><input type="checkbox" id="rp-wp-own"> أؤكد إن الرواية دي بتاعتي أو معايا إذن بنشرها</label><button type="button" class="rp-btn block" data-act="wpimp">' + ic('cloud-arrow-down') + ' استيراد ونشر</button><div id="rp-wp-prog" class="rp-sub" style="margin-top:8px"></div></div>' : '') +
       siteCard() + (S.mine.length ? S.mine.map(novelRow).join('') : siteMine().length ? '' : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
   }
   function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium' || t === 'actest' || t === 'bc' || t === 'msgs'; }
@@ -12101,6 +12103,7 @@ document.addEventListener('click', function (e) {
     var inp = function (id, lbl, val, ph, ltr) { return '<label class="rp-lbl">' + lbl + '</label><input id="' + id + '" class="rp-in"' + (ltr ? ' dir="ltr"' : '') + ' value="' + esc(val == null ? '' : val) + '" placeholder="' + (ph || '') + '">'; };
     h += '<h3 style="margin-top:16px">⚙️ الإعدادات العامة</h3><label class="rp-lbl">المزوّد الافتراضي للروايات الجديدة</label><select id="rp-tt-dp" class="rp-in"><option value="gemini"' + (c.defProv !== 'azure' && c.defProv !== 'gemini2' && c.defProv !== 'gemini3' ? ' selected' : '') + '>جوجل Gemini</option><option value="gemini2"' + (c.defProv === 'gemini2' ? ' selected' : '') + '>جوجل Gemini 2 (حساب تاني)</option><option value="gemini3"' + (c.defProv === 'gemini3' ? ' selected' : '') + '>جوجل Gemini 3 (حساب تالت)</option><option value="azure"' + (c.defProv === 'azure' ? ' selected' : '') + '>مايكروسوفت Azure</option></select>' +
       '<label class="rp-lbl">أصوات متعددة</label><select id="rp-tt-multi" class="rp-in"><option value="1"' + (c.multi !== false ? ' selected' : '') + '>شغّالة: راوي + راجل + ست + ولد + بنت</option><option value="0"' + (c.multi === false ? ' selected' : '') + '>مقفولة: صوت الراوي بس</option></select>' +
+      '<label class="rp-lbl">مين يقدر يسمع الروايات الصوتية</label><select id="rp-tt-open" class="rp-in"><option value="0"' + (c.listenAll ? '' : ' selected') + '>مشتركو Premium بس</option><option value="1"' + (c.listenAll ? ' selected' : '') + '>كل اللي مسجّلين دخول</option></select>' +
       '<label class="rp-lbl">زرار «استمع للفصل» عند المستخدمين</label><select id="rp-tt-hide" class="rp-in"><option value="0"' + (c.hideListen ? '' : ' selected') + '>ظاهر</option><option value="1"' + (c.hideListen ? ' selected' : '') + '>مخفي من التطبيق والموقع كله (محدش يشوفه ولا يسمع)</option></select>' +
       '<label class="rp-lbl">السرعة (أصوات اتنين في طلب واحد)</label><select id="rp-tt-mm" class="rp-in"><option value="1"' + (c.mm !== false ? ' selected' : '') + '>سريع (زي أول نسخة): الراوي والشخصية في طلب واحد — فصول أكتر في اليوم</option><option value="0"' + (c.mm === false ? ' selected' : '') + '>جودة أعلى: كل صوت في طلب لوحده — فصول أقل في اليوم</option></select>' +
       '<label class="rp-lbl">وضع توفير الطلبات (للحساب المجاني: 10 طلبات في اليوم بس)</label><select id="rp-tt-econ" class="rp-in"><option value="1"' + (c.econ !== false ? ' selected' : '') + '>شغّال: أجزاء أكبر وطلبات أقل (فصول أكتر في اليوم، وتغيير الأصوات أقل)</option><option value="0"' + (c.econ === false ? ' selected' : '') + '>مقفول: أجزاء صغيرة وأصوات أدق (محتاج حساب جوجل بفوترة)</option></select>' +
@@ -12407,7 +12410,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttssave') {
       var g = function (i) { var e = $(i); return e ? e.value.trim() : ''; }, RL = ['narrator', 'man', 'woman', 'boy', 'girl'], gv = {}, azv = {};
       RL.forEach(function (r) { gv[r] = g('rp-gv-' + r); azv[r] = { v: g('rp-azv-' + r), pitch: g('rp-azp-' + r), rate: g('rp-azr-' + r) }; });
-      api('/api/admin/tts', { method: 'PUT', body: { defProv: g('rp-tt-dp'), multi: g('rp-tt-multi') !== '0', smart: g('rp-tt-smart') !== '0', econ: g('rp-tt-econ') !== '0', mm: g('rp-tt-mm') !== '0', hideListen: g('rp-tt-hide') === '1', annModel: g('rp-tt-ann'), dict: ($('rp-tt-dict') || { value: '' }).value, dailyMin: g('rp-tt-cap'), freeMin: g('rp-tt-free'), style: g('rp-tt-st'), model: g('rp-tt-mod'), concurrency: g('rp-tt-conc'), priceIn: g('rp-tt-pin'), priceOut: g('rp-tt-pout'), gv: gv,
+      api('/api/admin/tts', { method: 'PUT', body: { defProv: g('rp-tt-dp'), multi: g('rp-tt-multi') !== '0', smart: g('rp-tt-smart') !== '0', econ: g('rp-tt-econ') !== '0', mm: g('rp-tt-mm') !== '0', hideListen: g('rp-tt-hide') === '1', listenAll: g('rp-tt-open') === '1', annModel: g('rp-tt-ann'), dict: ($('rp-tt-dict') || { value: '' }).value, dailyMin: g('rp-tt-cap'), freeMin: g('rp-tt-free'), style: g('rp-tt-st'), model: g('rp-tt-mod'), concurrency: g('rp-tt-conc'), priceIn: g('rp-tt-pin'), priceOut: g('rp-tt-pout'), gv: gv,
         g2: { dailyMin: g('rp-g2-cap'), freeMin: g('rp-g2-free'), concurrency: g('rp-g2-conc') }, g3: { dailyMin: g('rp-g3-cap'), freeMin: g('rp-g3-free'), concurrency: g('rp-g3-conc') }, az: { region: g('rp-az-region'), dailyMin: g('rp-az-cap'), freeChars: g('rp-az-free'), price: g('rp-az-price'), concurrency: g('rp-az-conc'), voices: azv } } }).then(function (d) { TT.st = d; TT.msg = ''; render(); flash('اتحفظ ✅'); }).catch(function (x) { var o = $('rp-tt-out'); if (o) o.textContent = x.message; });
     }
     else if (a === 'ttsvoices') { api('/api/admin/tts/voices?prov=' + (b.getAttribute('data-p') || 'gemini')).then(function (d) { TT.voices = d.voices || []; TT.raw = d.raw || ''; render(); }).catch(function (x) { TT.voices = []; TT.raw = x.message; render(); }); }
@@ -12477,6 +12480,20 @@ document.addEventListener('click', function (e) {
     else if (a === 'cmsave') {
       var bd = {}; ['perCh', 'perDay', 'pts', 'minLen', 'dayPts', 'newsPerDay'].forEach(function (k) { bd[k] = +(($('rp-cm-' + k) || {}).value); });
       api('/api/admin/cmt', { method: 'PUT', body: bd }).then(function (d) { PT.cf = d; flash('اتحفظت إعدادات التعليقات ✅'); render(); }).catch(function (x) { flash(x.message); });
+    }
+    else if (a === 'wpimp') {
+      var wu = (($('rp-wp-url') || {}).value || '').trim(), pg = function (m, bad) { var e = $('rp-wp-prog'); if (e) { e.textContent = m; e.style.color = bad ? '#dc2626' : ''; } };
+      if (!/wattpad\.com/.test(wu)) { flash('حط لينك واتباد صحيح'); return; }
+      if (!($('rp-wp-own') || {}).checked) { flash('أكّد إن الرواية بتاعتك أو معاك إذن'); return; }
+      b.disabled = true; pg('بجيب بيانات الرواية…');
+      api('/api/admin/import/wattpad', { method: 'POST', body: { url: wu } }).then(function (info) {
+        pg('لقيت «' + info.title + '» — ' + info.parts.length + ' فصل. بنشئ الرواية…');
+        return api('/api/my/novels', { method: 'POST', body: { title: info.title, author: info.author, genre: 'عام', synopsis: info.synopsis, cover: info.cover, chapters: [] } }).then(function (d) { return { info: info, id: d.id }; });
+      }).then(function (cx) {
+        var parts = cx.info.parts, i = 0, okN = 0, bad = 0;
+        function step() { if (i >= parts.length) return Promise.resolve(); var chunk = parts.slice(i, i + 5); i += 5; return api('/api/admin/import/wattpad/run', { method: 'POST', body: { novelId: cx.id, parts: chunk } }).then(function (r) { okN += r.ok; bad += (r.failed || []).length; pg('اتحمّل ' + okN + ' من ' + parts.length + ' فصل' + (bad ? ' (فشل ' + bad + ')' : '') + '…'); return step(); }); }
+        return step().then(function () { if (!okN) throw new Error('ماقدرتش أحمّل ولا فصل — واتباد ممكن يكون حاجب السيرفر'); pg('بنشر الرواية…'); return api('/api/my/novels/' + cx.id + '/submit', { method: 'POST', body: {} }); }).then(function () { pg('تم ✅ اتنشرت «' + cx.info.title + '» بـ ' + okN + ' فصل' + (bad ? ' (و' + bad + ' فشلوا، ضيفهم يدوي)' : '')); b.disabled = false; refresh(); });
+      }).catch(function (x) { b.disabled = false; pg('فشل: ' + x.message, true); });
     }
     else if (a === 'newsdel') { if (confirm('تمسح الخبر؟')) api('/api/admin/news/' + b.getAttribute('data-id') + '/delete', { method: 'POST', body: {} }).then(function () { NWX.list = null; NWX._l = 0; render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'qcopy') { var Q = window.__rpQuotes; if (Q) Q.copy(b.getAttribute('data-id')); }
@@ -12607,7 +12624,7 @@ document.addEventListener('click', function (e) {
   function btns(n) { return '<button type="button" class="rp-bb g" data-rp-read="' + esc(n.id) + '"><i class="fa-solid fa-book-open"></i> قراءة</button><button type="button" class="rp-bb r" data-rp-pdf="' + esc(n.id) + '"><i class="fa-solid fa-file-pdf"></i> تحميل PDF</button>'; }
   function card(n, o) {
     o = o || {};
-    return '<div class="rp-bk">' + coverHtml(n, o.rank, true) + '<div class="rp-bk-t" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) + '<div class="rp-bk-m">👁 ' + fnum(readsOf(n)) + ' قراءة' + (n.isPaper ? ' <span class="rp-ppr">📖 ورقية</span>' : '') + '</div>' + btns(n) + '</div>';
+    return '<div class="rp-bk">' + coverHtml(n, o.rank, true) + '<div class="rp-bk-t" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) + '<div class="rp-bk-m">👁 ' + fnum(readsOf(n)) + ' قراءة' + (n.isPaper ? ' <span class="rp-ppr">📖 ورقية</span>' : '') + '</div><div class="rp-bbs">' + btns(n).replace('تحميل PDF', 'PDF') + '</div></div>';
   }
   function section(icon, title, list, o) {
     o = o || {};
@@ -13354,7 +13371,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   function base() { var r = R(); return r ? r.base() : ''; }
   function isPrem() { var r = R(); try { return !!(r && r.isPrem()); } catch (e) { return false; } }
   function available() { return !!base(); }
-  function allowed() { return isPrem() && !(typeof READY !== 'undefined' && READY.hide); }
+  function allowed() { var r0 = R(); return (isPrem() || (typeof READY !== 'undefined' && READY.open && !!(r0 && r0.token && r0.token()))) && !(typeof READY !== 'undefined' && READY.hide); }
   function enabled() { return available() && allowed() && opt.cloud && !sessionOff; }
   function toast(m) { try { if (typeof showToast === 'function') showToast(m); } catch (e) {} }
   function hint(m) { var h = document.getElementById('tts-hint'); if (h) h.textContent = m; }
@@ -13454,22 +13471,24 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   var READY = { hide: false, novels: {} };
   function applyHide() {
     var st = document.getElementById('rp-hide-listen'); if (!st) { st = document.createElement('style'); st.id = 'rp-hide-listen'; document.head.appendChild(st); }
-    st.textContent = READY.hide ? '#tts-start-btn,#tts-hint,.rp-aud{display:none!important}' : '.rp-aud{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;border-radius:999px;font:800 .7rem Cairo,sans-serif;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.35);animation:rpAudIn .5s ease backwards}@keyframes rpAudIn{from{opacity:0;transform:translateY(6px) scale(.9)}to{opacity:1;transform:none}}';
+    st.textContent = READY.hide ? '#tts-start-btn,#tts-hint,.rp-aud{display:none!important}' : '.rp-aud.ov{position:absolute;top:6px;left:6px;margin:0;padding:2px 7px;font-size:.6rem;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.4)}.rp-aud{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;border-radius:999px;font:800 .7rem Cairo,sans-serif;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.35);animation:rpAudIn .5s ease backwards}@keyframes rpAudIn{from{opacity:0;transform:translateY(6px) scale(.9)}to{opacity:1;transform:none}}';
   }
   function paintAud() {
     if (READY.hide) return;
     var hs = document.querySelectorAll('h3[onclick*="requestNovelAccess"],.rp-bk-t[data-rp-read]');
     for (var i = 0; i < hs.length; i++) {
       var h = hs[i], id = h.getAttribute('data-rp-read'); if (!id) { var m = /requestNovelAccess\('([^']+)'/.exec(h.getAttribute('onclick') || ''); id = m && m[1]; } if (!id) continue;
-      var v = READY.novels[id], nx = h.nextElementSibling, txt = v ? '🎧 صوتية · ' + v.d + ' فصل جاهز' : '';
+      var v = READY.novels[id], txt = v ? '🎧 ' + v.d : '', cv = h.classList.contains('rp-bk-t') ? (h.closest('.rp-bk,.rp-li') || document).querySelector('.rp-bk-cv') : null;
+      if (cv) { var ex = cv.querySelector('.rp-aud'); if (!v) { if (ex) ex.remove(); continue; } if (ex) { if (ex.textContent !== txt) ex.textContent = txt; continue; } var o = document.createElement('div'); o.className = 'rp-aud ov'; o.title = 'صوتية — ' + v.d + ' فصل جاهز'; o.textContent = txt; cv.appendChild(o); continue; }
+      var nx = h.nextElementSibling;
       if (nx && nx.classList && nx.classList.contains('rp-aud')) { if (!v) nx.remove(); else if (nx.textContent !== txt) nx.textContent = txt; continue; }
       if (!v) continue;
-      var b = document.createElement('div'); b.className = 'rp-aud'; b.textContent = txt; h.parentNode.insertBefore(b, h.nextSibling);
+      var b = document.createElement('div'); b.className = 'rp-aud'; b.textContent = txt + ' فصل'; h.parentNode.insertBefore(b, h.nextSibling);
     }
   }
   function loadReady() {
     if (!base()) return;
-    fetch(base() + '/api/tts/ready').then(function (r) { return r.json(); }).then(function (d) { READY = { hide: !!d.hide, novels: d.novels || {} }; applyHide(); paintAud(); }).catch(function () {});
+    fetch(base() + '/api/tts/ready').then(function (r) { return r.json(); }).then(function (d) { READY = { hide: !!d.hide, open: !!d.open, novels: d.novels || {} }; applyHide(); paintAud(); }).catch(function () {});
   }
   try { var at = null; new MutationObserver(function () { clearTimeout(at); at = setTimeout(paintAud, 150); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
   setTimeout(loadReady, 1500); setInterval(loadReady, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) loadReady(); });
