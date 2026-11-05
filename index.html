@@ -701,7 +701,7 @@ html.dark .rp-pbar{background:linear-gradient(#070d18 75%,transparent)}
 @keyframes rpSlide{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes rpPg{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
 @keyframes rpFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}
-.rp-rv{opacity:0;transform:translateY(24px)}.rp-rv.on{opacity:1;transform:none;transition:opacity .5s ease,transform .5s cubic-bezier(.2,.9,.3,1)}
+.rp-rv{opacity:0}.rp-rv.on{opacity:1;transition:opacity .3s ease}
 @media (prefers-reduced-motion:reduce){.rp-mh *,.rp-mi,.rp-pgin,.rp-pgin>*,.rp-rv{animation:none!important;transition:none!important;opacity:1!important;transform:none!important}}
 
 /* ===== كورة الدارك مود + شارة ورقي + حركة عامة ===== */
@@ -733,7 +733,7 @@ html.dark .rp-fmt button{background:#0f1a2c;color:#94a3b8}html.dark .rp-fmt butt
 #app-tabbar button.on i{animation:rpTab .5s cubic-bezier(.2,1.5,.3,1)}
 @keyframes rpTab{0%{transform:translateY(0) scale(1)}40%{transform:translateY(-6px) scale(1.25)}100%{transform:none}}
 .rp-bk,.rp-li,.rp-au{transition:transform .2s ease,box-shadow .2s ease}.rp-bk:active,.rp-li:active,.rp-au:active{transform:scale(.97)}
-.rp-rv{opacity:0;transform:translateY(26px) scale(.96)}.rp-rv.on{opacity:1;transform:none;transition:opacity .55s ease var(--d,0s),transform .6s cubic-bezier(.2,.9,.3,1) var(--d,0s)}
+.rp-rv{opacity:0}.rp-rv.on{opacity:1;transition:opacity .3s ease}
 .rp-rv.now{opacity:1!important;transform:none!important;transition:none!important}
 #rp-quote-btn{position:fixed;z-index:9990;display:none;border:0;border-radius:999px;padding:9px 16px;background:linear-gradient(135deg,#e11d48,#be123c);color:#fff;font:900 .85rem Cairo,sans-serif;box-shadow:0 8px 22px rgba(190,18,60,.45);animation:rpPop .3s cubic-bezier(.2,1.4,.4,1)}
 #rp-quote-ov{position:fixed;inset:0;z-index:9995;background:rgba(2,6,23,.7);display:none;align-items:center;justify-content:center;padding:16px;direction:rtl;font-family:Cairo,sans-serif;animation:rpUp .25s ease}
@@ -743,11 +743,9 @@ html.dark .rp-fmt button{background:#0f1a2c;color:#94a3b8}html.dark .rp-fmt butt
 .rp-qcard .m{text-align:center;opacity:.85;font-size:.78rem;margin-top:12px}
 .rp-qact{display:flex;gap:8px;margin-top:16px}.rp-qact button{flex:1;border:0;border-radius:14px;padding:11px 4px;font:800 .8rem Cairo,sans-serif;background:rgba(255,255,255,.2);color:#fff;cursor:pointer}.rp-qact button.p{background:#fff;color:#be123c}
 
-@keyframes rpBoot{from{opacity:0;transform:translateY(34px) scale(.96)}to{opacity:1;transform:none}}
-@keyframes rpBootTab{from{transform:translateY(120%)}to{transform:none}}
-html.rp-boot #view-home>*{animation:rpBoot .8s cubic-bezier(.2,.9,.3,1) both}
-html.rp-boot #view-home>*:nth-child(2){animation-delay:.12s}html.rp-boot #view-home>*:nth-child(3){animation-delay:.24s}html.rp-boot #view-home>*:nth-child(4){animation-delay:.36s}html.rp-boot #view-home>*:nth-child(5){animation-delay:.48s}html.rp-boot #view-home>*:nth-child(n+6){animation-delay:.6s}
-html.rp-boot #rp-tabbar,html.rp-boot .rp-tabbar,html.rp-boot [id*="tabbar"]{animation:rpBootTab .7s .3s cubic-bezier(.2,.9,.3,1) both}
+@keyframes rpBoot{from{opacity:0}to{opacity:1}}
+html.rp-boot #view-home>*{animation:rpBoot .45s ease both}
+html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-home>*:nth-child(3){animation-delay:.12s}html.rp-boot #view-home>*:nth-child(n+4){animation-delay:.18s}
 @media (prefers-reduced-motion:reduce){html.rp-boot *{animation:none!important}}
 #rp-acct-page.rp-still *{animation:none!important}#rp-acct-page.rp-still .rp-mi{opacity:1!important;transform:none!important}
 </style>
@@ -12794,7 +12792,7 @@ document.addEventListener('click', function (e) {
   /* ظهور الكروت تدريجيًا مع السكرول (الصفوف + صفحة كل الروايات + الكتّاب) */
   (function () {
     if (!('IntersectionObserver' in window)) return;
-    var seen = {}, io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('on'); if (e.target.__k) seen[e.target.__k] = 1; io.unobserve(e.target); } }); }, { threshold: 0.08 });
+    var seen = {}, io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('on'); if (e.target.__k) seen[e.target.__k] = 1; io.unobserve(e.target); } }); }, { threshold: 0.01, rootMargin: '400px 0px 400px 0px' });
     function scan(root) {
       var cs = root.querySelectorAll('.rp-bk,.rp-li,.rp-au,.rp-rsec .rp-rhead'); var n = 0;
       for (var i = 0; i < cs.length; i++) {
@@ -13081,7 +13079,7 @@ document.addEventListener('click', function (e) {
   /* ---------- أنيميشن أول فتح: يبدأ لما شاشة البداية تختفي ---------- */
   (function () {
     var done = false, t0 = Date.now();
-    function go() { if (done) return; done = true; var h = document.documentElement; h.classList.add('rp-boot'); setTimeout(function () { h.classList.remove('rp-boot'); }, 2800); }
+    function go() { if (done) return; done = true; var h = document.documentElement; h.classList.add('rp-boot'); setTimeout(function () { h.classList.remove('rp-boot'); }, 900); }
     var iv = setInterval(function () {
       var sp = $('rp-splash'), ready = document.readyState === 'complete' && !!$('rp-rows');
       if (!sp ? ready || Date.now() - t0 > 4000 : sp.style.opacity === '0') { clearInterval(iv); go(); }
