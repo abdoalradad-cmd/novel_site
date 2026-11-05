@@ -748,6 +748,18 @@ html.rp-boot #view-home>*{animation:rpBoot .45s ease both}
 html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-home>*:nth-child(3){animation-delay:.12s}html.rp-boot #view-home>*:nth-child(n+4){animation-delay:.18s}
 @media (prefers-reduced-motion:reduce){html.rp-boot *{animation:none!important}}
 #rp-acct-page.rp-still *{animation:none!important}#rp-acct-page.rp-still .rp-mi{opacity:1!important;transform:none!important}
+@keyframes rpNp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes rpRing{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}100%{box-shadow:0 0 0 12px rgba(16,185,129,0)}}
+@keyframes rpShine{from{background-position:-200% 0}to{background-position:200% 0}}
+.rp-npost{animation:rpNp .5s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--i,0)*.07s)}
+.rp-npost.au{border-inline-start:4px solid #10b981;background-image:linear-gradient(110deg,transparent 40%,rgba(16,185,129,.08) 50%,transparent 60%);background-size:200% 100%;animation:rpNp .5s cubic-bezier(.2,.9,.3,1) both,rpShine 3.2s ease-in-out 1s 2}
+.rp-npa{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rp-npa>span:last-child{display:flex;flex-direction:column;line-height:1.25}.rp-npa small{opacity:.65;font-size:.68rem}
+.rp-npav,.rp-npa>img{width:42px;height:42px;border-radius:50%;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#10b981,#0f766e);color:#fff;font-weight:900;animation:rpRing 1.8s ease-out 3}
+.rp-npav img{width:100%;height:100%;object-fit:cover}
+.rp-wallet{background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(236,72,153,.12))}
+.rp-wbig{font-size:2.4rem;font-weight:900;line-height:1.1}.rp-wbig small{font-size:.9rem;opacity:.7}
+@media (prefers-reduced-motion:reduce){.rp-npost,.rp-npav{animation:none!important}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <symbol id="rp-logo-sym" viewBox="0 0 100 100">
@@ -11412,6 +11424,7 @@ document.addEventListener('click', function (e) {
   window.rpOpenFeedNovel = function (nid) {
     try { window.rpCloseNotifications && window.rpCloseNotifications(); } catch (e) {}
     if (nid === 'ord' || nid === 'ordadm') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { if (nid === 'ordadm' && window.__rpOpenSales) window.__rpOpenSales(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
+    if (nid === 'news') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { window.__rpOpenNews(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
     if (nid === 'msgs' || nid === 'pend') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { (nid === 'msgs' ? window.__rpOpenMsgs : window.__rpOpenPending)(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
     if (nid === 'pay') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { if (window.__rpOpenPremium) window.__rpOpenPremium(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
     setTimeout(function () { try { requestNovelAccess(nid, 'details'); } catch (e) { flash('الرواية مش متاحة دلوقتي'); } }, 150);
@@ -11447,6 +11460,7 @@ document.addEventListener('click', function (e) {
     try { if (window.__appAfterOverlay) window.__appAfterOverlay(); } catch (e) {}
   }
   window.__rpBuyNovel = function (id) { try { window.rpOpenAccount(); } catch (e) {} S.view = 'buy'; S.buy = { nid: id }; S.buyStep = ''; S.payProof = ''; S.paySender = ''; S.payNote = ''; loadPremInfo(function () { if (S.view === 'buy') render(); }); render(); top(); };
+  window.__rpOpenNews = function () { S.view = 'home'; S.tab = 'news'; S.menu = false; NWX.pend = null; NWX._p = 0; render(); };
   window.__rpOpenMsgs = function () { if (!isAdmin()) return; S.view = 'home'; S.tab = 'msgs'; S.menu = false; markSeen('msgs'); render(); };
   window.__rpOpenPending = function () { if (!isAdmin()) return; S.view = 'home'; S.tab = 'pending'; S.menu = false; markSeen('pending'); render(); };
   window.__rpOpenSales = function () { if (!isAdmin()) return; S.view = 'home'; S.tab = 'sales'; markSeen('sales'); S.menu = false; loadSales(); render(); };
@@ -11474,13 +11488,14 @@ document.addEventListener('click', function (e) {
   }
   /* علامات حمراء للأدمن: اللي لسه ما اتشافش */
   function seenGet(k) { try { return JSON.parse(lsGet('rp_seen_' + k) || '[]'); } catch (e) { return []; } }
-  function listFor(k) { return k === 'pending' ? S.pending : k === 'sales' ? S.orders : k === 'premium' ? S.payPending : k === 'msgs' ? CTX.list : null; }
+  function listFor(k) { return k === 'news' ? NWX.pend : k === 'pending' ? S.pending : k === 'sales' ? S.orders : k === 'premium' ? S.payPending : k === 'msgs' ? CTX.list : null; }
   function unseenN(k) { var L = listFor(k); if (!L) return 0; var sn = seenGet(k); return L.filter(function (x) { return sn.indexOf(String(x.id)) < 0; }).length; }
   function markSeen(k) { var L = listFor(k); if (!L) return; try { lsSet('rp_seen_' + k, JSON.stringify(L.map(function (x) { return String(x.id); }).slice(-300))); } catch (e) {} }
   function loadAdminBadges() {
     if (!isAdmin()) return;
     api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
     api('/api/admin/orders').then(function (d) { S.orders = d.orders || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
+    api('/api/admin/news/pending').then(function (d) { NWX.pend = d.items || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
   }
   function achCard() {
     var A = window.__rpAch; if (!A) return ''; var s = A.get(); try { A.check(); } catch (e) {}
@@ -11602,7 +11617,7 @@ document.addEventListener('click', function (e) {
     if (S.myPts == null && !S._pt) { S._pt = 1; api('/api/me/points').then(function (d) { S.myPts = d.points || 0; if (S.view === 'home' && S.tab === 'about') render(); }).catch(function () {}); }
     hero += streakCard() + achCard() + premCard() + libraryCard() + earnCard() + ptsMini();
     var html = '';
-    var tabs = [['about', 'user', 'عني'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز'], ['news', 'newspaper', 'الأخبار الأدبية'], ['quotes', 'quote-right', 'اقتباساتي'], ['contact', 'envelope', 'تواصل معنا']];
+    var tabs = [['about', 'user', 'عني'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز'], ['news', 'newspaper', 'الأخبار الأدبية', isAdmin() ? unseenN('news') : 0], ['quotes', 'quote-right', 'اقتباساتي'], ['contact', 'envelope', 'تواصل معنا']];
     if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['actest', 'gavel', 'إدارة المسابقات'], ['backup', 'database', 'النسخ الاحتياطي']);
     var MI = { about: ['#0f766e', 'اللي يخصك: بياناتك ومحفظتك ومكتبتك'], novels: ['#7c3aed', 'اكتب وانشر رواياتك'], settings: ['#475569', 'الصوت، الأجهزة، الحساب'], contest: ['#d97706', 'اشترك واكسب جوايز'], points: ['#ca8a04', 'نقاطك وقرعة الأسبوع'], pending: ['#dc2626', 'روايات مستنية موافقتك'], live: ['#059669', 'اللي نزل من الناس'], users: ['#2563eb', 'الحسابات والزوار والـ IP'], sales: ['#db2777', 'الطلبات والأرباح'], premium: ['#9333ea', 'الاشتراكات والصوت'], bc: ['#ea580c', 'ابعت إشعار لكل الناس'], news: ['#0d9488', 'آخر أخبار عالم الأدب'], quotes: ['#e11d48', 'جمل حفظتها من الروايات'], contact: ['#4f46e5', 'استفسار أو شكوى أو اقتراح'], msgs: ['#7c3aed', 'رسائل المستخدمين'], actest: ['#0891b2', 'أسئلة وجوايز المسابقات'], backup: ['#64748b', 'نسخة احتياطية'] };
     if (S.menu) {
@@ -11721,8 +11736,20 @@ document.addEventListener('click', function (e) {
     if (NWX.list == null && !NWX._l) { NWX._l = 1; api('/api/news').then(function (d) { NWX.list = d.items || []; if (S.view === 'home' && S.tab === 'news') render(); }).catch(function () { NWX.list = []; NWX._l = 0; }); }
     var h = '';
     if (isAdmin()) h += '<div class="rp-card"><h3>' + ic('pen-to-square') + ' انشر خبر جديد</h3><label class="rp-lbl" style="margin-top:0">عنوان الخبر</label><input id="rp-nw-t" class="rp-in" maxlength="120"><label class="rp-lbl">التفاصيل</label><textarea id="rp-nw-x" class="rp-in" rows="4" maxlength="3000"></textarea><label class="rp-lbl">رابط صورة (اختياري، https)</label><input id="rp-nw-i" class="rp-in" dir="ltr" placeholder="https://..."><label class="rp-lbl">رابط للمزيد (اختياري)</label><input id="rp-nw-u" class="rp-in" dir="ltr" placeholder="https://..."><label style="display:flex;gap:8px;align-items:center;margin:10px 0;font-weight:700;font-size:.85rem"><input type="checkbox" id="rp-nw-p"> ابعته كإشعار على موبايلات الناس كمان</label><button type="button" class="rp-btn block" data-act="newspost">' + ic('paper-plane') + ' نشر الخبر</button></div>';
-    h += '<div class="rp-card"><h3>' + ic('newspaper') + ' الأخبار الأدبية</h3>' + (NWX.list == null ? '<div class="rp-empty">جاري التحميل…</div>' : NWX.list.length ? NWX.list.map(function (n) {
-      return '<div class="rp-item">' + (n.img ? '<img src="' + esc(n.img) + '" alt="" referrerpolicy="no-referrer" loading="lazy" style="width:100%;max-height:190px;object-fit:cover;border-radius:14px;margin-bottom:8px" onerror="this.remove()">' : '') + '<b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:4px 0;white-space:normal">' + linkText(n.text) + '</div><div class="rp-sub" style="margin:0;font-size:.68rem">' + esc(fdate(n.ts)) + '</div>' + (n.url ? '<a class="rp-btn sm sec" style="margin-top:6px;text-decoration:none;display:inline-block" href="' + esc(n.url) + '" target="_blank" rel="noopener noreferrer">اقرأ المزيد ‹</a>' : '') + (isAdmin() ? ' <button type="button" class="rp-btn sm red" data-act="newsdel" data-id="' + n.id + '">' + ic('trash') + ' مسح</button>' : '') + '</div>';
+    var isAuth = !isAdmin() && ((S.mine || []).length > 0);
+    if (isAuth) {
+      if (NWX.my == null && !NWX._m) { NWX._m = 1; api('/api/my/news').then(function (d) { NWX.my = d.items || []; if (S.view === 'home' && S.tab === 'news') render(); }).catch(function () { NWX.my = []; }); }
+      var stl = { pending: '⏳ مستني مراجعة الأدمن', ok: '✅ اتنشر', no: '❌ ما اتنشرش' };
+      h += '<div class="rp-card"><h3>' + ic('pen-to-square') + ' انشر بوست باسمك</h3><p class="rp-sub">ممكن تنشر بوست واحد في اليوم، وبيتراجع من الأدمن قبل ما يظهر للناس باسمك وصورتك.</p><label class="rp-lbl" style="margin-top:0">العنوان</label><input id="rp-mn-t" class="rp-in" maxlength="120"><label class="rp-lbl">البوست</label><textarea id="rp-mn-x" class="rp-in" rows="4" maxlength="2000"></textarea><label class="rp-lbl">رابط صورة (اختياري، https)</label><input id="rp-mn-i" class="rp-in" dir="ltr" placeholder="https://..."><button type="button" class="rp-btn block" style="margin-top:10px" data-act="mynews">' + ic('paper-plane') + ' ابعت للمراجعة</button>' +
+        ((NWX.my || []).length ? '<div style="margin-top:10px">' + NWX.my.slice(0, 5).map(function (n) { return '<div class="rp-item"><b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:2px 0 0">' + (stl[n.status] || '') + ' · ' + esc(fdate(n.ts)) + '</div></div>'; }).join('') + '</div>' : '') + '</div>';
+    }
+    if (isAdmin()) {
+      if (NWX.pend == null && !NWX._p) { NWX._p = 1; api('/api/admin/news/pending').then(function (d) { NWX.pend = d.items || []; markSeen('news'); if (S.view === 'home' && S.tab === 'news') render(); }).catch(function () { NWX.pend = []; }); }
+      if ((NWX.pend || []).length) h += '<div class="rp-card"><h3>' + ic('inbox') + ' بوستات كتّاب مستنية مراجعتك (' + NWX.pend.length + ')</h3>' + NWX.pend.map(function (n) { return '<div class="rp-item"><div class="rp-npa">' + avBox(n.author, n.aavatar) + '<b>' + esc(n.author || 'كاتب') + '</b></div><b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:4px 0;white-space:normal">' + linkText(n.text) + '</div>' + (n.img ? '<img src="' + esc(n.img) + '" alt="" referrerpolicy="no-referrer" style="width:100%;max-height:160px;object-fit:cover;border-radius:12px" onerror="this.remove()">' : '') + '<div style="margin-top:8px"><button type="button" class="rp-btn sm" data-act="nwok" data-id="' + n.id + '">✅ انشر</button> <button type="button" class="rp-btn sm red" data-act="nwno" data-id="' + n.id + '">❌ ارفض</button></div></div>'; }).join('') + '</div>';
+    }
+    h += '<div class="rp-card"><h3>' + ic('newspaper') + ' الأخبار الأدبية</h3>' + (NWX.list == null ? '<div class="rp-empty">جاري التحميل…</div>' : NWX.list.length ? NWX.list.map(function (n, i) {
+      var who = n.author ? '<div class="rp-npa"><span class="rp-npav">' + avBox(n.author, n.aavatar) + '</span><span><b>' + esc(n.author) + '</b><small>كاتب في RadPad ✍️</small></span></div>' : '';
+      return '<div class="rp-item rp-npost' + (n.author ? ' au' : '') + '" style="--i:' + Math.min(i, 8) + '">' + who + (n.img ? '<img src="' + esc(n.img) + '" alt="" referrerpolicy="no-referrer" loading="lazy" style="width:100%;max-height:190px;object-fit:cover;border-radius:14px;margin-bottom:8px" onerror="this.remove()">' : '') + '<b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:4px 0;white-space:normal">' + linkText(n.text) + '</div><div class="rp-sub" style="margin:0;font-size:.68rem">' + esc(fdate(n.ts)) + '</div>' + (n.url ? '<a class="rp-btn sm sec" style="margin-top:6px;text-decoration:none;display:inline-block" href="' + esc(n.url) + '" target="_blank" rel="noopener noreferrer">اقرأ المزيد ‹</a>' : '') + (isAdmin() ? ' <button type="button" class="rp-btn sm red" data-act="newsdel" data-id="' + n.id + '">' + ic('trash') + ' مسح</button>' : '') + '</div>';
     }).join('') : '<div class="rp-empty">' + ic('newspaper') + 'مفيش أخبار لسه</div>') + '</div>';
     return h;
   }
@@ -12143,7 +12170,7 @@ document.addEventListener('click', function (e) {
   function nfmt(n) { return (Math.round((+n || 0) * 10) / 10).toLocaleString('en'); }
   function leftTxt(ms) { var m = Math.max(0, ms - Date.now()), d = Math.floor(m / 86400000), h = Math.floor(m % 86400000 / 3600000); return d ? d + ' يوم و' + h + ' ساعة' : h + ' ساعة'; }
   function loadContest() { api('/api/contest').then(function (d) { CT.d = d; if (S.view === 'home' && S.tab === 'contest') render(); }).catch(function (x) { CT.d = { error: x.message }; if (S.view === 'home' && S.tab === 'contest') render(); }); }
-  function loadPoints() { api('/api/points').then(function (d) { PT.d = d; if (S.view === 'home' && S.tab === 'points') render(); }).catch(function (x) { PT.d = { error: x.message }; if (S.view === 'home' && S.tab === 'points') render(); }); }
+  function loadPoints() { api('/api/me/points').then(function (d) { PT.w = d; if (S.view === 'home' && S.tab === 'points') render(); }).catch(function () {}); if (isAdmin()) api('/api/admin/cmt').then(function (d) { PT.cf = d; if (S.view === 'home' && S.tab === 'points') render(); }).catch(function () {}); api('/api/points').then(function (d) { PT.d = d; if (S.view === 'home' && S.tab === 'points') render(); }).catch(function (x) { PT.d = { error: x.message }; if (S.view === 'home' && S.tab === 'points') render(); }); }
   function avBox(name, av) { return av ? '<img src="' + esc(av) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : esc((name || '?').charAt(0)); }
   function winBanner(w, label, sub) {
     var sp = ['✨', '⭐', '🎉', '💰', '✨', '🌟', '🎊', '💚'].map(function (e, i) { return '<span class="sp" style="left:' + (6 + i * 12) + '%;animation-delay:' + (i * .45).toFixed(2) + 's">' + e + '</span>'; }).join('');
@@ -12172,7 +12199,10 @@ document.addEventListener('click', function (e) {
   function pointsTab() {
     var d = PT.d; if (!d) return '<div class="rp-card"><p class="rp-sub">جاري التحميل…</p></div>';
     if (d.error) return '<div class="rp-card"><div class="rp-err">' + esc(d.error) + '</div></div>';
-    var h = d.latest ? winBanner(d.latest, d.thisWeek ? '🎉 كاتب الأسبوع ده (قرعة النقاط)' : 'آخر فايز بقرعة النقاط', (d.thisWeek ? '' : 'أسبوع ' + d.latest.week + ' — ') + (d.latest.points ? nfmt(d.latest.points) + ' نقطة' : '')) : '';
+    var h = '';
+    if (PT.w) { var w = PT.w, cm = w.cmt || {}; h += '<div class="rp-card rp-wallet"><h3>💎 رصيد التشجيع</h3><div class="rp-wbig">' + nfmt(w.wallet || 0) + '<small> نقطة</small></div><p class="rp-sub">قيّم الفصل بنجوم واكتب تعليق تشجيع حقيقي (مش مكرر) تاخد ' + (cm.pts || 1) + ' نقطة. تقدر تجمعها وبعدين تصرفها في روايات مقفولة واشتراكات ومزايا تانية هنضيفها.</p><div><span class="rp-chip">💬 تعليقاتك النهارده: ' + (cm.today || 0) + '/' + (cm.perDay || 5) + '</span><span class="rp-chip">📖 لكل فصل: ' + (cm.perCh || 2) + ' تعليقات</span></div></div>'; }
+    if (isAdmin() && PT.cf) { var cf = PT.cf; var fld = function (k, l) { return '<label class="rp-lbl">' + l + '</label><input id="rp-cm-' + k + '" class="rp-in" type="number" min="0" value="' + (cf[k] == null ? '' : cf[k]) + '">'; }; h += '<div class="rp-card"><h3>' + ic('gear') + ' إعدادات التعليقات والنقاط (أدمن)</h3>' + fld('perCh', 'أقصى تعليقات لكل قارئ في الفصل الواحد') + fld('perDay', 'أقصى تعليقات للقارئ في اليوم') + fld('pts', 'نقاط التعليق الحقيقي') + fld('dayPts', 'أقصى نقاط يكسبها القارئ في اليوم') + fld('minLen', 'أقل عدد حروف للتعليق اللي ياخد نقطة') + fld('newsPerDay', 'أقصى بوستات للكاتب في الأخبار يوميًا') + '<button type="button" class="rp-btn block" style="margin-top:10px" data-act="cmsave">حفظ</button></div>'; }
+    h += d.latest ? winBanner(d.latest, d.thisWeek ? '🎉 كاتب الأسبوع ده (قرعة النقاط)' : 'آخر فايز بقرعة النقاط', (d.thisWeek ? '' : 'أسبوع ' + d.latest.week + ' — ') + (d.latest.points ? nfmt(d.latest.points) + ' نقطة' : '')) : '';
     var myId = (me() || {}).id;
     h += '<div class="rp-card"><h3>' + ic('star') + ' نقاط الفوز</h3><p class="rp-sub">كل تصويت من قارئ على فصل من رواياتك بيزوّد نقاطك 0.1. وكل أسبوع بتتسحب قرعة تلقائية بين أعلى 10 كتّاب نقاط، وواحد منهم بيكسب الجايزة.</p>' +
       '<div><span class="rp-chip">💰 جايزة الأسبوع: ' + (d.prize ? nfmt(d.prize) + ' جنيه' : 'هتتحدد قريب') + '</span><span class="rp-chip">⏳ القرعة بعد ' + leftTxt(d.endsAt) + '</span></div>' +
@@ -12437,6 +12467,17 @@ document.addEventListener('click', function (e) {
       api('/api/admin/news', { method: 'POST', body: { title: nt.trim(), text: nx.trim(), img: ($('rp-nw-i') || {}).value || '', url: ($('rp-nw-u') || {}).value || '', push: !!($('rp-nw-p') || {}).checked } })
         .then(function () { NWX.list = null; NWX._l = 0; flash('اتنشر الخبر ✅'); render(); }).catch(function (x) { b.disabled = false; flash(x.message); });
     }
+    else if (a === 'mynews') {
+      var mt = ($('rp-mn-t') || {}).value || '', mx = ($('rp-mn-x') || {}).value || '';
+      if (!mt.trim() || mx.trim().length < 10) { flash('اكتب عنوان وبوست (10 حروف على الأقل)'); return; }
+      b.disabled = true;
+      api('/api/my/news', { method: 'POST', body: { title: mt.trim(), text: mx.trim(), img: ($('rp-mn-i') || {}).value || '' } }).then(function () { NWX.my = null; NWX._m = 0; flash('اتبعت للمراجعة ✅'); render(); }).catch(function (x) { b.disabled = false; flash(x.message); });
+    }
+    else if (a === 'nwok' || a === 'nwno') { api('/api/admin/news/' + b.getAttribute('data-id') + '/' + (a === 'nwok' ? 'approve' : 'reject'), { method: 'POST', body: {} }).then(function () { NWX.pend = null; NWX._p = 0; NWX.list = null; NWX._l = 0; flash(a === 'nwok' ? 'اتنشر ✅' : 'اترفض'); render(); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'cmsave') {
+      var bd = {}; ['perCh', 'perDay', 'pts', 'minLen', 'dayPts', 'newsPerDay'].forEach(function (k) { bd[k] = +(($('rp-cm-' + k) || {}).value); });
+      api('/api/admin/cmt', { method: 'PUT', body: bd }).then(function (d) { PT.cf = d; flash('اتحفظت إعدادات التعليقات ✅'); render(); }).catch(function (x) { flash(x.message); });
+    }
     else if (a === 'newsdel') { if (confirm('تمسح الخبر؟')) api('/api/admin/news/' + b.getAttribute('data-id') + '/delete', { method: 'POST', body: {} }).then(function () { NWX.list = null; NWX._l = 0; render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'qcopy') { var Q = window.__rpQuotes; if (Q) Q.copy(b.getAttribute('data-id')); }
     else if (a === 'qshare') { var Q2 = window.__rpQuotes; if (Q2) Q2.share(b.getAttribute('data-id')); }
@@ -12533,21 +12574,27 @@ document.addEventListener('click', function (e) {
   }
   function numOf(v) { if (typeof v === 'number') return v; return parseInt(String(v == null ? '' : v).replace(/[^\d]/g, ''), 10) || 0; }
   /* القراءات الحقيقية: عدّاد الموقع (Firebase) لروايات الموقع، وعدّاد السيرفر لروايات الكُتّاب */
-  function readsOf(n) { return n.isUser ? (READS[n.id] || 0) : numOf(n.views); }
+  function readsOf(n) { return n.isUser ? (READS[n.id] || 0) : (window.__rpFB && window.__rpFB[n.id] != null ? window.__rpFB[n.id] : numOf(n.views)) + (READS[n.id] || 0); }
   function authorKey(n) { return n.isUser && n.uid ? String(n.uid) : (n.authorUid ? String(n.authorUid) : 'admin'); }
   function loadReads() {
     if (!base()) return;
     fetch(base() + '/api/reads').then(function (r) { return r.json(); }).then(function (d) { READS = d.reads || {}; schedule(); }).catch(function () {});
   }
-  var reported = {};
-  function reportRead(id) {
-    if (!base() || reported[id] || !/^[A-Za-z0-9_-]{1,60}$/.test(String(id))) return;
-    reported[id] = 1;
-    try { fetch(base() + '/api/reads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ k: id }) }); } catch (e) {}
-  }
-  try { var oPaint = window.paintViewsAndStarsOnCards; if (typeof oPaint === 'function') window.paintViewsAndStarsOnCards = function () { var r = oPaint.apply(this, arguments); try { schedule(); if ($('rp-all-page') && $('rp-all-page').classList.contains('open') && document.activeElement !== $('rp-all-q')) renderAll(); } catch (e) {} return r; }; } catch (e) {}
-  var oOpenCh = window.openChapterReader;
-  if (typeof oOpenCh === 'function') window.openChapterReader = function (nid) { try { reportRead(nid); } catch (e) {} return oOpenCh.apply(this, arguments); };
+  var RDK = 'rp_rd_v2', rdSeen = {};
+  try { rdSeen = JSON.parse(localStorage.getItem(RDK) || '{}') || {}; } catch (e) { rdSeen = {}; }
+  /* قراءة واحدة لكل فصل لكل IP: بتتحسب بس لما الفصل نفسه يتفتح فعلًا (ومرة واحدة) */
+  window.__rpReadCh = function (nid, ch) {
+    nid = String(nid); ch = parseInt(ch, 10); if (!base() || isNaN(ch) || ch < 0 || !/^[A-Za-z0-9_-]{1,60}$/.test(nid)) return;
+    var k = nid + ':' + ch; if (rdSeen[k]) return; rdSeen[k] = 1;
+    try { var ks = Object.keys(rdSeen); if (ks.length > 3000) delete rdSeen[ks[0]]; localStorage.setItem(RDK, JSON.stringify(rdSeen)); } catch (e) {}
+    try { fetch(base() + '/api/reads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ k: nid, ch: ch }) }).then(function (r) { return r.json(); }).then(function (d) { if (d && d.ok && !d.dup) { READS[nid] = (READS[nid] || 0) + 1; schedule(); } }).catch(function () {}); } catch (e) {}
+  };
+  /* قراءات فايربيز القديمة (ثابتة) + قراءات السيرفر الجديدة */
+  try { var fbw = setInterval(function () { if (typeof db === 'undefined' || !db || !db.ref) return; clearInterval(fbw); db.ref('viewsCounts').once('value').then(function (sn) { var v = sn.val() || {}, o = {}; Object.keys(v).forEach(function (id) { o[id] = numOf(v[id]); }); window.__rpFB = o; schedule(); }).catch(function () {}); }, 800); } catch (e) {}
+  window.incrementNovelViewLive = function () {};
+  function syncViews() { try { if (!window.__rpFB) return; novels.forEach(function (n) { if (!n.isUser) { var t = readsOf(n); n.views = String(t).replace(/\B(?=(\d{3})+(?!\d))/g, ','); } }); } catch (e) {} }
+  window.__rpSyncViews = syncViews;
+  try { var oPaint = window.paintViewsAndStarsOnCards; if (typeof oPaint === 'function') window.paintViewsAndStarsOnCards = function () { syncViews(); var r = oPaint.apply(this, arguments); try { schedule(); if ($('rp-all-page') && $('rp-all-page').classList.contains('open') && document.activeElement !== $('rp-all-q')) renderAll(); } catch (e) {} return r; }; } catch (e) {}
 
   /* ---------- كروت ---------- */
   function coverHtml(n, rank, withLock) {
@@ -12990,6 +13037,17 @@ document.addEventListener('click', function (e) {
     var ta = document.getElementById('comment-reader-text'), text = ta ? ta.value.trim() : '';
     var nid = G('currentNovelId'), stars = G('selectedCommentRating') || 5, novel = null;
     try { novel = (G('novels') || []).filter(function (n) { return n.id === nid; })[0]; } catch (x) {}
+    var self = this, args = arguments, isVote0 = text.indexOf(VOTE) === 0;
+    if (!isVote0 && text && novel && R.base() && !(e && e.__gated)) {
+      try { e.preventDefault(); } catch (x) {}
+      R.api('/api/cmt/gate', { method: 'POST', body: { novel: String(novel.id), chapter: (function () { try { return currentChapterIndex; } catch (x) { return -1; } })(), text: text } }).then(function (g) {
+        if (g && g.ok === false) { toast(g.reason || 'مينفعش تعلّق دلوقتي'); var bt = document.getElementById('rp-wp-ta'); if (bt && !bt.value) bt.value = text; return; }
+        var ev = { preventDefault: function () {}, __gated: 1 }; window.handleAddChapterComment.apply(self, [ev]);
+        if (g && g.points) { setTimeout(function () { toast('🎉 +' + g.points + ' نقطة تشجيع في رصيدك!'); }, 900); try { window.__rpCelebrate && window.__rpCelebrate(); } catch (x) {} }
+        else if (g && g.hint) setTimeout(function () { toast(g.hint); }, 900);
+      }).catch(function () { var ev = { preventDefault: function () {}, __gated: 1 }; window.handleAddChapterComment.apply(self, [ev]); });
+      return;
+    }
     var res = oAdd.apply(this, arguments);
     if (text && novel && R.base()) {
       var rating = text.indexOf(VOTE) === 0;
@@ -13268,11 +13326,11 @@ document.addEventListener('click', function (e) {
     function visible() { var v = $('view-reader'); return v && !v.classList.contains('hidden') && !document.hidden; }
     var lastKey = '';
     function onChapter() {
-      if (!visible()) return; var k = ''; try { k = currentNovelId + ':' + currentChapterIndex; } catch (e) { return; } if (k === lastKey) return; lastKey = k;
+      if (!visible()) return; var k = ''; try { k = currentNovelId + ':' + currentChapterIndex; } catch (e) { return; } if (k === lastKey) return; lastKey = k; try { window.__rpReadCh && window.__rpReadCh(currentNovelId, currentChapterIndex); } catch (x) {}
       var s = aGet(); if (s.seen[k]) return; s.seen[k] = 1; var ks = Object.keys(s.seen); if (ks.length > 600) delete s.seen[ks[0]];
       s.ch++; try { s.nov[String(currentNovelId)] = 1; } catch (e) {} var dk = dkey(new Date()); if (s.days.indexOf(dk) < 0) s.days.push(dk); if (new Date().getHours() < 4) s.owl = 1; aSet(s); check();
     }
-    var wait = setInterval(function () { var b = $('reader-chapter-body'); if (!b) return; clearInterval(wait); var t = null; new MutationObserver(function () { clearTimeout(t); t = setTimeout(onChapter, 1500); }).observe(b, { childList: true, subtree: true }); }, 500);
+    var wait = setInterval(function () { var b = $('reader-chapter-body'); if (!b) return; clearInterval(wait); var t = null; new MutationObserver(function () { clearTimeout(t); t = setTimeout(onChapter, 1200); }).observe(b, { childList: true, subtree: true }); }, 500);
     setInterval(function () { if (!visible()) return; var s = aGet(); s.sec += 10; var dk = dkey(new Date()); if (s.days.indexOf(dk) < 0) s.days.push(dk); if (new Date().getHours() < 4) s.owl = 1; aSet(s); if (s.sec % 600 === 0 || s.sec === 3600) check(); }, 10000);
   })();
 })();
@@ -14182,7 +14240,7 @@ window.addEventListener('load', () => {
             novels.forEach(n => {
                 const v = liveViewsMap[n.id] !== undefined ? liveViewsMap[n.id] : parseCleanNumber(n.views);
                 n.views = formatNumber(v);
-                viewsPayload[n.id] = v;
+                viewsPayload[n.id] = (window.__rpFB && window.__rpFB[n.id] != null) ? window.__rpFB[n.id] : v;
             });
             await db.ref('viewsCounts').update(viewsPayload);
             return true;
