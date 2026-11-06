@@ -11220,6 +11220,7 @@ document.addEventListener('click', function (e) {
   function setTitle(t) { var e = $('rp-ac-title'); if (e) e.textContent = t; }
   function isDark() { return document.documentElement.classList.contains('dark'); }
   function isAdmin() { return !!(me() && me().role === 'admin'); }
+  function isOwner() { var u = me(); return !!(u && u.role === 'admin' && u.owner !== false); }
   function fdate(t) { try { return new Date(t).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { return ''; } }
   function top() { var p = $('rp-acct-page'); if (p) p.scrollTop = 0; }
 
@@ -11373,7 +11374,7 @@ document.addEventListener('click', function (e) {
   /* روايات الموقع الأصلية (بتاعة الأدمن) — بتظهر في «رواياتي» وفي بروفايل الأدمن */
   function siteMine() {
     var u = me(); if (!isAdmin()) return [];
-    try { return novels.filter(function (n) { return !n.isUser && (!n.authorUid || String(n.authorUid) === String(u.id)); }); } catch (e) { return []; }
+    try { return novels.filter(function (n) { return !n.isUser && ((!n.authorUid && isOwner()) || (n.authorUid && String(n.authorUid) === String(u.id))); }); } catch (e) { return []; }
   }
   function siteRow(n) {
     var cover = n.coverImg && httpsUrl(String(n.coverImg).replace(/&amp;/g, '&'));
@@ -11391,7 +11392,7 @@ document.addEventListener('click', function (e) {
     if (!S.myEarn && !S._ern) { S._ern = 1; loadEarn(); } if (!PREM.orders && !S._lib) { S._lib = 1; loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); }
     var SM = siteMine(), smCh = SM.reduce(function (a, n) { return a + (n.chapters || []).length; }, 0);
     var chs = S.mine.reduce(function (a, n) { return a + (n.chaptersCount || 0); }, 0), liveN = S.mine.filter(function (n) { return n.isLive; }).length;
-    var hero = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b style="font-size:1.15rem;display:block">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span> <button type="button" class="rp-pill" data-act="viewprofile" style="margin-top:6px;border:0;cursor:pointer">' + ic('user') + ' صفحتي</button></div></div>' +
+    var hero = '<div class="rp-prof"><div class="rp-row" style="gap:14px;flex-wrap:nowrap"><div class="rp-av" data-act="viewprofile" style="cursor:pointer">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.remove()">' : esc((u.name || '?').charAt(0))) + '</div><div style="min-width:0;flex:1"><b data-act="viewprofile" style="font-size:1.15rem;display:block;cursor:pointer">' + esc(u.name) + '</b><div dir="ltr" style="text-align:right;font-size:.78rem;opacity:.85;overflow:hidden;text-overflow:ellipsis">' + esc(u.email) + '</div><span class="rp-pill" style="margin-top:6px">' + (admin ? '🛡️ أدمن' : '✍️ كاتب') + '</span> <button type="button" class="rp-pill" data-act="viewprofile" style="margin-top:6px;border:0;cursor:pointer">' + ic('user') + ' صفحتي</button></div></div>' +
       '<div class="rp-stats"><div class="rp-stat"><b>' + (S.mine.length + SM.length) + '</b><span>رواياتي</span></div><div class="rp-stat"><b>' + (liveN + SM.length) + '</b><span>منشورة</span></div><div class="rp-stat"><b>' + (chs + smCh) + '</b><span>فصل</span></div><div class="rp-stat"><b>' + S.mine.filter(function (n) { return n.status === 'pending'; }).length + '</b><span>مراجعة</span></div></div></div>';
     if (S.myPts == null && !S._pt) { S._pt = 1; api('/api/me/points').then(function (d) { S.myPts = d.points || 0; if (S.view === 'home' && S.tab === 'about') render(); }).catch(function () {}); }
     hero += streakCard() + achCard() + premCard() + libraryCard() + earnCard() + ptsMini();
@@ -11402,7 +11403,7 @@ document.addEventListener('click', function (e) {
     if (S.menu) {
       var av = u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : '<span>' + esc((u.name || '؟').trim().charAt(0)) + '</span>';
       var sub = isPremium0() ? '<span class="rp-mh-chip">👑 Premium</span>' : '<span class="rp-mh-chip dim">حساب عادي</span>';
-      html += '<div class="rp-mh" id="rp-mh"><button type="button" class="rp-orb" data-act="theme" aria-label="تبديل الوضع الليلي"><i></i></button><div class="rp-mh-av">' + av + '</div><div class="rp-mh-name">' + esc(u.name) + '</div><div class="rp-mh-sub">' + esc(u.email || '') + '</div>' + sub + '</div>';
+      html += '<div class="rp-mh" id="rp-mh"><button type="button" class="rp-orb" data-act="theme" aria-label="تبديل الوضع الليلي"><i></i></button><div class="rp-mh-av" data-act="viewprofile" style="cursor:pointer">' + av + '</div><div class="rp-mh-name" data-act="viewprofile" style="cursor:pointer">' + esc(u.name) + '</div><div class="rp-mh-sub">' + esc(u.email || '') + '</div>' + sub + '</div>';
       html += '<div class="rp-mlist">' + tabs.map(function (t, i) { var m = MI[t[0]] || ['#0f766e', '']; return '<button type="button" class="rp-mi" style="--i:' + i + ';--c:' + m[0] + '" data-act="tab" data-t="' + t[0] + '"><span class="ic">' + ic(t[1]) + '</span><span class="tx"><b>' + t[2] + '</b><small>' + m[1] + '</small></span>' + (t[3] ? '<span class="n">' + t[3] + '</span>' : '') + '<i class="fa-solid fa-chevron-left ch"></i></button>'; }).join('') +
         '<button type="button" class="rp-mi out" style="--i:' + tabs.length + ';--c:#b91c1c" data-act="logout"><span class="ic">' + ic('right-from-bracket') + '</span><span class="tx"><b>تسجيل الخروج</b><small>اخرج من الحساب على الجهاز ده</small></span><i class="fa-solid fa-chevron-left ch"></i></button></div>';
       if (S.err) html += '<div class="rp-card"><div class="rp-err">' + esc(S.err) + '</div></div>';
