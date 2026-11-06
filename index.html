@@ -248,6 +248,7 @@ html.dark .rp-fbtn.on{background:#1a2740;color:#cbd5e1}
 <style id="rp-acct-style">
 #rp-acct-page{display:none;position:fixed;left:0;right:0;top:var(--sat,0px);bottom:0;z-index:9310;overflow-y:auto;background:#eef1ee;color:#0f172a;direction:rtl;font-family:var(--ui-font,Cairo,sans-serif);-webkit-overflow-scrolling:touch}
 html.dark #rp-acct-page{background:#070d18;color:#e2e8f0}
+#rp-acct-page .rp-np-top{z-index:6}
 #rp-acct-page.open{display:block;animation:rpIn .25s ease backwards}
 .rp-ac-body{max-width:780px;margin:0 auto;padding:14px 14px calc(120px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .rp-card{background:#fff;border:1px solid #e3e8e5;border-radius:22px;padding:18px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px -12px rgba(15,23,42,.08)}
@@ -307,7 +308,7 @@ html.dark .rp-feat{background:#0f1a2c;border-color:#1c2b44;color:#cbd5e1}
 .rp-stat{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:10px 4px;text-align:center}
 .rp-stat b{display:block;font:900 1.25rem Cairo,sans-serif}
 .rp-stat span{font-size:.66rem;opacity:.85}
-.rp-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px;scrollbar-width:none;position:sticky;top:0;z-index:3;background:linear-gradient(#eef1ee 70%,transparent);padding-bottom:8px}
+.rp-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px;scrollbar-width:none;position:sticky;top:var(--rp-hh,68px);z-index:3;background:linear-gradient(#eef1ee 70%,transparent);padding-bottom:8px}
 html.dark .rp-tabs{background:linear-gradient(#070d18 70%,transparent)}
 .rp-tabs::-webkit-scrollbar{display:none}
 .rp-tab{flex:none;border:1px solid #dbe2de;background:#fff;border-radius:999px;padding:9px 15px;font:900 .8rem Cairo,sans-serif;color:#475569;cursor:pointer;display:flex;gap:6px;align-items:center;white-space:nowrap}
@@ -326,7 +327,7 @@ html.dark .rp-tab{background:#0f1a2c;border-color:#1c2b44;color:#94a3b8}
 .rp-empty{text-align:center;padding:26px 10px;color:#64748b;font-size:.85rem;line-height:2}
 .rp-empty i{font-size:2.2rem;color:#a7b7ae;display:block;margin-bottom:8px}
 /* ---- المحرر ---- */
-.rp-edtabs{display:flex;gap:4px;background:#fff;border:1px solid #e3e8e5;border-radius:18px;padding:5px;position:sticky;top:0;z-index:4}
+.rp-edtabs{display:flex;gap:4px;background:#fff;border:1px solid #e3e8e5;border-radius:18px;padding:5px;position:sticky;top:var(--rp-hh,68px);z-index:4}
 html.dark .rp-edtabs{background:#0f1a2c;border-color:#1c2b44}
 .rp-edtabs button{flex:1;border:0;background:none;border-radius:13px;padding:9px 2px;font:900 .72rem Cairo,sans-serif;color:#64748b;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 .rp-edtabs button i{font-size:1rem}
@@ -451,7 +452,7 @@ html.dark .rp-ctq,html.dark .rp-lb{background:#0b1422}html.dark .rp-subtabs butt
 .rp-mi.out{background:#fff5f5}
 html.dark .rp-mi{background:#0f1a2c;color:#e2e8f0;box-shadow:0 3px 14px rgba(0,0,0,.35)}
 html.dark .rp-mi .tx small{color:#94a3b8}html.dark .rp-mi.out{background:#2a1215}
-.rp-pbar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:4;padding:8px 4px 10px;background:linear-gradient(#eef1ee 75%,transparent);animation:rpUp .3s ease backwards}
+.rp-pbar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:var(--rp-hh,68px);z-index:4;padding:8px 4px 10px;background:linear-gradient(#eef1ee 75%,transparent);animation:rpUp .3s ease backwards}
 html.dark .rp-pbar{background:linear-gradient(#070d18 75%,transparent)}
 .rp-pbar b{font:900 .95rem Cairo,sans-serif;display:flex;gap:7px;align-items:center}
 .rp-pback{border:0;border-radius:999px;padding:8px 14px;background:#0f766e;color:#fff;font:800 .78rem Cairo,sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
@@ -11198,6 +11199,17 @@ document.addEventListener('click', function (e) {
   };
   window.__rp = { api: api, base: base, me: me, token: token, isPrem: isPrem, esc: esc, flash: flash, cldUpload: cldUpload, cldReady: cldReady, findNovel: findNovel, lsGet: lsGet, lsSet: lsSet,
     topicSub: topicSub, topicUnsub: topicUnsub, loadFeed: loadFeed, syncTopics: syncTopics, loadUserNovels: function () { return loadUserNovels(); }, USER_KEY: USER_KEY };
+
+;(function () {
+  function hook() {
+    var pg = document.getElementById('rp-acct-page'), tp = pg && pg.querySelector('.rp-np-top');
+    if (!tp) return;
+    var set = function () { var h = tp.offsetHeight; if (h) pg.style.setProperty('--rp-hh', h + 'px'); };
+    set(); try { new ResizeObserver(set).observe(tp); } catch (e) { window.addEventListener('resize', set); }
+    new MutationObserver(set).observe(pg, { attributes: true, attributeFilter: ['class'] });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else hook();
+})();
   /* ================== صفحة حسابي ================== */
   var S = fresh();
   function fresh() { return { menu: true, buyStep: '', buy: null, orders: [], dues: null, myEarn: null, payout: null, view: 'home', tab: 'about', mode: 'login', forgot: false, mine: [], pending: [], live: [], users: [], usersLoaded: false, ed: null, edTab: 'basic', review: null, loading: false, err: '', dirty: false, reset: null, uq: '', up: 0, premSel: null, premOpen: 0, premMsg: '', premStep: 'plans', premPlan: '', payMethod: '', payProof: '', paySender: '', payNote: '', payBusy: false, myPays: null, payPending: [] }; }
