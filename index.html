@@ -11383,16 +11383,46 @@ document.addEventListener('click', function (e) {
     var u = me(); if (!isAdmin()) return [];
     try { return novels.filter(function (n) { return !n.isUser && ((!n.authorUid && isOwner()) || (n.authorUid && String(n.authorUid) === String(u.id))); }); } catch (e) { return []; }
   }
+  function siteLink(n) { var L = S.mine || []; for (var i = 0; i < L.length; i++) if (String(L[i].siteId || '') === String(n.id)) return L[i]; return null; }
   function siteRow(n) {
-    var cover = n.coverImg && httpsUrl(String(n.coverImg).replace(/&amp;/g, '&'));
+    var cover = n.coverImg && httpsUrl(String(n.coverImg).replace(/&amp;/g, '&')), lnk = siteLink(n), rd = false; try { rd = !!isReaderOnlyMode; } catch (e) {}
     var cv = '<div class="rp-cv" style="background:linear-gradient(135deg,#065f46,#022c22)">' + (cover ? '<img src="' + esc(cover) + '" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.remove()">' : ic('book')) + '</div>';
-    var lk = n.isLocked || (n.chapters || []).some(function (c) { return c.isLocked; });
-    return '<div class="rp-item"><div class="rp-nv">' + cv + '<div class="rp-nv-main"><b>' + (n.title || '') + '</b><div class="rp-meta"><span class="rp-pill live">ظاهرة للناس</span>' + (lk ? '<span class="rp-pill lock">' + ic('lock') + ' مقفولة</span>' : '') + '<span class="rp-pill">' + (n.chapters || []).length + ' فصل</span></div>' +
-      '<div class="rp-row"><button type="button" class="rp-btn sm" data-act="siteread" data-id="' + esc(n.id) + '">' + ic('book-open') + ' فتح</button><button type="button" class="rp-btn sm sec" data-act="sitectl">' + ic('pen') + ' تعديل من لوحة التحكم</button></div></div></div></div>';
+    var lk = n.isLocked || (n.chapters || []).some(function (c) { return c.isLocked || (c.enc && !c.content); });
+    var btns = '<button type="button" class="rp-btn sm" data-act="siteread" data-id="' + esc(n.id) + '">' + ic('book-open') + ' فتح</button>' +
+      (lnk ? '<button type="button" class="rp-btn sm sec" data-act="edit" data-id="' + lnk.id + '">' + ic('pen') + ' تعديل من السيرفر</button>' + (rd ? '' : '<button type="button" class="rp-btn sm gold" data-act="import" data-id="' + lnk.id + '">' + ic('cloud-arrow-up') + ' نشر للموقع</button>')
+        : '<button type="button" class="rp-btn sm sec" data-act="sitectl">' + ic('pen') + ' تعديل من لوحة التحكم</button>');
+    return '<div class="rp-item"><div class="rp-nv">' + cv + '<div class="rp-nv-main"><b>' + (n.title || '') + '</b><div class="rp-meta"><span class="rp-pill live">ظاهرة للناس</span>' + (lk ? '<span class="rp-pill lock">' + ic('lock') + ' مقفولة</span>' : '') + '<span class="rp-pill">' + (n.chapters || []).length + ' فصل</span>' + (lnk ? '<span class="rp-pill" style="background:#dcfce7;color:#166534">☁️ نسخة السيرفر</span>' : '') + '</div>' +
+      '<div class="rp-row">' + btns + '</div></div></div></div>';
+  }
+  function siteMig(L) {
+    var todo = L.filter(function (n) { return !siteLink(n); }), rd = false; try { rd = !!isReaderOnlyMode; } catch (e) {}
+    if (!todo.length) return '<div class="rp-sub" style="margin:8px 0">☁️ كل رواياتك منقولة للسيرفر وبتتعدّل من هنا. بعد أي تعديل دوس «نشر للموقع» من الموقع في وضع الأدمن وارفع الـ index زي العادة.</div>';
+    return '<div class="rp-item" style="margin:10px 0;border:1.5px solid #fcd34d"><b>☁️ انقل رواياتك للسيرفر (مرة واحدة)</b><div class="rp-sub" style="margin:4px 0">بعد النقل بتعدّل الرواية والباسورد والغلاف والفصول من التطبيق على طول، وتفضل بتتزامن مع الموقع لما ترفعها. باقي ' + todo.length + ' رواية.</div>' +
+      (rd ? '<div class="rp-err">النقل بيتعمل مرة واحدة من الموقع في وضع الأدمن (بعد ما تفك الـ PIN) علشان نقرا باسورداتك الأصلية. بعده كل حاجة من التطبيق.</div>' : '<button type="button" class="rp-btn sm gold" data-act="sitemig">' + ic('cloud-arrow-up') + ' انقل روايات الموقع للسيرفر</button>') +
+      '<div class="rp-sub" id="rp-mig-msg" style="margin-top:6px;white-space:pre-line">' + esc(S.migMsg || '') + '</div></div>';
   }
   function siteCard() {
     var L = siteMine(); if (!L.length) return '';
-    return '<div class="rp-card"><h3>' + ic('earth-africa') + ' روايات الموقع (' + L.length + ')</h3><p class="rp-sub">دي رواياتك الأصلية اللي على الموقع، وبتظهر في صفحتك الشخصية زي ما الناس بتشوفها. التعديل عليها من لوحة التحكم.</p>' + L.map(siteRow).join('') + '</div>';
+    return '<div class="rp-card"><h3>' + ic('earth-africa') + ' روايات الموقع (' + L.length + ')</h3><p class="rp-sub">دي رواياتك الأصلية اللي على الموقع، وبتظهر في صفحتك الشخصية زي ما الناس بتشوفها.</p>' + siteMig(L) + L.map(siteRow).join('') + '</div>';
+  }
+  function siteMigrate() {
+    var set = function (m) { S.migMsg = m; var e = $('rp-mig-msg'); if (e) e.textContent = m; };
+    try { if (isReaderOnlyMode) { set('النقل بيتعمل من الموقع في وضع الأدمن.'); return; } } catch (e) {}
+    var todo = siteMine().filter(function (n) { return !siteLink(n); }), done = 0, skipped = [], i = 0, plainText = function (x) { return String(x == null ? '' : x); }, okPw = function (p) { return p && String(p).indexOf('\uD83D\uDD12') !== 0 && p !== '•'; };
+    if (!todo.length) { set('كله منقول ✅'); return; }
+    function nextN() {
+      if (i >= todo.length) { try { saveAllData(); } catch (e) {} set('خلص ✅ اتنقل ' + done + ' رواية للسيرفر.' + (skipped.length ? '\nاتخطّيت:\n' + skipped.join('\n') : '') + '\nدلوقتي صدّر الموقع وارفعه علشان الربط يتحفظ.'); refresh(); return; }
+      var n = todo[i++], pw = '', sealed = false;
+      if (n.isLocked) { if (okPw(n.password)) pw = String(n.password); else sealed = true; }
+      var chs = (n.chapters || []).map(function (c) { var lk = !n.isLocked && !!c.isLocked; if (lk) { if (okPw(c.password)) { if (!pw) pw = String(c.password); } else sealed = true; } if (!c.content && c.enc) sealed = true; return { title: plainText(c.title), content: plainText(c.content), locked: lk }; });
+      var pdfLocked = !!n.isPdfLocked; if (pdfLocked) { if (okPw(n.pdfPassword)) { if (!pw) pw = String(n.pdfPassword); } else sealed = true; }
+      if (n.pdfEnc && !n.pdfUrl) sealed = true;
+      if (sealed) { skipped.push('• ' + n.title + ' — باسورداتها لسه مقفولة بالـ PIN (افتح لوحة التحكم وادخل الـ PIN وجرّب تاني)'); nextN(); return; }
+      var body = { siteId: String(n.id), title: plainText(n.title), subtitle: plainText(n.subtitle), author: plainText(n.author), genre: plainText(n.genre), tags: n.tags || [], synopsis: plainText(n.synopsis), cover: n.coverImg || '', novelStatus: n.status, promoUrl: n.promoUrl || '', pdfUrl: n.pdfUrl || '', grad: '', icon: '', allowSharing: n.allowDirectSharing !== false, paper: !!n.isPaper, password: pw, lockAll: !!n.isLocked, lockPdf: pdfLocked, chapters: chs };
+      set('جاري نقل «' + n.title + '» (' + i + ' / ' + todo.length + ')…');
+      api('/api/admin/site-novels/import', { method: 'POST', body: body }).then(function (r) { n.srcUserNovel = r.id; done++; nextN(); }).catch(function (x) { skipped.push('• ' + n.title + ' — ' + x.message); nextN(); });
+    }
+    nextN();
   }
   function renderHome() {
     var u = me(); setTitle('حسابي'); var admin = isAdmin(); if (!PREM.info) loadPremInfo();
@@ -11458,7 +11488,7 @@ document.addEventListener('click', function (e) {
     if (t === 'backup') return '<div class="rp-card"><h3>' + ic('database') + ' النسخ الاحتياطي</h3><p class="rp-sub">روايات الناس وحساباتهم محفوظة على Cloudflare. حمّل نسخة احتياطية كل فترة واحتفظ بيها في مكان آمن (فيها بيانات الحسابات، فما تشاركهاش مع حد) وتقدر ترجّعها لو حصلت مشكلة.</p><div class="rp-row"><button type="button" class="rp-btn" data-act="backup">' + ic('download') + ' تحميل نسخة</button><button type="button" class="rp-btn sec" data-act="restore">' + ic('upload') + ' استعادة من ملف</button></div><input id="rp-restore-file" type="file" accept=".json,application/json" style="display:none"><div class="rp-err" id="rp-bk-msg" style="color:' + (S.bkColor || '#047857') + '">' + esc(S.bkMsg || '') + '</div></div>';
     return '<div class="rp-card"><h3>' + ic('feather-pointed') + ' انشر روايتك</h3><p class="rp-sub">اكتب روايتك وفصولها، اقفلها بباسورد لو عايز، حط برومو، وابعتها للمراجعة. بعد ما الأدمن يوافق هتظهر للناس في الموقع والتطبيق.</p><button type="button" class="rp-btn block" data-act="new">' + ic('plus') + ' رواية جديدة</button></div>' +
       (1 ? '<div class="rp-card"><h3>' + ic('cloud-arrow-down') + ' استيراد رواية من واتباد</h3><p class="rp-sub">حط لينك روايتك على واتباد، والتطبيق يجيب كل فصولها وينشئ الرواية بدل ما تنسخ فصل فصل. ' + (isAdmin() ? 'بتتنشر علطول.' : 'وبعدها بتتبعت للمراجعة قبل النشر.') + '</p><input id="rp-wp-url" class="rp-in" dir="ltr" placeholder="https://www.wattpad.com/story/..."><label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-weight:700;font-size:.82rem"><input type="checkbox" id="rp-wp-own"> أؤكد إن الرواية دي بتاعتي أو معايا إذن بنشرها</label><button type="button" class="rp-btn block" data-act="wpimp">' + ic('cloud-arrow-down') + (isAdmin() ? ' استيراد ونشر' : ' استيراد وإرسال للمراجعة') + '</button><div id="rp-wp-prog" class="rp-sub" style="margin-top:8px"></div></div>' : '') +
-      siteCard() + (S.mine.length ? S.mine.map(novelRow).join('') : siteMine().length ? '' : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
+      siteCard() + (S.mine.length ? S.mine.filter(function (x) { return !x.siteId; }).map(novelRow).join('') : siteMine().length ? '' : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
   }
   function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium' || t === 'actest' || t === 'bc' || t === 'msgs'; }
   function settingsTab() {
@@ -11982,19 +12012,39 @@ document.addEventListener('click', function (e) {
   }
   function ttsSync() {
     var set = function (m) { TT.sync = m; var e = $('rp-tt-sync'); if (e) e.textContent = m; };
-    try { if (isReaderOnlyMode) { set('افتح الموقع بوضع الأدمن (زي ما بتعدّل رواياتك) وادخل «حسابي» من هناك.'); return; } } catch (e) {}
+    var rd = false; try { rd = !!isReaderOnlyMode; } catch (e) {}
     set('جاري مقارنة الروايات…');
-    api('/api/admin/tts/known').then(function (d) {
-      var known = d.sigs || {}, mkm = d.mk || {}, items = [], list = novels.slice(), hasMk = function (x) { return /[«“"]/.test(x) || /(^|\n)\s*[-–—]/.test(x); };
-      list.forEach(function (n, ni) { (n.chapters || []).forEach(function (c, i) { var ct = ttsChapText(c); if (!ct.text) return; var sig = ct.sig; if (known[n.id + '#' + i] === sig && (mkm[n.id + '#' + i] || !hasMk(ct.text))) return; items.push({ nid: String(n.id), idx: i, ntitle: String(n.title || ''), ctitle: String(c.title || ''), ord: list.length - ni, sig: sig, text: ct.text }); }); });
-      if (!items.length) { set('كله متبعت قبل كده ✅ مفيش جديد.'); return; }
-      var total = items.length, sent = 0, added = 0, upd = 0;
-      function next() {
-        if (!items.length) { set('تم ✅ اتضاف ' + added + ' فصل جديد' + (upd ? ' وتحدّث ' + upd : '') + ' للطابور.'); loadTts(); return; }
-        var batch = [], size = 0; while (items.length && batch.length < 25 && size < 250000) { var it = items.shift(); batch.push(it); size += it.text.length; }
-        api('/api/admin/tts/enqueue', { method: 'POST', body: { items: batch } }).then(function (r) { added += r.added || 0; upd += r.updated || 0; sent += batch.length; set('جاري الإرسال… ' + sent + ' / ' + total); next(); }).catch(function (x) { set('وقف: ' + x.message); });
+    Promise.all([api('/api/admin/tts/known'), rd ? getKeys().catch(function () { return {}; }) : Promise.resolve({})]).then(function (rs) {
+      var d = rs[0], keys = rs[1] || {}, known = d.sigs || {}, mkm = d.mk || {}, items = [], list = novels.slice(), miss = 0, jobs = [], hasMk = function (x) { return /[«“"]/.test(x) || /(^|\n)\s*[-–—]/.test(x); };
+      list.forEach(function (n, ni) { (n.chapters || []).forEach(function (c, i) { jobs.push({ n: n, ni: ni, c: c, i: i }); }); });
+      function plain(j) {
+        var c = j.c; if (c.content || !c.enc) return Promise.resolve(c);
+        var k = keys[j.n.id] || {}, pw = (k.c && k.c[j.i]) || k.n || '';
+        if (!pw || !window.AC) { miss++; return Promise.resolve(null); }
+        return window.AC.decrypt(c.enc, pw).then(function (tx) { if (tx == null) { miss++; return null; } var o = {}; for (var kk in c) o[kk] = c[kk]; o.content = tx; return o; });
       }
-      next();
+      var p = 0;
+      function scan() {
+        if (p >= jobs.length) return Promise.resolve();
+        var j = jobs[p++];
+        return plain(j).then(function (c) {
+          if (!c) return;
+          var ct = ttsChapText(c); if (!ct.text) return; var sig = ct.sig;
+          if (known[j.n.id + '#' + j.i] === sig && (mkm[j.n.id + '#' + j.i] || !hasMk(ct.text))) return;
+          items.push({ nid: String(j.n.id), idx: j.i, ntitle: String(j.n.title || ''), ctitle: String(c.title || ''), ord: list.length - j.ni, sig: sig, text: ct.text });
+        }).then(scan);
+      }
+      return scan().then(function () {
+        var warn = miss ? ' (⚠️ ' + miss + ' فصل مقفول متقدرش أفكه لأن مفتاحه مش متسجّل في السيرفر)' : '';
+        if (!items.length) { set('كله متبعت قبل كده ✅ مفيش جديد.' + warn); return; }
+        var total = items.length, sent = 0, added = 0, upd = 0;
+        function next() {
+          if (!items.length) { set('تم ✅ اتضاف ' + added + ' فصل جديد' + (upd ? ' وتحدّث ' + upd : '') + ' للطابور.' + warn); loadTts(); return; }
+          var batch = [], size = 0; while (items.length && batch.length < 25 && size < 250000) { var it = items.shift(); batch.push(it); size += it.text.length; }
+          api('/api/admin/tts/enqueue', { method: 'POST', body: { items: batch } }).then(function (r) { added += r.added || 0; upd += r.updated || 0; sent += batch.length; set('جاري الإرسال… ' + sent + ' / ' + total); next(); }).catch(function (x) { set('وقف: ' + x.message); });
+        }
+        next();
+      });
     }).catch(function (x) { set(x.message); });
   }
 
@@ -12103,11 +12153,15 @@ document.addEventListener('click', function (e) {
     var i = PREM.info || {}, plans = i.plans || [], M = methodsOf();
     var adminMode = false; try { adminMode = !isReaderOnlyMode; } catch (e) {}
     var v = vaultKeys(), st;
-    if (!adminMode) st = '<span class="rp-err">⚠️ أنت في وضع القارئ. افتح الموقع بوضع الأدمن (زي ما بتعدّل رواياتك) وادخل «حسابي» من هناك علشان تتزامن الباسوردات.</span>';
+    if (!adminMode) {
+      if (!PREM.keys && !PREM._kreq) { PREM._kreq = 1; getKeys().then(function () { if (S.view === 'home' && S.tab === 'premium') render(); }).catch(function () {}); }
+      var kk = PREM.keys || {}, kn = Object.keys(kk).length, kc = 0; Object.keys(kk).forEach(function (id) { kc += Object.keys((kk[id] || {}).c || {}).length; });
+      st = PREM.keys ? '<span class="rp-ok" style="font-weight:800">✅ السيرفر عنده مفاتيح ' + kn + ' رواية و' + kc + ' فصل مقفول، والمشترين بيفتحوا بيها تلقائي. أي رواية موقع بتعدّلها من التطبيق بتتحدّث مفاتيحها لوحدها.</span>' : '<span class="rp-sub">جاري قراءة المفاتيح من السيرفر…</span>';
+    }
     else if (v.sealed && !v.novels) st = '<span class="rp-err">⚠️ باسورداتك لسه مقفولة بالـ PIN. افتح لوحة التحكم وادخل كلمة سر الكاتب (PIN) علشان تتفك، وبعدها دوس «مزامنة الآن».</span>';
     else st = '<span class="rp-ok" style="font-weight:800">' + (PREM.syncAt ? '✅ اتزامنت الآن — ' : '') + v.novels + ' رواية و' + v.chapters + ' فصل مقفول جاهزين للمشترين.' + (v.sealed ? ' (' + v.sealed + ' باسورد لسه مقفول بالـ PIN)' : '') + '</span>';
     return payAdminCard() + ttsAdminCard() + readsResetCard() + '<div class="rp-card"><h3>🔑 باسوردات رواياتك للمشترين</h3><p class="rp-sub">علشان اللي بيشتري رواية من رواياتك تتفتحله تلقائي، باسورداتها لازم تتبعت للسيرفر (بتتبعت لوحدها، وتقدر تعملها يدوي من هنا).</p>' + st +
-      '<div class="rp-err" id="rp-sync-out"></div><button type="button" class="rp-btn sm gold" data-act="syncv" style="margin-top:8px">' + ic('rotate') + ' مزامنة الآن</button></div>' +
+      '<div class="rp-err" id="rp-sync-out"></div><button type="button" class="rp-btn sm gold" data-act="syncv" style="margin-top:8px">' + ic('rotate') + (adminMode ? ' مزامنة الآن' : ' تحديث الحالة') + '</button></div>' +
       '<div class="rp-card"><h3>👑 الباقات وطرق الدفع</h3><p class="rp-sub">بتتحفظ فورًا ومش محتاجة تصدير الموقع. الفاضي من الباقات بيتشال.</p>' +
       (plans.concat([{}, {}]).slice(0, 5)).map(function (p, ix) { return '<div class="rp-item" style="margin-top:8px"><div class="rp-row" style="flex-wrap:nowrap"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="name" placeholder="الاسم (شهر)" value="' + esc(p.name || '') + '" maxlength="30"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="months" placeholder="شهور" inputmode="numeric" style="width:78px" value="' + esc(p.months || '') + '"></div><div class="rp-row" style="flex-wrap:nowrap;margin-top:6px"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="price" placeholder="السعر" inputmode="decimal" value="' + esc(p.price || '') + '"><input class="rp-in rp-pl" data-i="' + ix + '" data-k="old" placeholder="قبل الخصم" inputmode="decimal" value="' + esc(p.old || '') + '"></div><input class="rp-in rp-pl" data-i="' + ix + '" data-k="badge" placeholder="شارة (مثال: الأوفر)" style="margin-top:6px" maxlength="24" value="' + esc(p.badge || '') + '"></div>'; }).join('') +
       '<h3 style="margin-top:18px">' + ic('bolt') + ' انستا باي</h3><label class="rp-chk"><input type="checkbox" id="rp-m-ion"' + (M.instapay.on ? ' checked' : '') + '> مفعّل</label>' +
@@ -12122,18 +12176,18 @@ document.addEventListener('click', function (e) {
   /* ---------- نسخ رواية منشورة إلى روايات الأدمن (GitHub) ---------- */
   function importToMine(id) {
     var msg = $('rp-imp-msg');
-    try { if (isReaderOnlyMode) { if (msg) msg.textContent = 'الميزة دي بتشتغل من الموقع في وضع الأدمن (مش من التطبيق أو وضع القارئ).'; return; } } catch (e) {}
+    try { if (isReaderOnlyMode) { var rm = 'النشر على الموقع نفسه بيتعمل من الموقع في وضع الأدمن (زي ما بترفع الرواية للـ index). تعديلاتك محفوظة على السيرفر ✅'; if (msg) msg.textContent = rm; else flash(rm); return; } } catch (e) {}
     if (msg) { msg.style.color = '#047857'; msg.textContent = 'جاري النسخ…'; }
     api('/api/admin/novels/' + id + '/live').then(function (d) {
       var u = d.novel, lockAll = !!u.lockAll && !!u.password, pw = u.password || '';
       var obj = {
         id: 'novel-' + Date.now(), srcUserNovel: u.id, authorUid: u.uid, title: esc(u.title), subtitle: esc(u.subtitle || ''), author: esc(u.author || u.owner), genre: esc(u.genre || 'عام'), tags: (u.tags || []).map(esc),
         status: u.novelStatus === 'مكتملة' ? 'مكتملة' : 'مستمرة', views: '1', rating: '5.0', coverGradient: u.grad || GRADS[0][0], accentIcon: u.icon || 'fa-book', coverImg: httpsUrl(u.cover), pdfUrl: httpsUrl(u.pdfUrl), synopsis: esc(u.synopsis),
-        isLocked: lockAll, password: lockAll ? pw : '', hasPromo: !!httpsUrl(u.promoUrl), promoUrl: httpsUrl(u.promoUrl), allowDirectSharing: u.allowSharing !== false, isPaper: !!u.paper,
+        isLocked: lockAll, password: lockAll ? pw : '', isPdfLocked: !!(u.siteId && u.pdfUrl && u.lockPdf !== false && pw), pdfPassword: (u.siteId && u.pdfUrl && u.lockPdf !== false && pw) ? pw : '', hasPromo: !!httpsUrl(u.promoUrl), promoUrl: httpsUrl(u.promoUrl), allowDirectSharing: u.allowSharing !== false, isPaper: !!u.paper,
         chapters: u.chapters.map(function (c, i) { var lk = !lockAll && !!c.locked && !!pw; return { id: i + 1, title: esc(c.title), readTime: Math.max(1, Math.ceil(c.content.split(/\s+/).length / 200)) + ' دقائق', isLocked: lk, password: lk ? pw : '', content: esc(c.content) }; })
       };
       var ex = novels.filter(function (n) { return n.srcUserNovel === u.id; })[0];
-      if (ex) { if (!confirm('الرواية دي اتضافت للموقع قبل كده. تحدّث النسخة بآخر نسخة منشورة؟')) { if (msg) msg.textContent = ''; return; } obj.id = ex.id; obj.views = ex.views; novels[novels.indexOf(ex)] = obj; }
+      if (ex) { if (!confirm('الرواية دي اتضافت للموقع قبل كده. تحدّث النسخة بآخر نسخة منشورة؟')) { if (msg) msg.textContent = ''; return; } obj.id = ex.id; obj.views = ex.views; if (u.siteId) { obj.coverGradient = ex.coverGradient || obj.coverGradient; obj.accentIcon = ex.accentIcon || obj.accentIcon; obj.rating = ex.rating || obj.rating; if (!obj.coverImg && ex.coverImg) obj.coverImg = ex.coverImg; } novels[novels.indexOf(ex)] = obj; }
       else novels.unshift(obj);
       try { saveAllData(); } catch (e) {}
       try { applySiteConfiguration(); } catch (e) {}
@@ -12280,10 +12334,12 @@ document.addEventListener('click', function (e) {
       var methods = { instapay: { on: $('rp-m-ion').checked, handle: $('rp-m-ih').value, name: $('rp-m-in').value }, wallet: { on: $('rp-m-won').checked, number: $('rp-m-wn').value, name: $('rp-m-wname').value, kinds: $('rp-m-wk').value } };
       api('/api/admin/premium', { method: 'PUT', body: { features: ($('rp-pa-feats') || { value: '' }).value.split('\n'), whatsapp: $('rp-pa-wa').value, defaultPrice: (PREM.info || {}).defaultPrice || '', message: (PREM.info || {}).message || '', prices: (PREM.info || {}).prices || {}, plans: plans.length ? plans : undefined, methods: methods } }).then(function (d) { PREM.info = d.info; var o = $('rp-pa-msg-out'); if (o) { o.textContent = 'تم الحفظ ✅'; o.className = 'rp-err rp-ok'; } flash('تم حفظ إعدادات Premium'); }).catch(function (x) { var o = $('rp-pa-msg-out'); if (o) o.textContent = x.message; });
     }
+    else if (a === 'syncv' && (function () { try { return isReaderOnlyMode; } catch (e) { return false; } })()) { PREM.keys = null; PREM._kreq = 0; render(); flash('اتحدّثت الحالة ✅'); }
     else if (a === 'syncv') { var so = $('rp-sync-out'); if (so) { so.className = 'rp-err'; so.textContent = 'جاري المزامنة…'; } syncVault(true).then(function (r) { var o = $('rp-sync-out'); if (r.ok) { render(); var o2 = $('rp-sync-out'); if (o2) { o2.className = 'rp-err rp-ok'; o2.textContent = 'تمت المزامنة ✅'; } } else if (o) o.textContent = r.err === 'reader' ? 'لازم تكون في وضع الأدمن' : (r.err === 'noadmin' ? 'سجّل دخول بحساب الأدمن' : r.err); }); }
     else if (a === 'premopen') { S.premOpen = S.premOpen === +id ? 0 : +id; render(); }
     else if (a === 'setprem') api('/api/admin/users/' + id + '/premium', { method: 'POST', body: { months: b.getAttribute('data-m') } }).then(function () { S.premOpen = 0; flash(b.getAttribute('data-m') === '0' ? 'تم إلغاء الاشتراك' : 'تم تفعيل Premium ✅'); loadUsers(); }).catch(function (x) { flash(x.message); });
     else if (a === 'import') importToMine(id);
+    else if (a === 'sitemig') siteMigrate();
     else if (a === 'unpub') { if (confirm('تلغي نشر الرواية دي؟')) api('/api/admin/novels/' + id + '/unpublish', { method: 'POST' }).then(function () { flash('تم إلغاء النشر'); refresh(); loadUserNovels(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'admdel') { if (confirm('تحذف الرواية دي نهائيًا من السيرفر؟ (يفضّل تنسخها لرواياتك الأول)')) api('/api/admin/novels/' + id, { method: 'DELETE' }).then(function () { flash('تم الحذف'); refresh(); loadUserNovels(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'setrole') { var r = b.getAttribute('data-r'); if (confirm(r === 'admin' ? 'هتخلي «' + b.getAttribute('data-e') + '» أدمن معاك بكل الصلاحيات. متأكد؟' : 'هتشيل صلاحية الأدمن من «' + b.getAttribute('data-e') + '». متأكد؟')) api('/api/admin/users/' + id + '/role', { method: 'POST', body: { role: r } }).then(function () { flash(r === 'admin' ? 'تمام، بقى أدمن (لازم يسجّل خروج ويدخل تاني)' : 'اتشالت صلاحية الأدمن'); loadUsers(); }).catch(function (x) { flash(x.message); }); }
