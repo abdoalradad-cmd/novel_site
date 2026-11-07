@@ -12539,7 +12539,19 @@ document.addEventListener('click', function (e) {
     var prem = most.filter(isPremNovel);
     return { pop: pop.slice(0, 15), most: most, recent: recent, prem: prem, paper: most.filter(function (n) { return !!n.isPaper; }) };
   }
-  function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} }, 60); }
+  function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} try { window.__rpRepaintViews && window.__rpRepaintViews(); } catch (e) {} try { fixDetailsViews(); } catch (e) {} }, 60); }
+  window.__rpReadsOf = function (n) { return readsOf(n); };
+  /* رقم المشاهدات جوه صفحة الرواية = نفس رقم الكارت بالظبط (من السيرفر) */
+  function fixDetailsViews() {
+    var id; try { id = typeof currentNovelId !== 'undefined' ? currentNovelId : null; } catch (e) { id = null; } if (!id) return;
+    var host = $('novel-details-content'); if (!host || !host.offsetParent && !host.innerHTML) return;
+    var n = null; for (var i = 0; i < novels.length; i++) if (novels[i].id === id) { n = novels[i]; break; } if (!n) return;
+    var pill = $('details-live-views-pill');
+    if (!pill) { var pc = host.querySelector('.flex.flex-wrap.items-center'); if (!pc) return; pill = document.createElement('span'); pill.id = 'details-live-views-pill'; pill.className = 'px-3.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'; pc.appendChild(pill); }
+    var t = '<i class="fa-solid fa-eye ml-1"></i> ' + fnum(readsOf(n)) + ' مشاهدة'; if (pill.innerHTML !== t) pill.innerHTML = t;
+  }
+  setInterval(function () { try { fixDetailsViews(); } catch (e) {} }, 1000);
+
   window.rpRenderRows = renderRows; window.rpLoadAuthors = function () { loadAuthors(); };
 
   /* ---------- نمط الصفوف: للقراء فقط، ويُخفى أثناء البحث ---------- */
@@ -13926,11 +13938,12 @@ window.addEventListener('load', () => {
         paintViewsAndStarsOnCards();
     }
 
+    window.__rpRepaintViews = function () { try { paintViewsAndStarsOnCards(); } catch (e) {} };
     function paintViewsAndStarsOnCards() {
         if (typeof novels === 'undefined' || !Array.isArray(novels)) return;
 
         novels.forEach(novel => {
-            const viewsCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseCleanNumber(novel.views);
+            const viewsCount = (window.__rpReadsOf ? window.__rpReadsOf(novel) : parseCleanNumber(novel.views));
             const viewsFormatted = formatNumber(viewsCount);
 
             const cardBtns = document.querySelectorAll(`button[onclick*="'${novel.id}'"]`);
@@ -13963,7 +13976,7 @@ window.addEventListener('load', () => {
                 const novel = novels.find(n => n.id === currentNovelId);
                 const detailsContainer = document.getElementById('novel-details-content');
                 if (novel && detailsContainer) {
-                    const viewsCount = liveViewsMap[novel.id] !== undefined ? liveViewsMap[novel.id] : parseCleanNumber(novel.views);
+                    const viewsCount = (window.__rpReadsOf ? window.__rpReadsOf(novel) : parseCleanNumber(novel.views));
                     const pillsContainer = detailsContainer.querySelector('.flex.flex-wrap.items-center');
                     if (pillsContainer) {
                         let detailViewPill = document.getElementById('details-live-views-pill');
