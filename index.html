@@ -11543,11 +11543,11 @@ document.addEventListener('click', function (e) {
       '<label class="rp-lbl">رسالتك</label><textarea id="rp-ct-x" class="rp-in" rows="6" maxlength="1500" placeholder="اكتب هنا…"></textarea><button type="button" class="rp-btn block" style="margin-top:12px" data-act="ctsend">' + ic('paper-plane') + ' إرسال</button></div>';
   }
   function msgsTab() {
-    if (CTX.list == null && !CTX._l) { CTX._l = 1; api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; if (S.view === 'home' && S.tab === 'msgs') render(); }).catch(function () { CTX.list = []; CTX._l = 0; }); }
+    if (CTX.list == null && !CTX._l) { CTX._l = 1; api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; CTX.err = ''; if (S.view === 'home' && S.tab === 'msgs') render(); }).catch(function (x) { CTX.list = []; CTX._l = 0; CTX.err = (x && x.message) || 'تعذّر تحميل الرسائل'; if (S.view === 'home' && S.tab === 'msgs') render(); }); }
     var K = { inquiry: '❓ استفسار', complaint: '😠 شكوى', suggestion: '💡 اقتراح', bug: '🐞 مشكلة تقنية', other: '📝 أخرى' };
     return '<div class="rp-card"><h3>' + ic('inbox') + ' رسائل التواصل' + (CTX.list ? ' (' + CTX.list.length + ')' : '') + '</h3>' + (CTX.list == null ? '<div class="rp-empty">جاري التحميل…</div>' : CTX.list.length ? CTX.list.map(function (m) {
       return '<div class="rp-item"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><b>' + (K[m.kind] || m.kind) + '</b> · ' + esc(m.name || 'زائر') + (m.uid ? ' <span class="rp-pill approved">حساب #' + m.uid + '</span>' : '') + (m.email ? '<div class="rp-sub" dir="ltr" style="text-align:right;margin:2px 0">' + esc(m.email) + '</div>' : '') + '<div class="rp-sub" style="white-space:pre-wrap;margin:4px 0">' + esc(m.text) + '</div><div class="rp-sub" style="margin:0;font-size:.68rem">' + esc(agoTxt(m.ts)) + '</div></div><button type="button" class="rp-btn sm red" data-act="msgdel" data-id="' + m.id + '">' + ic('trash') + '</button></div></div>';
-    }).join('') : '<div class="rp-empty">مفيش رسايل</div>') + '</div>';
+    }).join('') : (CTX.err ? '<div class="rp-err" style="margin:8px 0">⚠️ ' + esc(CTX.err) + '</div><button type="button" class="rp-btn sm" data-act="msgreload">' + ic('rotate') + ' إعادة المحاولة</button>' : '<div class="rp-empty">مفيش رسايل</div>')) + '</div>';
   }
   function quotesTab() {
     var Q = window.__rpQuotes, L = Q ? Q.list() : [];
@@ -11844,6 +11844,11 @@ document.addEventListener('click', function (e) {
   function usd(n) { n = +n || 0; return '$' + (n < 1 ? n.toFixed(3) : n.toFixed(2)); }
   function mins(sec) { return (Math.round((+sec || 0) / 6) / 10).toLocaleString('en') + ' د'; }
   function provBox(d, prov) {
+    if (prov === 'voicetut') {
+      var Q = ((d.prov || {}).voicetut || {}).chapters || {}, left = (d.novels || []).filter(function (n) { return n.prov === 'voicetut' && (n.d || 0) < n.n; });
+      return '<div class="rp-item" style="margin-top:10px;border:1.5px solid #e9d5ff"><b style="font-size:1.02rem">🟪 VoiceTuT (تحويل خارجي من Colab — مجاني)</b>' +
+        '<div class="rp-sub" style="margin:6px 0;line-height:1.8">الروايات اللي تختار لها «🟪 VoiceTuT» السيرفر مش بيحوّلها. أنت بتفتح نوتبوك Colab وهو يسحب فصولها ويحوّلها ويرفع الصوت الجاهز. المنتظر: <b>' + (Q.queued || 0) + '</b> فصل · الجاهز: <b>' + (Q.done || 0) + '</b>' + (left.length ? '<br>روايات مستنية: ' + left.map(function (n) { return esc(n.title || n.nid); }).join('، ') : '') + '</div></div>';
+    }
     var P = (d.prov || {})[prov] || {}, t = P.today || {}, m = P.month || {}, q = P.chapters || {}, rm = P.remain || {}, az = prov === 'azure';
     var nm = az ? '🟦 مايكروسوفت Azure' : (prov === 'gemini3' ? '🟧 جوجل Gemini 3 (حساب تالت)' : prov === 'gemini2' ? '🟨 جوجل Gemini 2 (حساب تاني)' : '🟩 جوجل Gemini');
     var h = '<div class="rp-item" style="margin-top:10px;border:1.5px solid ' + (az ? '#bfdbfe' : (prov === 'gemini3' ? '#fed7aa' : prov === 'gemini2' ? '#fde68a' : '#bbf7d0')) + '"><b style="font-size:1.02rem">' + nm + '</b> ' +
@@ -11866,7 +11871,7 @@ document.addEventListener('click', function (e) {
   function nvCard(n, rank, act) {
     var pc = n.n ? Math.round(n.d / n.n * 100) : 0, np2 = n.prov || 'gemini', nid = esc(n.nid);
     return '<div class="rp-item" style="margin-top:6px' + (n.run ? ';border:1.5px solid #34d399' : '') + '"><div style="min-width:0"><b>' + (rank ? rank + '. ' : '') + esc(n.title || n.nid) + '</b>' + (n.run ? ' <span class="rp-pill live">⚙️ بتتحوّل دلوقتي</span>' : '') + '<div class="rp-sub" style="margin:2px 0">' + n.d + ' / ' + n.n + ' فصل جاهز (' + pc + '%)</div></div>' +
-      '<div class="rp-row" style="flex-wrap:wrap;margin-top:4px">' + [['gemini', '🟩 جوجل'], ['gemini2', '🟨 جوجل 2'], ['gemini3', '🟧 جوجل 3'], ['azure', '🟦 Azure']].map(function (p) { return '<button type="button" class="rp-btn sm ' + (np2 === p[0] ? '' : 'sec') + '" data-act="ttsprov" data-n="' + nid + '" data-p="' + p[0] + '">' + p[1] + '</button>'; }).join('') +
+      '<div class="rp-row" style="flex-wrap:wrap;margin-top:4px">' + [['gemini', '🟩 جوجل'], ['gemini2', '🟨 جوجل 2'], ['gemini3', '🟧 جوجل 3'], ['azure', '🟦 Azure'], ['voicetut', '🟪 VoiceTuT']].map(function (p) { return '<button type="button" class="rp-btn sm ' + (np2 === p[0] ? '' : 'sec') + '" data-act="ttsprov" data-n="' + nid + '" data-p="' + p[0] + '">' + p[1] + '</button>'; }).join('') +
       '<button type="button" class="rp-btn sm sec" data-act="ttsredo" data-n="' + nid + '" data-p="' + np2 + '">' + ic('rotate') + ' إعادة تحويلها</button><button type="button" class="rp-btn sm sec" data-act="ttsinsp" data-n="' + nid + '">🔍 فحص الأصوات</button>' +
       (act ? '<span class="rp-row" style="gap:4px;flex-wrap:nowrap"><input type="number" min="1" inputmode="numeric" class="rp-in" id="rp-pos-' + nid + '" value="' + rank + '" style="width:64px;padding:8px;text-align:center"><button type="button" class="rp-btn sm sec" data-act="ttspos" data-n="' + nid + '">ثبّت الترتيب</button></span>' : '') +
       '<button type="button" class="rp-btn sm red" data-act="ttsdel" data-n="' + nid + '">حذف</button></div>' + ((TT.insp || {})[n.nid] ? '<div class="rp-sub" style="margin-top:6px;line-height:1.7">' + (TT.insp || {})[n.nid] + '</div>' : '') + '</div>';
@@ -11880,7 +11885,7 @@ document.addEventListener('click', function (e) {
     var badge = function (ok, x, y) { return '<span class="rp-ok" style="font-weight:800;margin-inline-end:10px">' + (ok ? '✅ ' + x : '<span class="rp-err">❌ ' + y + '</span>') + '</span>'; };
     var h = '<div class="rp-card">' + T + '<p class="rp-sub">الفصول بتتحوّل لصوت مسبقًا بالترتيب وبحد يومي، وكل مزوّد ليه طابور لوحده وبيشتغلوا مع بعض. الصوت بيفرّق بين الراوي والراجل والست والولد والبنت. المشتركين بيسمعوا الجاهز بس.</p>' +
       '<p style="margin:6px 0">' + badge(has.gemini, 'جوجل جاهز', 'مفتاح Gemini ناقص') + badge(has.gemini2, 'جوجل 2 جاهز', 'جوجل 2 ناقص') + badge(has.gemini3, 'جوجل 3 جاهز', 'جوجل 3 ناقص') + badge(has.azure, 'Azure جاهز', 'Azure ناقص (المفتاح/المنطقة)') + badge(d.hasBucket, 'تخزين R2 شغّال', 'R2 مش مفعّل') + '</p>';
-    h += provBox(d, 'gemini') + provBox(d, 'gemini2') + provBox(d, 'gemini3') + provBox(d, 'azure');
+    h += provBox(d, 'gemini') + provBox(d, 'gemini2') + provBox(d, 'gemini3') + provBox(d, 'azure') + provBox(d, 'voicetut');
     h += '<div class="rp-row" style="margin-top:12px;flex-wrap:wrap"><button type="button" class="rp-btn sm gold" data-act="ttssync">' + ic('cloud-arrow-up') + ' ابعت الروايات والفصول الجديدة للطابور</button></div><div class="rp-sub" id="rp-tt-sync" style="margin-top:6px">' + esc(TT.sync) + '</div>';
     if ((d.novels || []).length) {
       var NV = d.novels, actL = NV.filter(function (n) { return (n.d || 0) < n.n; }), doneL = NV.filter(function (n) { return (n.d || 0) >= n.n; });
@@ -12185,7 +12190,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttspos') { var pe = document.getElementById('rp-pos-' + b.getAttribute('data-n')); api('/api/admin/tts/pos', { method: 'POST', body: { nid: b.getAttribute('data-n'), pos: pe ? pe.value : 1 } }).then(function (d) { TT.st = d; flash('اتثبّت الترتيب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsfront') api('/api/admin/tts/front', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); });
     else if (a === 'ttsdel') { if (confirm('تشيل الرواية دي من طابور الصوت وتمسح الصوت المتخزّن لها؟')) api('/api/admin/tts/remove', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); }); }
-    else if (a === 'ttsprov') { var pp = b.getAttribute('data-p'); if (confirm('تحوّل الرواية دي لـ ' + (pp === 'azure' ? 'Azure' : (pp === 'gemini3' ? 'جوجل 3' : pp === 'gemini2' ? 'جوجل 2' : 'جوجل')) + '؟ الصوت الجاهز لها هيتمسح وتتحوّل من الأول.')) api('/api/admin/tts/provider', { method: 'POST', body: { nid: b.getAttribute('data-n'), prov: pp } }).then(function (d) { TT.st = d; render(); flash('تمام ✅'); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'ttsprov') { var pp = b.getAttribute('data-p'); if (confirm('تحوّل الرواية دي لـ ' + (pp === 'voicetut' ? 'VoiceTuT (Colab)' : pp === 'azure' ? 'Azure' : (pp === 'gemini3' ? 'جوجل 3' : pp === 'gemini2' ? 'جوجل 2' : 'جوجل')) + '؟ الصوت الجاهز لها هيتمسح وتتحوّل من الأول.')) api('/api/admin/tts/provider', { method: 'POST', body: { nid: b.getAttribute('data-n'), prov: pp } }).then(function (d) { TT.st = d; render(); flash('تمام ✅'); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsinsp') { var inn = b.getAttribute('data-n'); TT.insp = TT.insp || {}; TT.insp[inn] = 'جاري الفحص…'; render(); api('/api/admin/tts/inspect?nid=' + encodeURIComponent(inn)).then(function (d) {
       var RN = { narrator: 'الراوي', man: 'راجل', woman: 'ست', boy: 'ولد', girl: 'بنت' }, tot = 0, k, parts = []; for (k in d.roles) tot += d.roles[k];
       for (k in d.roles) parts.push(RN[k] + ' ' + Math.round(d.roles[k] / (tot || 1) * 100) + '%');
@@ -12253,6 +12258,7 @@ document.addEventListener('click', function (e) {
         .then(function () { CTX.sent = true; render(); }).catch(function (x) { b.disabled = false; flash(x.message); });
     }
     else if (a === 'ctagain') { CTX.sent = false; render(); }
+    else if (a === 'msgreload') { CTX.list = null; CTX.err = ''; CTX._l = 0; render(); }
     else if (a === 'msgdel') { if (confirm('تمسح الرسالة؟')) api('/api/admin/contact/' + b.getAttribute('data-id') + '/delete', { method: 'POST', body: {} }).then(function () { CTX.list = null; CTX._l = 0; render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'newspost') {
       var nt = ($('rp-nw-t') || {}).value || '', nx = ($('rp-nw-x') || {}).value || '';
