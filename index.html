@@ -6510,6 +6510,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -11898,7 +11900,7 @@ document.addEventListener('click', function (e) {
     h += '<div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttsrun" data-p="' + prov + '">' + ic('play') + ' شغّل دفعة</button>' + (q.failed || (P.pausedUntil && P.pausedUntil > Date.now()) ? '<button type="button" class="rp-btn sm sec" data-act="ttsretry" data-p="' + prov + '">' + ic('rotate') + ' إعادة المحاولة</button>' : '') + '</div></div>';
     return h;
   }
-  var PV = [['gemini', 'جوجل 1', '🟩', '#bbf7d0'], ['gemini2', 'جوجل 2', '🟨', '#fde68a'], ['gemini3', 'جوجل 3', '🟧', '#fed7aa'], ['gemini4', 'جوجل 4', '🟥', '#fecaca'], ['gemini5', 'جوجل 5', '🟪', '#e9d5ff'], ['gemini6', 'جوجل 6', '🟫', '#e7d5c3'], ['azure', 'Azure', '🟦', '#bfdbfe'], ['colab', 'Colab', '🎧', '#a5f3fc']];
+  var PV = [['gemini', 'جوجل 1', '🟩', '#bbf7d0'], ['gemini2', 'جوجل 2', '🟨', '#fde68a'], ['gemini3', 'جوجل 3', '🟧', '#fed7aa'], ['gemini4', 'جوجل 4', '🟥', '#fecaca'], ['gemini5', 'جوجل 5', '🟪', '#e9d5ff'], ['gemini6', 'جوجل 6', '🟫', '#e7d5c3'], ['azure', 'Azure', '🟦', '#bfdbfe']];
   function pvInfo(id) { for (var i = 0; i < PV.length; i++) if (PV[i][0] === id) return PV[i]; return PV[0]; }
   function gcf(c, prov) { return prov === 'gemini' ? (c || {}) : ((c || {})['g' + String(prov).slice(6)] || {}); }
   function ttsInp(id, lbl, val, ph, ltr) { return '<label class="rp-lbl">' + lbl + '</label><input id="' + id + '" class="rp-in"' + (ltr ? ' dir="ltr"' : '') + ' value="' + esc(val == null ? '' : val) + '" placeholder="' + (ph || '') + '">'; }
@@ -11949,28 +11951,7 @@ document.addEventListener('click', function (e) {
     h += '<div class="rp-err" id="rp-tt-out">' + esc(TT.msg) + '</div><div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttssave">' + ic('floppy-disk') + ' حفظ الإعدادات العامة</button><button type="button" class="rp-btn sm gold" data-act="ttsvoices" data-p="gemini">' + ic('list') + ' أصوات جوجل المتاحة</button></div>';
     return h;
   }
-  function provNovels(d, prov) {
-    var h = '';
-    var NV = (d.novels || []), mine = NV.filter(function (n) { return n.prov === prov; }), actL = mine.filter(function (n) { return (n.d || 0) < n.n; }), doneL = mine.filter(function (n) { return (n.d || 0) >= n.n; });
-    h += '<h3 style="margin-top:16px">📚 روايات الحساب ده (' + actL.length + ' بتتحوّل)</h3><div class="rp-sub">الرقم = ترتيبها في طابور الحساب ده بس (1 تتحوّل الأول). اكتب الرقم ودوس «ثبّت الترتيب». الخلصانة 100% مفصولة تحت.</div>';
-    h += actL.length ? actL.map(function (n, i) { return nvCard(n, i + 1, true, prov); }).join('') : '<div class="rp-empty">مفيش روايات بتتحوّل على الحساب ده دلوقتي</div>';
-    if (doneL.length) h += '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:800;padding:8px 2px">✅ روايات خلصت (' + doneL.length + ')</summary>' + doneL.map(function (n) { return nvCard(n, 0, false, prov); }).join('') + '</details>';
-    var others = NV.filter(function (n) { return n.prov !== prov; });
-    if (others.length) h += '<h4 style="margin:14px 0 4px">➕ ضيف رواية للحساب ده</h4><div class="rp-sub" style="margin:0 0 6px">اختار رواية من حساب تاني وهتتنقل هنا (صوتها الجاهز بيتمسح وتتحوّل من الأول).</div><div class="rp-row" style="flex-wrap:nowrap;gap:4px"><select id="rp-as-' + prov + '" class="rp-in" style="flex:1;min-width:0;padding:8px">' + others.map(function (n) { return '<option value="' + esc(n.nid) + '">' + esc(n.title || n.nid) + ' — ' + pvInfo(n.prov)[1] + (n.d >= n.n ? ' ✅' : '') + '</option>'; }).join('') + '</select><button type="button" class="rp-btn sm" data-act="ttsassign" data-p="' + prov + '">ضيفها</button></div>';
-    return h;
-  }
-  function ttsColab(d) {
-    var I = pvInfo('colab'), P = (d.prov || {}).colab || {}, q = P.chapters || {};
-    var h = '<div class="rp-item" style="border:1.5px solid ' + I[3] + '"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><b style="font-size:1.08rem">🎧 Colab — صوت OmniVoice (خارجي)</b><span class="rp-ok">✅ جاهز</span></div>' +
-      '<p class="rp-sub" style="line-height:1.8">التحويل هنا بيتم على Google Colab (مجاني) مش على السيرفر. حط الروايات اللي عايزها على التابة دي، وبعدين شغّل النوتبوك فيتحوّل الفصل ويترفع للسيرفر لوحده. مفيش مفتاح ولا حد يومي.</p>' +
-      '<div class="rp-item" style="margin-top:6px"><b>إزاي أشغّله؟</b><ol class="rp-sub" style="line-height:1.9;margin:6px 18px 0">' +
-      '<li>افتح ملف <b dir="ltr">RadPad_OmniVoice_Colab.ipynb</b> في <b dir="ltr">colab.research.google.com</b>.</li><li>من Runtime اختار <b dir="ltr">T4 GPU</b>.</li><li>شغّل الخلايا واحدة واحدة من فوق، واكتب باسورد الأدمن في خلية الإعدادات.</li><li>الخلية الأخيرة بتفضل شغالة وتحوّل الفصول بالترتيب. لو وقفت شغّلها تاني وهتكمّل.</li></ol></div>' +
-      '<div class="rp-sub" style="margin-top:8px"><b>الطابور:</b> ' + (q.queued || 0) + ' فصل مستني · ' + (q.running || 0) + ' شغّال · ' + (q.done || 0) + ' خلص' + (q.failed ? ' · ' + q.failed + ' فشل' : '') + '</div>';
-    h += provNovels(d, 'colab');
-    return h + '</div>';
-  }
   function ttsProv(d, prov) {
-    if (prov === 'colab') return ttsColab(d);
     var c = d.conf || {}, az = prov === 'azure', I = pvInfo(prov), has = (d.has || {})[prov], keySrc = (d.keys || {})[prov], g = gcf(c, prov), a = c.az || {}, av = a.voices || {};
     var ROLE = [['narrator', '🎙️ الراوي'], ['man', '👨 راجل'], ['woman', '👩 ست'], ['boy', '👦 ولد'], ['girl', '👧 بنت']];
     var h = '<div class="rp-item" style="border:1.5px solid ' + I[3] + '"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><b style="font-size:1.08rem">' + I[2] + ' ' + (az ? 'مايكروسوفت Azure' : 'حساب ' + I[1]) + '</b>' + (has ? '<span class="rp-ok">✅ جاهز</span>' : '<span class="rp-err">❌ مش جاهز</span>') + '</div>';
@@ -11985,7 +11966,13 @@ document.addEventListener('click', function (e) {
       '<div class="rp-sub" style="margin-top:6px"><b>أصوات Azure (الصوت · الحدّة · السرعة):</b></div>' + ROLE.map(function (r) { var o = av[r[0]] || {}; return '<div class="rp-sub" style="margin:6px 0 0">' + r[1] + '</div><div class="rp-row" style="flex-wrap:nowrap;gap:6px"><input id="rp-azv-' + r[0] + '" class="rp-in" dir="ltr" style="flex:2" value="' + esc(o.v || '') + '"><input id="rp-azp-' + r[0] + '" class="rp-in" dir="ltr" style="flex:1" value="' + esc(o.pitch || '') + '" placeholder="+0%"><input id="rp-azr-' + r[0] + '" class="rp-in" dir="ltr" style="flex:1" value="' + esc(o.rate || '') + '" placeholder="0%"></div>'; }).join('');
     h += '<div class="rp-err" id="rp-tt-out">' + esc(TT.msg) + '</div><div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttssave">' + ic('floppy-disk') + ' حفظ إعدادات الحساب</button><button type="button" class="rp-btn sm" data-act="ttstest" data-p="' + prov + '">' + ic('play') + ' جرّب الصوت</button>' + (az ? '<button type="button" class="rp-btn sm gold" data-act="ttsvoices" data-p="azure">' + ic('list') + ' أصوات Azure العربي</button>' : '') + '</div>';
     if (TT.voices && TT.vprov === (az ? 'azure' : 'gemini')) h += '<div class="rp-item" style="margin-top:8px;max-height:200px;overflow:auto" dir="ltr">' + (TT.voices.length ? TT.voices.map(function (v) { return esc(v.name) + ' <span class="rp-sub">' + esc([].concat(v.lang || '').join(',')) + ' ' + esc(v.gender || '') + '</span>'; }).join('<br>') : esc(TT.raw || 'مفيش قايمة.')) + '</div>';
-    h += provNovels(d, prov);
+    // روايات الحساب ده
+    var NV = (d.novels || []), mine = NV.filter(function (n) { return n.prov === prov; }), actL = mine.filter(function (n) { return (n.d || 0) < n.n; }), doneL = mine.filter(function (n) { return (n.d || 0) >= n.n; });
+    h += '<h3 style="margin-top:16px">📚 روايات الحساب ده (' + actL.length + ' بتتحوّل)</h3><div class="rp-sub">الرقم = ترتيبها في طابور الحساب ده بس (1 تتحوّل الأول). اكتب الرقم ودوس «ثبّت الترتيب». الخلصانة 100% مفصولة تحت.</div>';
+    h += actL.length ? actL.map(function (n, i) { return nvCard(n, i + 1, true, prov); }).join('') : '<div class="rp-empty">مفيش روايات بتتحوّل على الحساب ده دلوقتي</div>';
+    if (doneL.length) h += '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:800;padding:8px 2px">✅ روايات خلصت (' + doneL.length + ')</summary>' + doneL.map(function (n) { return nvCard(n, 0, false, prov); }).join('') + '</details>';
+    var others = NV.filter(function (n) { return n.prov !== prov; });
+    if (others.length) h += '<h4 style="margin:14px 0 4px">➕ ضيف رواية للحساب ده</h4><div class="rp-sub" style="margin:0 0 6px">اختار رواية من حساب تاني وهتتنقل هنا (صوتها الجاهز بيتمسح وتتحوّل من الأول).</div><div class="rp-row" style="flex-wrap:nowrap;gap:4px"><select id="rp-as-' + prov + '" class="rp-in" style="flex:1;min-width:0;padding:8px">' + others.map(function (n) { return '<option value="' + esc(n.nid) + '">' + esc(n.title || n.nid) + ' — ' + pvInfo(n.prov)[1] + (n.d >= n.n ? ' ✅' : '') + '</option>'; }).join('') + '</select><button type="button" class="rp-btn sm" data-act="ttsassign" data-p="' + prov + '">ضيفها</button></div>';
     return h + '</div>';
   }
   function readsResetCard() {
