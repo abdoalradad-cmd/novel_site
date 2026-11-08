@@ -6516,6 +6516,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -10884,19 +10886,36 @@ document.addEventListener('click', function (e) {
 </script>
 
 <script id="rp-mood-module">
-/* أجواء القراءة: القارئ يختار من قايمة (مطر / بحر / رعب / غموض / أكشن) فتشتغل خلفية صوتية هادية جدًا بتتكرر لوحدها.
-   الأصوات بتتولّد في الجهاز (Web Audio) من غير ملفات ومن غير موسيقى، فتشتغل أوفلاين ومبتاخدش نت. */
+/* أجواء القراءة + القوايم العايمة.
+   - الأصوات تسجيلات حقيقية هادية (مطر/بحر/رعب/غموض/أكشن/نار/غابة) بتتحمّل أول مرة وتتخزّن في الجهاز، ولو مفيش نت وماتخزّنتش بتشتغل نسخة مولّدة بسيطة.
+   - القارئ يختار من قايمة عايمة، ويتحكم في مستوى الصوت والكتم.
+   - نفس القايمة العايمة بتفتح عند اختيار الفصل بدل القايمة البيضاء القديمة. */
 (function () {
   'use strict';
   if (window.__rpMood) return;
-  var MOODS = [['', 'بدون أجواء'], ['rain', '🌧️ مطر'], ['sea', '🌊 صوت البحر'], ['horror', '👻 رعب'], ['mystery', '🌙 غموض'], ['action', '⚡ أكشن']];
-  var ctx = null, master = null, ana = null, cur = null, sel = '', muted = false, autoPaused = false, bufs = {};
-  var LEVEL = 0.24; // الصوت الكلي هادي
+  var SOUND_BASE = window.__rpSoundBase || 'https://abdoalradad-cmd.github.io/novel_site/sounds/';
+  var MOODS = [
+    ['', '🎧', 'بدون أجواء', 'قراءة هادية من غير خلفية'],
+    ['rain', '🌧️', 'مطر', 'مطر هادي على الشباك'],
+    ['sea', '🌊', 'صوت البحر', 'أمواج بتيجي وتروح'],
+    ['fire', '🔥', 'نار', 'طقطقة نار الحطب'],
+    ['forest', '🌲', 'غابة', 'ريح بين الشجر وعصافير'],
+    ['mystery', '🌙', 'غموض', 'ليل هادي وسكون'],
+    ['horror', '👻', 'رعب', 'ريح بتعوي وذئب بعيد'],
+    ['action', '⚡', 'أكشن', 'عاصفة ورعد']
+  ];
+  var LAYERS = {
+    rain: [['rain-window', 1]], sea: [['waves', 1]], fire: [['fire', 1.15]], forest: [['trees', 0.85], ['birds', 0.8]],
+    mystery: [['night', 1]], horror: [['wind-howl', 0.95], ['wolf', 0.4]], action: [['heavy-rain', 0.75], ['thunder', 0.95]]
+  };
+  var ctx = null, master = null, ana = null, cur = null, sel = '', muted = false, autoPaused = false, bufs = {}, tok = 0, vol = 0.4, loading = false;
+  try { var sv = parseFloat(localStorage.getItem('rp_mood_vol')); if (sv >= 0 && sv <= 1) vol = sv; } catch (e) {}
+  var gainOf = function (v) { return Math.pow(v, 1.6) * 3.2; }; // 0..100% → هادي جدًا .. عالي واضح
 
   function ac() {
     if (ctx) return ctx;
     var C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
-    ctx = new C(); master = ctx.createGain(); master.gain.value = muted ? 0 : LEVEL;
+    ctx = new C(); master = ctx.createGain(); master.gain.value = muted ? 0 : gainOf(vol);
     ana = ctx.createAnalyser(); ana.fftSize = 2048; master.connect(ana); master.connect(ctx.destination);
     return ctx;
   }
@@ -10964,58 +10983,209 @@ document.addEventListener('click', function (e) {
       b.every(780, 780, function () { b.blip(54, 0.16, 0.34, 'sine', out, 0); S_later(b, 190, function () { b.blip(48, 0.18, 0.22, 'sine', out, 0); }); }); // نبض قلب هادي
     }
   };
+
+  // ---- نسخ مولّدة للنار والغابة (احتياطي لو التسجيل ما اتحمّلش)
+  var _mk = mk;
+  mk = function (S) {
+    var o = _mk(S);
+    o.pop = function (vol, dest) { var t = ctx.currentTime, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noise('white'); f.type = 'bandpass'; f.frequency.value = 1500 + Math.random() * 4000; f.Q.value = 1.2; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03 + Math.random() * 0.04); s.connect(f); f.connect(g); g.connect(dest); s.start(t, Math.random() * 8); s.stop(t + 0.12); };
+    o.chirp = function (f0, vol, dest, pan) { var t = ctx.currentTime, x = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner ? ctx.createStereoPanner() : null; x.frequency.setValueAtTime(f0, t); x.frequency.exponentialRampToValueAtTime(f0 * 1.35, t + 0.07); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1); x.connect(g); if (p) { p.pan.value = pan || 0; g.connect(p); p.connect(dest); } else g.connect(dest); x.start(t); x.stop(t + 0.12); };
+    return o;
+  };
+  BUILD.fire = function (b, out) {
+    var a = b.noise('brown'), lp = b.filt('lowpass', 700), g = b.gain(0.5); b.chain(a, lp, g, out); b.lfo(0.3, 0.1, g.gain);
+    b.every(60, 420, function () { b.pop(0.05 + Math.random() * 0.12, out); });
+  };
+  BUILD.forest = function (b, out) {
+    var w = b.noise('pink'), bp = b.filt('bandpass', 520, 0.9), g = b.gain(0.28); b.chain(w, bp, g, out); b.lfo(0.06, 160, bp.frequency); b.lfo(0.08, 0.1, g.gain);
+    b.every(1100, 3200, function () { var f = 2600 + Math.random() * 1800, p = Math.random() * 1.6 - 0.8, n = 2 + Math.floor(Math.random() * 3); for (var i = 0; i < n; i++) (function (k) { S_later(b, k * 120, function () { b.chirp(f + k * 90, 0.02, out, p); }); })(i); });
+  };
   function S_later(b, ms, fn) { b._S.timers.push(setTimeout(function () { try { fn(); } catch (e) {} }, ms)); }
-  function start(id) {
-    if (!ac() || !BUILD[id]) return;
-    var S = { id: id, nodes: [], timers: [] }, b = mk(S); b._S = S;
-    var fade = ctx.createGain(); fade.gain.value = 0; fade.connect(master); S.fade = fade;
-    BUILD[id](b, fade);
-    var t = ctx.currentTime; fade.gain.setValueAtTime(0, t); fade.gain.linearRampToValueAtTime(1, t + 1.8);
-    cur = S;
+
+  // ---- تحميل التسجيلات (مرة واحدة، وبعدها من الذاكرة المحلية)
+  function fetchSound(name) {
+    var url = SOUND_BASE + name + '.mp3';
+    var cp = (window.caches && caches.open) ? caches.open('rp-mood-v1').catch(function () { return null; }) : Promise.resolve(null);
+    return cp.then(function (c) {
+      var net = function () { return fetch(url, { mode: 'cors' }).then(function (r) { if (!r.ok) throw new Error('x'); if (c) { try { c.put(url, r.clone()); } catch (e) {} } return r.arrayBuffer(); }); };
+      if (!c) return net();
+      return c.match(url).then(function (m) { return m ? m.arrayBuffer() : net(); }, net);
+    });
   }
-  function stop(S, quick) {
-    if (!S) return;
-    S.timers.forEach(clearTimeout); S.timers = [];
-    var t = ctx.currentTime, d = quick ? 0.2 : 1.3;
+  function getBuf(name) {
+    if (bufs[name]) return Promise.resolve(bufs[name]);
+    return fetchSound(name).then(function (ab) {
+      return new Promise(function (res, rej) { var p = ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); });
+    }).then(function (b) { return (bufs[name] = b); });
+  }
+  function startSamples(id, S) {
+    var L = LAYERS[id]; if (!L) return Promise.reject(new Error('no'));
+    return Promise.all(L.map(function (l) { return getBuf(l[0]); })).then(function (bs) {
+      if (S.dead) return;
+      bs.forEach(function (b, i) { var s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b; s.loop = true; g.gain.value = L[i][1]; s.connect(g); g.connect(S.fade); s.start(0, Math.random() * Math.min(b.duration, 20)); S.nodes.push(s, g); });
+      S.real = true;
+    });
+  }
+  function start(id) {
+    var S = { id: id, nodes: [], timers: [], dead: false }, my = ++tok; cur = S;
+    var fade = ctx.createGain(); fade.gain.value = 0; fade.connect(master); S.fade = fade;
+    var t = ctx.currentTime; fade.gain.setValueAtTime(0, t); fade.gain.linearRampToValueAtTime(1, t + 1.8);
+    loading = true; paintUI();
+    startSamples(id, S).then(function () { if (my === tok) { loading = false; paintUI(); } }, function () {
+      if (S.dead || my !== tok) return; loading = false; // مفيش نت ولا نسخة محفوظة: نسخة مولّدة بسيطة
+      var b = mk(S); b._S = S; if (BUILD[id]) BUILD[id](b, fade); paintUI();
+    });
+  }
+  function stop(S) {
+    if (!S) return; S.dead = true; S.timers.forEach(clearTimeout); S.timers = [];
+    var t = ctx.currentTime, d = 1.2;
     try { S.fade.gain.cancelScheduledValues(t); S.fade.gain.setValueAtTime(S.fade.gain.value, t); S.fade.gain.linearRampToValueAtTime(0, t + d); } catch (e) {}
     setTimeout(function () { S.nodes.forEach(function (n) { try { if (n.stop) n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} }); try { S.fade.disconnect(); } catch (e) {} }, d * 1000 + 100);
   }
-  function suspendSoon() { setTimeout(function () { if (ctx && (muted || autoPaused) && ctx.state === 'running') ctx.suspend().catch(function () {}); }, 400); }
+  function suspendSoon() { setTimeout(function () { if (ctx && (muted || autoPaused || !sel) && ctx.state === 'running') ctx.suspend().catch(function () {}); }, 450); }
+  function applyGain(ramp) { if (!ctx) return; var t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t); master.gain.linearRampToValueAtTime(muted ? 0 : gainOf(vol), t + (ramp || 0.15)); }
   function setMute(m) {
     muted = !!m; if (!ctx) { paintUI(); return; }
-    var t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t);
-    if (muted) { master.gain.linearRampToValueAtTime(0, t + 0.25); suspendSoon(); }
-    else { if (ctx.state !== 'running') ctx.resume().catch(function () {}); master.gain.linearRampToValueAtTime(LEVEL, t + 0.4); }
+    if (muted) { applyGain(0.25); suspendSoon(); } else { if (ctx.state !== 'running') ctx.resume().catch(function () {}); applyGain(0.4); }
     paintUI();
   }
+  function setVol(v) { vol = Math.max(0, Math.min(1, v)); try { localStorage.setItem('rp_mood_vol', String(vol)); } catch (e) {} if (vol > 0 && muted) muted = false; applyGain(0.12); paintUI(); }
   function choose(id) {
-    sel = id || '';
+    sel = id || ''; tok++;
     if (cur) { stop(cur); cur = null; }
-    if (sel) { muted = false; if (!ac()) { sel = ''; paintUI(); return; } if (ctx.state !== 'running') ctx.resume().catch(function () {}); master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setValueAtTime(LEVEL, ctx.currentTime); start(sel); }
+    loading = false;
+    if (sel) { muted = false; if (!ac()) { sel = ''; paintUI(); return; } if (ctx.state !== 'running') ctx.resume().catch(function () {}); applyGain(0.05); start(sel); }
     else if (ctx) suspendSoon();
     paintUI();
   }
-  /* ---------- الواجهة: جنب زرار «استمع للفصل» ---------- */
-  var css = '#mood-box{display:inline-flex;align-items:center;gap:.4rem;margin-top:.9rem;margin-inline-start:.5rem;padding:.35rem .5rem .35rem .8rem;border-radius:.9rem;background:rgba(127,127,127,.13);border:1px solid rgba(127,127,127,.35);font-weight:800;font-size:.9rem;vertical-align:top}' +
-    '#mood-box select{background:transparent;color:inherit;border:0;font:inherit;font-weight:800;padding:.3rem .2rem;cursor:pointer;max-width:9.5rem;outline:0}' +
-    '#mood-box select option{color:#111;background:#fff}' +
-    '#mood-box button{border:0;background:rgba(127,127,127,.22);color:inherit;width:2rem;height:2rem;border-radius:.7rem;cursor:pointer;font-size:1rem;display:none;align-items:center;justify-content:center}' +
-    '#mood-box.on button{display:inline-flex}#mood-box.muted button{background:#dc2626;color:#fff}';
+  var label = function (id) { for (var i = 0; i < MOODS.length; i++) if (MOODS[i][0] === id) return MOODS[i]; return MOODS[0]; };
+
+  /* ---------- القائمة العايمة (مشتركة: الأجواء + الفصول) ---------- */
+  var css = '' +
+    '#rp-sh-bd{position:fixed;inset:0;z-index:2147483000;background:rgba(6,14,11,.55);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);opacity:0;transition:opacity .22s;display:flex;align-items:flex-end;justify-content:center;font-family:inherit;direction:rtl}' +
+    '#rp-sh-bd.show{opacity:1}' +
+    '#rp-sh{width:min(540px,100%);max-height:82vh;display:flex;flex-direction:column;background:#fffdf8;color:#1c2a24;border-radius:28px 28px 0 0;box-shadow:0 -24px 70px rgba(0,0,0,.38);transform:translateY(46px) scale(.98);transition:transform .3s cubic-bezier(.2,.9,.3,1);padding-bottom:max(10px,env(safe-area-inset-bottom));overflow:hidden}' +
+    '#rp-sh-bd.show #rp-sh{transform:none}' +
+    '@media(min-width:640px){#rp-sh-bd{align-items:center}#rp-sh{border-radius:28px;max-height:80vh}}' +
+    'html.dark #rp-sh,.dark #rp-sh{background:#10201a;color:#e7f2ed;box-shadow:0 -24px 70px rgba(0,0,0,.7)}' +
+    '#rp-sh .gr{width:44px;height:5px;border-radius:9px;background:rgba(127,127,127,.4);margin:10px auto 2px}' +
+    '#rp-sh .hd{display:flex;align-items:center;gap:10px;padding:8px 18px 10px}' +
+    '#rp-sh .hd b{flex:1;font-size:1.12rem;font-weight:900}' +
+    '#rp-sh .hd button{width:36px;height:36px;border-radius:12px;border:0;background:rgba(127,127,127,.16);color:inherit;font-size:1rem;cursor:pointer}' +
+    '#rp-sh .sr{margin:0 16px 8px;padding:11px 14px;border-radius:14px;border:1px solid rgba(127,127,127,.3);background:rgba(127,127,127,.09);color:inherit;font:inherit;font-size:.95rem;width:calc(100% - 32px);outline:0}' +
+    '#rp-sh .ls{position:relative;overflow-y:auto;padding:4px 12px 10px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}' +
+    '#rp-sh .it{display:flex;align-items:center;gap:12px;width:100%;text-align:right;padding:11px 12px;margin:4px 0;border-radius:18px;border:1.5px solid transparent;background:transparent;color:inherit;font:inherit;cursor:pointer;transition:background .15s,transform .1s}' +
+    '#rp-sh .it:active{transform:scale(.985)}#rp-sh .it:hover{background:rgba(127,127,127,.1)}' +
+    '#rp-sh .it .ic{flex:none;width:46px;height:46px;border-radius:15px;background:rgba(127,127,127,.14);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900}' +
+    '#rp-sh .it .tx{flex:1;min-width:0}#rp-sh .it .tx b{display:block;font-weight:800;font-size:1rem;line-height:1.35}#rp-sh .it .tx small{display:block;opacity:.65;font-size:.8rem;margin-top:1px}' +
+    '#rp-sh .it .ck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff}' +
+    '#rp-sh .it.on{border-color:var(--brand-primary,#065f46);background:rgba(6,95,70,.1)}#rp-sh .it.on .ic{background:var(--brand-primary,#065f46);color:#fff}#rp-sh .it.on .ck{background:var(--brand-primary,#065f46);border-color:var(--brand-primary,#065f46)}' +
+    '#rp-sh .ft{padding:10px 18px 6px;border-top:1px solid rgba(127,127,127,.2)}' +
+    '#rp-sh .vr{display:flex;align-items:center;gap:10px}#rp-sh .vr span{font-size:1.15rem}' +
+    '#rp-sh .vr input{flex:1;accent-color:var(--brand-primary,#065f46);height:32px}' +
+    '#rp-sh .vr button{width:40px;height:40px;border-radius:13px;border:0;background:rgba(127,127,127,.18);color:inherit;font-size:1.1rem;cursor:pointer}' +
+    '#rp-sh .vr button.m{background:#dc2626;color:#fff}' +
+    '#rp-sh .ok{display:block;width:100%;margin-top:10px;padding:13px;border-radius:15px;border:0;background:var(--brand-primary,#065f46);color:#fff;font:inherit;font-weight:900;font-size:1rem;cursor:pointer}' +
+    '#rp-sh .ld{font-size:.8rem;opacity:.7;text-align:center;padding:2px 0 0;min-height:1.2em}' +
+    '#mood-box{display:inline-flex;align-items:center;gap:.4rem;margin-top:.9rem;margin-inline-start:.5rem;vertical-align:top}' +
+    '#mood-open{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.1rem;border-radius:.9rem;background:rgba(127,127,127,.14);border:1px solid rgba(127,127,127,.38);color:inherit;font:inherit;font-weight:800;font-size:.92rem;cursor:pointer}' +
+    '#mood-open small{opacity:.6;font-size:.7rem}' +
+    '#mood-box.on #mood-open{border-color:var(--brand-primary,#065f46);background:rgba(6,95,70,.14)}' +
+    '#mood-mute{display:none;border:0;background:rgba(127,127,127,.2);color:inherit;width:2.6rem;height:2.6rem;border-radius:.9rem;cursor:pointer;align-items:center;justify-content:center;font-size:1.05rem}' +
+    '#mood-box.on #mood-mute{display:inline-flex}#mood-box.muted #mood-mute{background:#dc2626;color:#fff}';
+  var SH = null;
+  function injectCss() { if (document.getElementById('rp-sh-css')) return; var st = document.createElement('style'); st.id = 'rp-sh-css'; st.textContent = css; document.head.appendChild(st); }
+  function closeSheet() {
+    if (!SH) return; var s = SH; SH = null; s.bd.classList.remove('show'); document.removeEventListener('keydown', s.key, true);
+    setTimeout(function () { if (s.bd.parentNode) s.bd.parentNode.removeChild(s.bd); }, 260);
+  }
+  /* o: {title, items:[{id,ic,t,s,lock}], sel, search, onPick(id), foot(el)} */
+  function openSheet(o) {
+    injectCss(); if (SH) closeSheet();
+    var bd = document.createElement('div'); bd.id = 'rp-sh-bd'; bd.setAttribute('role', 'dialog'); bd.setAttribute('aria-modal', 'true');
+    var sh = document.createElement('div'); sh.id = 'rp-sh'; bd.appendChild(sh);
+    sh.innerHTML = '<div class="gr"></div><div class="hd"><b></b><button type="button" aria-label="إغلاق">✕</button></div>';
+    sh.querySelector('b').textContent = o.title; sh.querySelector('.hd button').onclick = closeSheet;
+    var q = null; if (o.search) { q = document.createElement('input'); q.className = 'sr'; q.type = 'search'; q.placeholder = 'ابحث عن فصل…'; sh.appendChild(q); }
+    var ls = document.createElement('div'); ls.className = 'ls'; sh.appendChild(ls);
+    var rows = [];
+    o.items.forEach(function (it) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'it' + (String(it.id) === String(o.sel) ? ' on' : ''); b.setAttribute('data-id', it.id);
+      var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = it.ic; var tx = document.createElement('span'); tx.className = 'tx'; var bb = document.createElement('b'); bb.textContent = it.t; tx.appendChild(bb);
+      if (it.s) { var sm = document.createElement('small'); sm.textContent = it.s; tx.appendChild(sm); }
+      var ck = document.createElement('span'); ck.className = 'ck'; ck.textContent = String(it.id) === String(o.sel) ? '✓' : '';
+      b.appendChild(ic); b.appendChild(tx); b.appendChild(ck);
+      b.onclick = function () { rows.forEach(function (r) { var on = r.b === b; r.b.classList.toggle('on', on); r.b.querySelector('.ck').textContent = on ? '✓' : ''; }); o.sel = it.id; o.onPick(it.id); };
+      ls.appendChild(b); rows.push({ b: b, k: (it.t + ' ' + (it.s || '')).toLowerCase() });
+    });
+    if (q) q.oninput = function () { var v = q.value.trim().toLowerCase(); rows.forEach(function (r) { r.b.style.display = !v || r.k.indexOf(v) > -1 ? '' : 'none'; }); };
+    if (o.foot) { var ft = document.createElement('div'); ft.className = 'ft'; sh.appendChild(ft); o.foot(ft); }
+    bd.addEventListener('click', function (e) { if (e.target === bd) closeSheet(); });
+    var key = function (e) { if (e.key === 'Escape') { e.stopPropagation(); closeSheet(); } };
+    document.addEventListener('keydown', key, true);
+    document.body.appendChild(bd); SH = { bd: bd, key: key, o: o, refresh: null };
+    requestAnimationFrame(function () { bd.classList.add('show'); var on = ls.querySelector('.it.on'); if (on && on.scrollIntoView) { try { ls.scrollTop = Math.max(0, on.offsetTop - ls.clientHeight / 2 + on.clientHeight / 2); } catch (e) {} } });
+    return SH;
+  }
+  function moodSheet() {
+    openSheet({
+      title: 'أجواء القراءة', sel: sel, items: MOODS.map(function (m) { return { id: m[0], ic: m[1], t: m[2], s: m[3] }; }),
+      onPick: function (id) { choose(id); var ld = document.getElementById('rp-sh-ld'); if (ld) ld.textContent = id ? '' : ''; },
+      foot: function (ft) {
+        ft.innerHTML = '<div class="vr"><button type="button" id="rp-sh-mt" aria-label="كتم"></button><span>🔈</span><input id="rp-sh-vol" type="range" min="0" max="100" step="1" aria-label="مستوى الصوت"><span>🔊</span></div><div class="ld" id="rp-sh-ld"></div><button type="button" class="ok">تمام</button>';
+        var rg = ft.querySelector('#rp-sh-vol'), mt = ft.querySelector('#rp-sh-mt');
+        rg.value = Math.round(vol * 100);
+        rg.oninput = function () { setVol(rg.value / 100); paintFoot(); };
+        mt.onclick = function () { if (!sel) return; setMute(!muted); paintFoot(); };
+        ft.querySelector('.ok').onclick = closeSheet;
+        paintFoot();
+      }
+    });
+  }
+  function paintFoot() {
+    var mt = document.getElementById('rp-sh-mt'), rg = document.getElementById('rp-sh-vol'), ld = document.getElementById('rp-sh-ld');
+    if (mt) { mt.textContent = muted ? '🔇' : '🔊'; mt.className = muted && sel ? 'm' : ''; mt.style.opacity = sel ? '1' : '.4'; }
+    if (rg && +rg.value !== Math.round(vol * 100)) rg.value = Math.round(vol * 100);
+    if (ld) ld.textContent = loading ? 'جاري تحميل الصوت… (مرة واحدة بس)' : (sel && muted ? 'الصوت مكتوم' : '');
+  }
+  function chapterSheet(select) {
+    var opts = [].slice.call(select.options), items = opts.map(function (op, i) {
+      var tx = (op.textContent || '').trim(), lock = /^🔒/.test(tx); tx = tx.replace(/^🔒\s*/, '');
+      return { id: op.value, ic: lock ? '🔒' : String(i + 1), t: tx, s: lock ? 'فصل مقفول' : (i === opts.length - 1 && opts.length > 1 ? 'آخر فصل' : '') };
+    });
+    openSheet({
+      title: 'الفصول (' + items.length + ')', search: items.length > 9, sel: select.value, items: items,
+      onPick: function (id) { select.value = id; closeSheet(); setTimeout(function () { if (typeof window.changeChapterFromDropdown === 'function') window.changeChapterFromDropdown(id); else select.dispatchEvent(new Event('change', { bubbles: true })); }, 180); }
+    });
+  }
+  // اعتراض القايمة البيضاء القديمة لاختيار الفصل
+  var CH_IDS = { 'reader-chapter-select-top': 1, 'reader-chapter-select-bottom': 1 }, lastOpen = 0;
+  function chSel(e) { var t = e.target; return t && t.tagName === 'SELECT' && CH_IDS[t.id] ? t : null; }
+  function openFor(e) { var s = chSel(e); if (!s) return false; e.preventDefault(); e.stopPropagation(); if (Date.now() - lastOpen > 450) { lastOpen = Date.now(); try { s.blur(); } catch (x) {} chapterSheet(s); } return true; }
+  ['mousedown', 'pointerdown'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (chSel(e)) { e.preventDefault(); } }, true); });
+  document.addEventListener('touchstart', function (e) { if (chSel(e)) e.preventDefault(); }, { capture: true, passive: false });
+  document.addEventListener('touchend', function (e) { openFor(e); }, { capture: true, passive: false });
+  document.addEventListener('click', function (e) { openFor(e); }, true);
+  document.addEventListener('keydown', function (e) { if (chSel(e) && /^(Enter| |ArrowDown|ArrowUp)$/.test(e.key)) openFor(e); }, true);
+
+  /* ---------- زرار الأجواء جنب «استمع للفصل» ---------- */
   function paintUI() {
-    var bx = document.getElementById('mood-box'); if (!bx) return;
-    var s = document.getElementById('mood-sel'), bt = document.getElementById('mood-mute');
-    if (s && s.value !== sel) s.value = sel;
-    bx.classList.toggle('on', !!sel); bx.classList.toggle('muted', !!sel && muted);
-    if (bt) { bt.textContent = muted ? '🔇' : '🔊'; bt.title = muted ? 'شغّل الصوت' : 'كتم الصوت'; bt.setAttribute('aria-label', bt.title); }
+    var bx = document.getElementById('mood-box');
+    if (bx) {
+      var m = label(sel), op = document.getElementById('mood-open'), bt = document.getElementById('mood-mute');
+      bx.classList.toggle('on', !!sel); bx.classList.toggle('muted', !!sel && muted);
+      if (op) op.innerHTML = '<span>' + m[1] + '</span><span>' + (sel ? m[2] : 'أجواء القراءة') + '</span><small>▾</small>';
+      if (bt) { bt.textContent = muted ? '🔇' : '🔊'; bt.title = muted ? 'شغّل الصوت' : 'كتم الصوت'; bt.setAttribute('aria-label', bt.title); }
+    }
+    paintFoot();
   }
   function ensureUI() {
     var t = document.getElementById('reader-chapter-title'); if (!t || !t.parentNode) return false;
-    if (!document.getElementById('mood-css')) { var st = document.createElement('style'); st.id = 'mood-css'; st.textContent = css; document.head.appendChild(st); }
-    if (document.getElementById('mood-box')) return true;
+    injectCss(); if (document.getElementById('mood-box')) return true;
     var bx = document.createElement('span'); bx.id = 'mood-box';
-    bx.innerHTML = '<span aria-hidden="true">🎧</span><select id="mood-sel" aria-label="أجواء القراءة">' + MOODS.map(function (m) { return '<option value="' + m[0] + '">' + m[1] + '</option>'; }).join('') + '</select><button type="button" id="mood-mute"></button>';
+    bx.innerHTML = '<button type="button" id="mood-open"></button><button type="button" id="mood-mute"></button>';
     t.parentNode.appendChild(bx);
-    document.getElementById('mood-sel').addEventListener('change', function (e) { choose(e.target.value); });
+    document.getElementById('mood-open').addEventListener('click', moodSheet);
     document.getElementById('mood-mute').addEventListener('click', function () { setMute(!muted); });
     paintUI(); return true;
   }
@@ -11023,13 +11193,15 @@ document.addEventListener('click', function (e) {
     try {
       var t = document.getElementById('reader-chapter-title'), vis = !!(t && t.offsetParent !== null) && !document.hidden;
       if (vis) ensureUI();
+      if (!vis && SH && SH.o && SH.o.title === 'أجواء القراءة') {}
       if (!ctx || !sel) return;
-      if (!vis && !autoPaused && ctx.state === 'running' && !muted) { autoPaused = true; var tt = ctx.currentTime; master.gain.cancelScheduledValues(tt); master.gain.setValueAtTime(master.gain.value, tt); master.gain.linearRampToValueAtTime(0, tt + 0.4); suspendSoon(); }
-      else if (vis && autoPaused) { autoPaused = false; if (!muted) { ctx.resume().catch(function () {}); master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setValueAtTime(master.gain.value, ctx.currentTime); master.gain.linearRampToValueAtTime(LEVEL, ctx.currentTime + 0.6); } }
+      if (!vis && !autoPaused && ctx.state === 'running' && !muted) { autoPaused = true; applyGain(0.4); master.gain.cancelScheduledValues(ctx.currentTime); master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4); suspendSoon(); }
+      else if (vis && autoPaused) { autoPaused = false; if (!muted) { ctx.resume().catch(function () {}); applyGain(0.6); } }
     } catch (e) {}
   }
   setInterval(tick, 700);
-  window.__rpMood = { choose: choose, mute: setMute, state: function () { return { sel: sel, muted: muted, ctx: ctx && ctx.state }; },
+  window.__rpMood = { choose: choose, mute: setMute, vol: setVol, openSheet: openSheet, closeSheet: closeSheet,
+    state: function () { return { sel: sel, muted: muted, vol: vol, ctx: ctx && ctx.state, loading: loading, real: !!(cur && cur.real) }; },
     rms: function () { if (!ana) return 0; var d = new Float32Array(ana.fftSize); ana.getFloatTimeDomainData(d); var s = 0, i; for (i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); } };
 })();
 </script>
