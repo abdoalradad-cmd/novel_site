@@ -6512,6 +6512,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -11932,10 +11934,11 @@ document.addEventListener('click', function (e) {
       h += '<button type="button" class="rp-ovr" data-act="tttab" data-t="' + p[0] + '" style="border-color:' + p[3] + '"><b>' + p[2] + ' ' + p[1] + '</b> ' + (has[p[0]] ? (pz ? '<span class="rp-err">⏸ واقف مؤقتًا</span>' : '<span class="rp-ok">✅ جاهز</span>') : '<span class="rp-err">❌ مفيش مفتاح</span>') +
         '<div class="rp-sub" style="margin:2px 0 0">' + nv + ' رواية بتتحوّل · ' + (q.queued || 0) + ' فصل مستني · النهارده ' + (P.usedTodayPct || 0) + '% من الحد</div></button>';
     });
-    h += '<div class="rp-row" style="margin-top:12px;flex-wrap:wrap"><button type="button" class="rp-btn sm gold" data-act="ttssync">' + ic('cloud-arrow-up') + ' ابعت الروايات والفصول الجديدة للطابور</button></div><div class="rp-sub" id="rp-tt-sync" style="margin-top:6px">' + esc(TT.sync || '') + '</div>';
+    h += '<div class="rp-row" style="margin-top:12px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttsrebal">' + ic('shuffle') + ' وزّع دلوقتي على الحسابات الفاضية</button><button type="button" class="rp-btn sm gold" data-act="ttssync">' + ic('cloud-arrow-up') + ' ابعت الروايات والفصول الجديدة للطابور</button></div><div class="rp-sub" id="rp-tt-sync" style="margin-top:6px">' + esc(TT.sync || '') + '</div>';
     var provOpts = PV.map(function (p) { return [p[0], p[2] + ' ' + p[1]]; });
     h += '<h3 style="margin-top:16px">⚙️ الإعدادات العامة</h3>' +
       ttsSel('rp-tt-dp', 'الحساب الافتراضي للروايات الجديدة', provOpts, c.defProv || 'gemini') +
+      ttsSel('rp-tt-rb', 'توزيع تلقائي على الحسابات الفاضية', [['1', 'شغّال: أي حساب طابوره خلص بياخد 1–2 رواية لسه ما اتبدأتش من طوابير الحسابات التانية'], ['0', 'مقفول: كل رواية تفضل في حسابها']], c.rebalance !== false ? '1' : '0') +
       ttsSel('rp-tt-open', 'مين يقدر يسمع الروايات الصوتية', [['0', 'مشتركو Premium بس'], ['1', 'كل اللي مسجّلين دخول']], c.listenAll ? '1' : '0') +
       ttsSel('rp-tt-hide', 'زرار «استمع للفصل» عند المستخدمين', [['0', 'ظاهر'], ['1', 'مخفي من التطبيق والموقع كله']], c.hideListen ? '1' : '0') +
       ttsSel('rp-tt-multi', 'أصوات متعددة', [['1', 'شغّالة: راوي + راجل + ست + ولد + بنت'], ['0', 'مقفولة: صوت الراوي بس']], c.multi !== false ? '1' : '0') +
@@ -12278,6 +12281,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttsload') { TT.st = null; render(); loadTts(); }
     else if (a === 'ttssync') ttsSync();
     else if (a === 'ttsrun') { var pv = b.getAttribute('data-p') || 'gemini', so2 = $('rp-tt-sync'); if (so2) so2.textContent = 'جاري التحويل… (ممكن ياخد نص دقيقة)'; api('/api/admin/tts/run', { method: 'POST', body: { prov: pv } }).then(function (d) { TT.st = d; TT.sync = d.step && d.step.idle ? ({ daily_limit: 'وصلت للحد اليومي ✋ هيكمّل بكرة.', paused: 'واقف مؤقتًا بسبب رفض المزوّد.', empty: 'مفيش حاجة في الطابور ده.', not_configured: 'المفتاح أو R2 ناقص.' }[d.step.idle] || '') : 'اتحوّل ' + ((d.step || {}).made || 0) + ' جزء.'; render(); }).catch(function (x) { if (so2) so2.textContent = x.message; }); }
+    else if (a === 'ttsrebal') api('/api/admin/tts/rebalance', { method: 'POST', body: {} }).then(function (d) { TT.st = d; TT.sync = (d.moved && d.moved.length) ? 'اتنقل ' + d.moved.length + ' رواية للحسابات الفاضية' : 'مفيش حساب فاضي أو مفيش روايات تتنقل دلوقتي'; flash('تمام'); render(); }).catch(function (e) { flash(e.message || 'حصل خطأ'); });
     else if (a === 'ttsretry') api('/api/admin/tts/retry', { method: 'POST', body: { prov: b.getAttribute('data-p') } }).then(function (d) { TT.st = d; flash('تمام'); render(); }).catch(function (x) { flash(x.message); });
     else if (a === 'ttspos') { var pe = document.getElementById('rp-pos-' + b.getAttribute('data-n')); api('/api/admin/tts/pos', { method: 'POST', body: { nid: b.getAttribute('data-n'), pos: pe ? pe.value : 1 } }).then(function (d) { TT.st = d; flash('اتثبّت الترتيب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsfront') api('/api/admin/tts/front', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); });
@@ -12297,8 +12301,8 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttssave') {
       var g = function (i) { var e = $(i); return e ? e.value.trim() : null; }, bd = {}, put = function (k, v) { if (v !== null) bd[k] = v; }, RL = ['narrator', 'man', 'woman', 'boy', 'girl'];
       put('defProv', g('rp-tt-dp')); put('annModel', g('rp-tt-ann')); put('style', g('rp-tt-st')); put('model', g('rp-tt-mod')); put('priceIn', g('rp-tt-pin')); put('priceOut', g('rp-tt-pout'));
-      var bl = function (i, v1) { var x = g(i); if (x !== null) bd[{ 'rp-tt-multi': 'multi', 'rp-tt-smart': 'smart', 'rp-tt-econ': 'econ', 'rp-tt-mm': 'mm', 'rp-tt-hide': 'hideListen', 'rp-tt-open': 'listenAll' }[i]] = v1 ? x === '1' : x !== '0'; };
-      bl('rp-tt-multi'); bl('rp-tt-smart'); bl('rp-tt-econ'); bl('rp-tt-mm'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
+      var bl = function (i, v1) { var x = g(i); if (x !== null) bd[{ 'rp-tt-multi': 'multi', 'rp-tt-smart': 'smart', 'rp-tt-econ': 'econ', 'rp-tt-mm': 'mm', 'rp-tt-hide': 'hideListen', 'rp-tt-rb': 'rebalance', 'rp-tt-open': 'listenAll' }[i]] = v1 ? x === '1' : x !== '0'; };
+      bl('rp-tt-multi'); bl('rp-tt-smart'); bl('rp-tt-econ'); bl('rp-tt-mm'); bl('rp-tt-rb'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
       if ($('rp-tt-dict')) bd.dict = $('rp-tt-dict').value;
       var gvv = {}; RL.forEach(function (r) { var x = g('rp-gv-' + r); if (x !== null) gvv[r] = x; }); if (Object.keys(gvv).length) bd.gv = gvv;
       if ($('rp-pc-cap')) { var pc = { dailyMin: g('rp-pc-cap'), freeMin: g('rp-pc-free'), concurrency: g('rp-pc-conc') }; if (TT.tab === 'gemini') { bd.dailyMin = pc.dailyMin; bd.freeMin = pc.freeMin; bd.concurrency = pc.concurrency; } else bd['g' + String(TT.tab).slice(6)] = pc; }
