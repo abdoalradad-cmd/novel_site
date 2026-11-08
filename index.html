@@ -6514,6 +6514,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -10881,6 +10883,156 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 
+<script id="rp-mood-module">
+/* أجواء القراءة: القارئ يختار من قايمة (مطر / بحر / رعب / غموض / أكشن) فتشتغل خلفية صوتية هادية جدًا بتتكرر لوحدها.
+   الأصوات بتتولّد في الجهاز (Web Audio) من غير ملفات ومن غير موسيقى، فتشتغل أوفلاين ومبتاخدش نت. */
+(function () {
+  'use strict';
+  if (window.__rpMood) return;
+  var MOODS = [['', 'بدون أجواء'], ['rain', '🌧️ مطر'], ['sea', '🌊 صوت البحر'], ['horror', '👻 رعب'], ['mystery', '🌙 غموض'], ['action', '⚡ أكشن']];
+  var ctx = null, master = null, ana = null, cur = null, sel = '', muted = false, autoPaused = false, bufs = {};
+  var LEVEL = 0.24; // الصوت الكلي هادي
+
+  function ac() {
+    if (ctx) return ctx;
+    var C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+    ctx = new C(); master = ctx.createGain(); master.gain.value = muted ? 0 : LEVEL;
+    ana = ctx.createAnalyser(); ana.fftSize = 2048; master.connect(ana); master.connect(ctx.destination);
+    return ctx;
+  }
+  function noise(kind) {
+    if (bufs[kind]) return bufs[kind];
+    var sr = ctx.sampleRate, n = Math.floor(sr * 9), F = Math.floor(sr * 1.2), tot = n + F, d = new Float32Array(tot), b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, last = 0, i;
+    for (i = 0; i < tot; i++) {
+      var w = Math.random() * 2 - 1;
+      if (kind === 'pink') { b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852; b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898; d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926; }
+      else if (kind === 'brown') { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+      else d[i] = w * 0.6;
+    }
+    // تطعيم نهاية الصوت في بدايته علشان التكرار يبقى من غير "طَقّة"
+    var out = new Float32Array(n);
+    for (i = 0; i < n; i++) out[i] = d[i];
+    for (i = 0; i < F; i++) { var t = i / F; out[i] = out[i] * t + d[n + i] * (1 - t); }
+    var buf = ctx.createBuffer(1, n, sr); buf.getChannelData(0).set(out); return (bufs[kind] = buf);
+  }
+  function mk(S) { // أدوات بناء الصوت: كل حاجة بتتسجّل علشان تتقفل بعدين
+    var o = {
+      node: function (x) { S.nodes.push(x); return x; },
+      noise: function (kind, rate) { var s = ctx.createBufferSource(); s.buffer = noise(kind); s.loop = true; if (rate) s.playbackRate.value = rate; s.start(0, Math.random() * 8); return o.node(s); },
+      gain: function (v) { var g = ctx.createGain(); g.gain.value = v; return o.node(g); },
+      filt: function (type, f, q) { var x = ctx.createBiquadFilter(); x.type = type; x.frequency.value = f; if (q) x.Q.value = q; return o.node(x); },
+      osc: function (f, type) { var x = ctx.createOscillator(); x.type = type || 'sine'; x.frequency.value = f; x.start(); return o.node(x); },
+      lfo: function (f, depth, param) { var l = o.osc(f), g = o.gain(depth); l.connect(g); g.connect(param); },
+      chain: function () { var a = arguments; for (var i = 0; i < a.length - 1; i++) a[i].connect(a[i + 1]); },
+      every: function (minMs, maxMs, fn) { (function loop() { S.timers.push(setTimeout(function () { try { fn(); } catch (e) {} loop(); }, minMs + Math.random() * (maxMs - minMs))); })(); },
+      blip: function (f, dur, vol, type, dest, pan) { // نغمة قصيرة جدًا بتخفت بسرعة (نقطة مطر / نبضة / صرصار)
+        var t = ctx.currentTime, x = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+        x.type = type || 'sine'; x.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        x.connect(g); if (p) { p.pan.value = pan || 0; g.connect(p); p.connect(dest); } else g.connect(dest); x.start(t); x.stop(t + dur + 0.05);
+      }
+    };
+    return o;
+  }
+  var BUILD = {
+    rain: function (b, out) {
+      var a = b.noise('pink'), hp = b.filt('highpass', 450), lp = b.filt('lowpass', 6500), g = b.gain(0.5); b.chain(a, hp, lp, g, out);
+      var c = b.noise('white', 1), bp = b.filt('bandpass', 3200, 0.5), g2 = b.gain(0.07); b.chain(c, bp, g2, out);
+      var r = b.noise('brown'), l2 = b.filt('lowpass', 220), g3 = b.gain(0.25); b.chain(r, l2, g3, out); // رَشّ بعيد
+      b.every(120, 700, function () { b.blip(1400 + Math.random() * 2600, 0.03 + Math.random() * 0.03, 0.025 + Math.random() * 0.02, 'sine', out, Math.random() * 1.6 - 0.8); });
+    },
+    sea: function (b, out) {
+      var a = b.noise('brown'), lp = b.filt('lowpass', 520), g = b.gain(0.5); b.chain(a, lp, g, out);
+      b.lfo(0.085, 0.3, g.gain); b.lfo(0.085, 260, lp.frequency);
+      var c = b.noise('pink'), bp = b.filt('bandpass', 1700, 0.7), g2 = b.gain(0.05); b.chain(c, bp, g2, out); b.lfo(0.085, 0.045, g2.gain); // رغوة الموجة
+      var d = b.noise('brown'), lp2 = b.filt('lowpass', 300), g3 = b.gain(0.3); b.chain(d, lp2, g3, out); b.lfo(0.052, 0.2, g3.gain);
+    },
+    horror: function (b, out) {
+      var o1 = b.osc(46), o2 = b.osc(48.3), g = b.gain(0.2); b.chain(o1, g, out); b.chain(o2, g, out);
+      var w = b.noise('pink'), bp = b.filt('bandpass', 380, 2.2), g2 = b.gain(0.4); b.chain(w, bp, g2, out); b.lfo(0.045, 220, bp.frequency); b.lfo(0.07, 0.15, g2.gain);
+      var d = b.noise('brown'), lp = b.filt('lowpass', 140), g3 = b.gain(0.3); b.chain(d, lp, g3, out);
+      b.every(9000, 22000, function () { b.blip(36, 0.9, 0.22, 'sine', out, 0); }); // دقّة بعيدة تقيلة
+    },
+    mystery: function (b, out) {
+      var w = b.noise('pink'), bp = b.filt('bandpass', 650, 1.1), g = b.gain(0.4); b.chain(w, bp, g, out); b.lfo(0.04, 180, bp.frequency); b.lfo(0.06, 0.12, g.gain);
+      var s = b.noise('brown'), lp = b.filt('lowpass', 180), g2 = b.gain(0.3); b.chain(s, lp, g2, out);
+      var pitch = [4150, 4600];
+      b.every(900, 2600, function () { var f = pitch[Math.random() < 0.5 ? 0 : 1] + Math.random() * 120, pan = Math.random() * 1.4 - 0.7, n = 2 + Math.floor(Math.random() * 3); for (var i = 0; i < n; i++) (function (k) { S_later(b, k * 85, function () { b.blip(f, 0.05, 0.02, 'sine', out, pan); }); })(i); });
+    },
+    action: function (b, out) {
+      var r = b.noise('brown'), lp = b.filt('lowpass', 130), g = b.gain(0.5); b.chain(r, lp, g, out);
+      var w = b.noise('pink'), bp = b.filt('bandpass', 800, 1), g2 = b.gain(0.07); b.chain(w, bp, g2, out); b.lfo(0.1, 0.04, g2.gain);
+      b.every(780, 780, function () { b.blip(54, 0.16, 0.34, 'sine', out, 0); S_later(b, 190, function () { b.blip(48, 0.18, 0.22, 'sine', out, 0); }); }); // نبض قلب هادي
+    }
+  };
+  function S_later(b, ms, fn) { b._S.timers.push(setTimeout(function () { try { fn(); } catch (e) {} }, ms)); }
+  function start(id) {
+    if (!ac() || !BUILD[id]) return;
+    var S = { id: id, nodes: [], timers: [] }, b = mk(S); b._S = S;
+    var fade = ctx.createGain(); fade.gain.value = 0; fade.connect(master); S.fade = fade;
+    BUILD[id](b, fade);
+    var t = ctx.currentTime; fade.gain.setValueAtTime(0, t); fade.gain.linearRampToValueAtTime(1, t + 1.8);
+    cur = S;
+  }
+  function stop(S, quick) {
+    if (!S) return;
+    S.timers.forEach(clearTimeout); S.timers = [];
+    var t = ctx.currentTime, d = quick ? 0.2 : 1.3;
+    try { S.fade.gain.cancelScheduledValues(t); S.fade.gain.setValueAtTime(S.fade.gain.value, t); S.fade.gain.linearRampToValueAtTime(0, t + d); } catch (e) {}
+    setTimeout(function () { S.nodes.forEach(function (n) { try { if (n.stop) n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} }); try { S.fade.disconnect(); } catch (e) {} }, d * 1000 + 100);
+  }
+  function suspendSoon() { setTimeout(function () { if (ctx && (muted || autoPaused) && ctx.state === 'running') ctx.suspend().catch(function () {}); }, 400); }
+  function setMute(m) {
+    muted = !!m; if (!ctx) { paintUI(); return; }
+    var t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t);
+    if (muted) { master.gain.linearRampToValueAtTime(0, t + 0.25); suspendSoon(); }
+    else { if (ctx.state !== 'running') ctx.resume().catch(function () {}); master.gain.linearRampToValueAtTime(LEVEL, t + 0.4); }
+    paintUI();
+  }
+  function choose(id) {
+    sel = id || '';
+    if (cur) { stop(cur); cur = null; }
+    if (sel) { muted = false; if (!ac()) { sel = ''; paintUI(); return; } if (ctx.state !== 'running') ctx.resume().catch(function () {}); master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setValueAtTime(LEVEL, ctx.currentTime); start(sel); }
+    else if (ctx) suspendSoon();
+    paintUI();
+  }
+  /* ---------- الواجهة: جنب زرار «استمع للفصل» ---------- */
+  var css = '#mood-box{display:inline-flex;align-items:center;gap:.4rem;margin-top:.9rem;margin-inline-start:.5rem;padding:.35rem .5rem .35rem .8rem;border-radius:.9rem;background:rgba(127,127,127,.13);border:1px solid rgba(127,127,127,.35);font-weight:800;font-size:.9rem;vertical-align:top}' +
+    '#mood-box select{background:transparent;color:inherit;border:0;font:inherit;font-weight:800;padding:.3rem .2rem;cursor:pointer;max-width:9.5rem;outline:0}' +
+    '#mood-box select option{color:#111;background:#fff}' +
+    '#mood-box button{border:0;background:rgba(127,127,127,.22);color:inherit;width:2rem;height:2rem;border-radius:.7rem;cursor:pointer;font-size:1rem;display:none;align-items:center;justify-content:center}' +
+    '#mood-box.on button{display:inline-flex}#mood-box.muted button{background:#dc2626;color:#fff}';
+  function paintUI() {
+    var bx = document.getElementById('mood-box'); if (!bx) return;
+    var s = document.getElementById('mood-sel'), bt = document.getElementById('mood-mute');
+    if (s && s.value !== sel) s.value = sel;
+    bx.classList.toggle('on', !!sel); bx.classList.toggle('muted', !!sel && muted);
+    if (bt) { bt.textContent = muted ? '🔇' : '🔊'; bt.title = muted ? 'شغّل الصوت' : 'كتم الصوت'; bt.setAttribute('aria-label', bt.title); }
+  }
+  function ensureUI() {
+    var t = document.getElementById('reader-chapter-title'); if (!t || !t.parentNode) return false;
+    if (!document.getElementById('mood-css')) { var st = document.createElement('style'); st.id = 'mood-css'; st.textContent = css; document.head.appendChild(st); }
+    if (document.getElementById('mood-box')) return true;
+    var bx = document.createElement('span'); bx.id = 'mood-box';
+    bx.innerHTML = '<span aria-hidden="true">🎧</span><select id="mood-sel" aria-label="أجواء القراءة">' + MOODS.map(function (m) { return '<option value="' + m[0] + '">' + m[1] + '</option>'; }).join('') + '</select><button type="button" id="mood-mute"></button>';
+    t.parentNode.appendChild(bx);
+    document.getElementById('mood-sel').addEventListener('change', function (e) { choose(e.target.value); });
+    document.getElementById('mood-mute').addEventListener('click', function () { setMute(!muted); });
+    paintUI(); return true;
+  }
+  function tick() {
+    try {
+      var t = document.getElementById('reader-chapter-title'), vis = !!(t && t.offsetParent !== null) && !document.hidden;
+      if (vis) ensureUI();
+      if (!ctx || !sel) return;
+      if (!vis && !autoPaused && ctx.state === 'running' && !muted) { autoPaused = true; var tt = ctx.currentTime; master.gain.cancelScheduledValues(tt); master.gain.setValueAtTime(master.gain.value, tt); master.gain.linearRampToValueAtTime(0, tt + 0.4); suspendSoon(); }
+      else if (vis && autoPaused) { autoPaused = false; if (!muted) { ctx.resume().catch(function () {}); master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setValueAtTime(master.gain.value, ctx.currentTime); master.gain.linearRampToValueAtTime(LEVEL, ctx.currentTime + 0.6); } }
+    } catch (e) {}
+  }
+  setInterval(tick, 700);
+  window.__rpMood = { choose: choose, mute: setMute, state: function () { return { sel: sel, muted: muted, ctx: ctx && ctx.state }; },
+    rms: function () { if (!ana) return 0; var d = new Float32Array(ana.fftSize); ana.getFloatTimeDomainData(d); var s = 0, i; for (i = 0; i < d.length; i++) s += d[i] * d[i]; return Math.sqrt(s / d.length); } };
+})();
+</script>
 <script id="rp-account-module">
 /* RadPad: حسابات المستخدمين + نشر الروايات (بمراجعة الأدمن) عن طريق سيرفر Cloudflare. رابط السيرفر من siteConfig.apiUrl */
 (function () {
