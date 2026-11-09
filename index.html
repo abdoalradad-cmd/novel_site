@@ -6526,6 +6526,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -13598,7 +13600,7 @@ function actBox() {
     var v = document.getElementById('view-novel-details'); if (!v) return null;
     var cv = v.querySelector('.book-cover'), c = cv && cv.parentElement; if (!c) return null;
     var bx = document.getElementById('rp-act-box'); if (bx && bx.parentElement === c) return bx; if (bx) bx.remove();
-    bx = document.createElement('div'); bx.id = 'rp-act-box'; bx.style.cssText = 'width:17rem;max-width:calc(100vw - 5rem);margin:16px auto 0;display:flex;flex-direction:column;gap:10px'; c.appendChild(bx); return bx;
+    bx = document.createElement('div'); bx.id = 'rp-act-box'; c.classList.add('rp-act-col'); c.appendChild(bx); return bx;
   }
   function ensureFav() {
     var v = document.getElementById('view-novel-details');
@@ -13606,16 +13608,17 @@ function actBox() {
     var rb = v.querySelector('button[onclick^="toggleChaptersSection"]'); if (!rb) return;
     var grid = rb.parentElement; if (!grid) return;
     var id = G('currentNovelId'); if (!id) return;
-    var box = actBox(), b = document.getElementById('rp-fav-btn');
-    if (b && b.getAttribute('data-nx-fav') === id && (box ? b.parentElement === box : b.previousElementSibling === grid)) return;
+    var bx = actBox(), blk = grid.parentElement; if (bx && blk && blk.parentElement !== bx) bx.appendChild(blk);
+    var b = document.getElementById('rp-fav-btn');
+    if (b && b.getAttribute('data-nx-fav') === id && b.previousElementSibling === grid) return;
     if (b) b.remove();
     var on = favOn(id);
     b = document.createElement('button');
     b.id = 'rp-fav-btn'; b.type = 'button'; b.setAttribute('data-nx-fav', id);
     b.setAttribute('onclick', "nxToggleFav('" + String(id).replace(/'/g, "\\'") + "')");
-    b.className = 'w-full px-5 py-4 rounded-2xl text-base font-black flex items-center justify-center gap-2 border border-rose-300/60 text-rose-600 bg-rose-50 dark:bg-rose-500/10 dark:text-rose-300 hover:opacity-90';
+    b.className = 'w-full mt-4 px-5 py-4 rounded-2xl text-base font-black flex items-center justify-center gap-2 border border-rose-300/60 text-rose-600 bg-rose-50 dark:bg-rose-500/10 dark:text-rose-300 hover:opacity-90';
     b.innerHTML = '<i class="' + (on ? 'fa-solid' : 'fa-regular') + ' fa-heart"></i><span>' + (on ? 'في مفضلتك' : 'أضف للمفضلة') + '</span>';
-    if (box) box.appendChild(b); else grid.insertAdjacentElement('afterend', b);
+    grid.insertAdjacentElement('afterend', b);
   }
   setInterval(function () { try { ensureFav(); } catch (x) {} }, 800);
 })();
@@ -15177,9 +15180,9 @@ window.addEventListener('load', () => {
     var v = document.getElementById('view-novel-details'); if (!v) return null;
     var cv = v.querySelector('.book-cover'), c = cv && cv.parentElement; if (!c) return null;
     var bx = document.getElementById('rp-act-box'); if (bx && bx.parentElement === c) return bx; if (bx) bx.remove();
-    bx = document.createElement('div'); bx.id = 'rp-act-box'; bx.style.cssText = 'width:17rem;max-width:calc(100vw - 5rem);margin:16px auto 0;display:flex;flex-direction:column;gap:10px'; c.appendChild(bx); return bx;
+    bx = document.createElement('div'); bx.id = 'rp-act-box'; c.classList.add('rp-act-col'); c.appendChild(bx); return bx;
   }
-  var CSS = '#rp-off-btn{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:1rem;border:0;color:#fff;text-align:right;font:inherit;cursor:pointer;background:linear-gradient(135deg,#10b981,#047857);box-shadow:0 8px 20px rgba(4,120,87,.32);transition:transform .15s}#rp-off-btn:active{transform:scale(.97)}#rp-off-btn.on{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 8px 20px rgba(217,119,6,.32)}#rp-off-btn .ic{flex:0 0 40px;height:40px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:1.05rem}#rp-off-btn b{display:block;font-size:1rem;font-weight:900;line-height:1.2}#rp-off-btn small{display:block;font-size:.68rem;font-weight:700;opacity:.92;margin-top:2px;line-height:1.3}';
+  var CSS = '#rp-act-box{width:100%;display:flex;flex-direction:column;gap:14px;margin-top:16px}.rp-act-col{width:100%;display:flex;flex-direction:column;align-items:center}@media(min-width:768px){.rp-act-col{width:20rem}}#rp-act-box>div{width:100%}#rp-off-btn{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:1rem;border:0;color:#fff;text-align:right;font:inherit;cursor:pointer;background:linear-gradient(135deg,#10b981,#047857);box-shadow:0 8px 20px rgba(4,120,87,.32);transition:transform .15s}#rp-off-btn:active{transform:scale(.97)}#rp-off-btn.on{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 8px 20px rgba(217,119,6,.32)}#rp-off-btn .ic{flex:0 0 40px;height:40px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:1.05rem}#rp-off-btn b{display:block;font-size:1rem;font-weight:900;line-height:1.2}#rp-off-btn small{display:block;font-size:.68rem;font-weight:700;opacity:.92;margin-top:2px;line-height:1.3}';
   function paint() {
     var v = $('view-novel-details');
     if (!v || v.classList.contains('hidden')) { var o = $('rp-off-btn'); if (o) o.remove(); return; }
