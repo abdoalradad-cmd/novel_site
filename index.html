@@ -6520,6 +6520,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -11384,7 +11386,7 @@ document.addEventListener('click', function (e) {
   function cairoDay() { try { return new Date(Date.now() + 2 * 3600000).toISOString().slice(0, 10); } catch (e) { return ''; } }
   function streakPop(d) {
     injectCss(); var o = document.createElement('div'); o.id = 'rp-streak-pop';
-    o.innerHTML = '<div><div style="font-size:3rem">🎉🔥</div><h3>كملت ' + d.days + ' أيام ورا بعض!</h3><p>خدت <b>' + d.pts + ' نقاط</b> هدية في محفظتك. السلسلة بدأت من جديد — كمّل وخد غيرها 💪</p><button type="button">تمام</button></div>';
+    o.innerHTML = '<div><div style="font-size:3rem">🎉🔥</div><h3>كملت ' + d.days + ' أيام ورا بعض!</h3><p>خدت <b>' + d.pts + ' نقطة</b> هدية في محفظتك. السلسلة بدأت من جديد — كمّل وخد غيرها 💪</p><button type="button">تمام</button></div>';
     o.addEventListener('click', function (e) { if (e.target === o || e.target.tagName === 'BUTTON') o.remove(); }); document.body.appendChild(o);
   }
   function checkin() {
@@ -11393,7 +11395,7 @@ document.addEventListener('click', function (e) {
     api('/api/me/checkin', { method: 'POST', body: {} }).then(function (d) {
       if (!d || !d.on) return;
       if (d.awarded > 0) streakPop(d);
-      else if (!d.today) toast('🔥 يوم ' + (d.shown || d.cur) + ' من ' + d.days + ' في سلسلة الحضور — كمّل وخد ' + d.pts + ' نقاط');
+      else if (!d.today) toast('🔥 يوم ' + (d.shown || d.cur) + ' من ' + d.days + ' في سلسلة الحضور — كمّل وخد ' + d.pts + ' نقطة، ادخل كل يوم 🎁');
     }).catch(function () { lsSet(key, ''); });
   }
 
@@ -11894,7 +11896,7 @@ document.addEventListener('click', function (e) {
   function streakBox(s) {
     if (!s || !s.on) return '';
     var dots = '', i, cur = s.cur || 0; for (i = 1; i <= s.days; i++) dots += '<i style="display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;text-align:center;font-size:.7rem;font-style:normal;margin:0 2px;' + (i <= cur ? 'background:#f59e0b;color:#fff;font-weight:900' : 'background:rgba(127,127,127,.2)') + '">' + (i <= cur ? '🔥' : i) + '</i>';
-    return '<div style="margin-top:12px;padding-top:10px;border-top:1px dashed rgba(127,127,127,.35)"><b>🔥 سلسلة الحضور</b><p class="rp-sub" style="margin:4px 0 8px">افتح الموقع ' + s.days + ' أيام ورا بعض وخد ' + s.pts + ' نقاط هدية. لو فاتك يوم السلسلة بتبدأ من الأول.</p><div style="direction:rtl">' + dots + '</div><p class="rp-sub" style="margin:6px 0 0">' + (s.today ? '✅ سجّلت حضور النهارده' : 'افتح التطبيق النهارده عشان تكمل السلسلة') + '</p></div>';
+    return '<div style="margin-top:12px;padding-top:10px;border-top:1px dashed rgba(127,127,127,.35)"><b>🔥 سلسلة الحضور</b><p class="rp-sub" style="margin:4px 0 8px">افتح الموقع ' + s.days + ' أيام ورا بعض وخد <b>' + s.pts + ' نقطة</b> هدية 🎁 مهم تدخل كل يوم. لو فاتك يوم السلسلة بتبدأ من الأول.</p><div style="direction:rtl">' + dots + '</div><p class="rp-sub" style="margin:6px 0 0">' + (s.today ? '✅ سجّلت حضور النهارده' : 'افتح التطبيق النهارده عشان تكمل السلسلة') + '</p></div>';
   }
   function hasLock(n) { return n.lockAll || (n.chapters && n.chapters.some(function (c) { return c.locked; })) || n.hasLock; }
   function novelRow(n) {
@@ -12618,8 +12620,8 @@ document.addEventListener('click', function (e) {
     var d = PT.d; if (!d) return '<div class="rp-card"><p class="rp-sub">جاري التحميل…</p></div>';
     if (d.error) return '<div class="rp-card"><div class="rp-err">' + esc(d.error) + '</div></div>';
     var h = '';
-    if (PT.w) { var w = PT.w, cm = w.cmt || {}; h += '<div class="rp-card rp-wallet"><h3>💎 رصيد التشجيع</h3><div class="rp-wbig">' + nfmt(w.wallet || 0) + '<small> نقطة</small></div><p class="rp-sub">قيّم الفصل بنجوم واكتب تعليق تشجيع حقيقي (مش مكرر) تاخد ' + (cm.pts || 1) + ' نقطة. تقدر تجمعها وبعدين تصرفها في روايات مقفولة واشتراكات ومزايا تانية هنضيفها.</p><div><span class="rp-chip">💬 تعليقاتك النهارده: ' + (cm.today || 0) + '/' + (cm.perDay || 5) + '</span><span class="rp-chip">📖 لكل فصل: ' + (cm.perCh || 2) + ' تعليقات</span></div>' + streakBox(w.streak) + '</div>'; }
-    if (isAdmin() && PT.cf) { var cf = PT.cf; var fld = function (k, l) { return '<label class="rp-lbl">' + l + '</label><input id="rp-cm-' + k + '" class="rp-in" type="number" min="0" value="' + (cf[k] == null ? '' : cf[k]) + '">'; }; h += '<div class="rp-card"><h3>' + ic('gear') + ' إعدادات التعليقات والنقاط (أدمن)</h3>' + fld('perCh', 'أقصى تعليقات لكل قارئ في الفصل الواحد') + fld('perDay', 'أقصى تعليقات للقارئ في اليوم') + fld('pts', 'نقاط التعليق الحقيقي') + fld('dayPts', 'أقصى نقاط يكسبها القارئ في اليوم') + fld('minLen', 'أقل عدد حروف للتعليق اللي ياخد نقطة') + fld('newsPerDay', 'أقصى بوستات للكاتب في الأخبار يوميًا') + '<button type="button" class="rp-btn block" style="margin-top:10px" data-act="cmsave">حفظ</button></div>'; }
+    if (PT.w) { var w = PT.w, cm = w.cmt || {}, ea = w.earn || {}; h += '<div class="rp-card rp-wallet"><h3>💎 رصيد التشجيع</h3><div class="rp-wbig">' + nfmt(w.wallet || 0) + '<small> نقطة</small></div><p class="rp-sub">كل تقييم لفصل = <b>' + nfmt(ea.per || 0.1) + ' نقطة</b> وكل تعليق تشجيع حقيقي = <b>' + nfmt(ea.per || 0.1) + ' نقطة</b> (بحد أقصى ' + (ea.max || 3) + ' مرات في اليوم للتقييم والتعليق مع بعض)، وسلسلة 7 أيام ورا بعض بتدّيك <b>' + nfmt((w.streak || {}).pts || 2) + ' نقطة</b>.' + (w.mult === 2 ? ' 👑 بما إنك Premium نقاطك <b>ضعف</b> في كل حاجة.' : ' 👑 مشتركين Premium بياخدوا ضعف النقاط في كل حاجة.') + ' النقط بتتجمّع في رصيدك وبس، ومفيش استخدام ليها دلوقتي.</p><div><span class="rp-chip">⭐ نقاط النهارده: ' + (ea.today || 0) + '/' + (ea.max || 3) + '</span><span class="rp-chip">📖 تعليقات لكل فصل: ' + (cm.perCh || 2) + '</span></div>' + streakBox(w.streak) + '</div>'; }
+    if (isAdmin() && PT.cf) { var cf = PT.cf; var fld = function (k, l) { return '<label class="rp-lbl">' + l + '</label><input id="rp-cm-' + k + '" class="rp-in" type="number" min="0" value="' + (cf[k] == null ? '' : cf[k]) + '">'; }; h += '<div class="rp-card"><h3>' + ic('gear') + ' إعدادات التعليقات والنقاط (أدمن)</h3>' + fld('perCh', 'أقصى تعليقات لكل قارئ في الفصل الواحد') + fld('perDay', 'أقصى تعليقات للقارئ في اليوم') + fld('minLen', 'أقل عدد حروف للتعليق اللي ياخد نقطة') + fld('newsPerDay', 'أقصى بوستات للكاتب في الأخبار يوميًا') + '<button type="button" class="rp-btn block" style="margin-top:10px" data-act="cmsave">حفظ</button></div>'; }
     h += d.latest ? winBanner(d.latest, d.thisWeek ? '🎉 كاتب الأسبوع ده (قرعة النقاط)' : 'آخر فايز بقرعة النقاط', (d.thisWeek ? '' : 'أسبوع ' + d.latest.week + ' — ') + (d.latest.points ? nfmt(d.latest.points) + ' نقطة' : '')) : '';
     var myId = (me() || {}).id;
     h += '<div class="rp-card"><h3>' + ic('star') + ' نقاط الفوز</h3><p class="rp-sub">كل تصويت من قارئ على فصل من رواياتك بيزوّد نقاطك 0.1. وكل أسبوع بتتسحب قرعة تلقائية بين أعلى 10 كتّاب نقاط، وواحد منهم بيكسب الجايزة.</p>' +
@@ -12636,7 +12638,7 @@ document.addEventListener('click', function (e) {
       [['q', 'الأسئلة'], ['a', 'الإجابات' + (d ? ' (' + d.count + ')' : '')], ['p', 'نقاط الفوز'], ['w', 'الفائزون']].map(function (t) { return '<button type="button" data-act="casub" data-s="' + t[0] + '" class="' + (sub === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div class="rp-err" id="rp-ca-msg">' + esc(CA.msg) + '</div>';
     if (sub === 'p') { var p = CA.pts; if (!p) return h + '<p class="rp-sub">جاري التحميل…</p></div>';
       return h + '<label class="rp-lbl">جايزة قرعة نقاط الفوز (جنيه)</label><input id="rp-pt-prize" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(p.prize || '') + '" placeholder="مثال: 300"><div class="rp-sub">القرعة بتتعمل لوحدها أول كل أسبوع (بعد أول أسبوع من التفعيل) لو الجايزة أكبر من صفر. تقدر كمان تسحب دلوقتي.</div>' +
-        (function () { var k = CA.stk || { on: true, days: 7, pts: 3 }; return '<div class="rp-sub" style="margin-top:14px"><b>🔥 سلسلة الحضور (هدية للقرّاء)</b></div><div class="rp-row" style="gap:8px;flex-wrap:wrap"><select id="rp-sk-on" class="rp-in" style="flex:1"><option value="1"' + (k.on ? ' selected' : '') + '>شغّالة</option><option value="0"' + (k.on ? '' : ' selected') + '>مقفولة</option></select><input id="rp-sk-days" class="rp-in" dir="ltr" inputmode="numeric" style="width:90px" value="' + esc(k.days) + '" aria-label="عدد الأيام"><input id="rp-sk-pts" class="rp-in" dir="ltr" inputmode="decimal" style="width:90px" value="' + esc(k.pts) + '" aria-label="النقاط"></div><div class="rp-sub">الخانتين: عدد الأيام المتتالية، وعدد النقاط اللي القارئ ياخدها في محفظته لما يكمّلها. اضغط «حفظ» تحت.</div>'; })() +
+        (function () { var k = CA.stk || { on: true, days: 7, pts: 2 }; return '<div class="rp-sub" style="margin-top:14px"><b>🔥 سلسلة الحضور (هدية للقرّاء)</b></div><div class="rp-row" style="gap:8px;flex-wrap:wrap"><select id="rp-sk-on" class="rp-in" style="flex:1"><option value="1"' + (k.on ? ' selected' : '') + '>شغّالة</option><option value="0"' + (k.on ? '' : ' selected') + '>مقفولة</option></select><input id="rp-sk-days" class="rp-in" dir="ltr" inputmode="numeric" style="width:90px" value="' + esc(k.days) + '" aria-label="عدد الأيام"><input id="rp-sk-pts" class="rp-in" readonly dir="ltr" inputmode="decimal" style="width:90px" value="' + esc(k.pts) + '" aria-label="النقاط"></div><div class="rp-sub">الخانتين: عدد الأيام المتتالية، والنقاط ثابتة (نقطتين، وPremium ياخد الضعف). اضغط «حفظ» تحت.</div>'; })() +
         '<div class="rp-row" style="margin-top:8px"><button type="button" class="rp-btn sm" data-act="ptsave">' + ic('floppy-disk') + ' حفظ الجايزة</button><button type="button" class="rp-btn sm gold" data-act="ptdraw">' + ic('dice') + ' اسحب القرعة دلوقتي</button></div>' +
         '<h3 style="margin-top:14px">أعلى 10 نقاط</h3>' + (p.top.length ? p.top.map(function (u, i) { return '<div class="rp-lb"><div class="rk">' + (i + 1) + '</div><div class="a">' + avBox(u.name, u.avatar) + '</div><div class="nm">' + esc(u.name) + '<div class="rp-sub" style="margin:0" dir="ltr">' + esc(u.email) + '</div></div><div class="pt">' + nfmt(u.points) + ' ⭐</div></div>'; }).join('') : '<div class="rp-empty">مفيش نقاط لسه</div>') +
         '<h3 style="margin-top:14px">آخر قرعات</h3>' + (p.draws.length ? p.draws.map(function (w) { return '<div class="rp-item">أسبوع ' + esc(w.week) + ': ' + (w.user_id ? '<b>' + esc(w.name) + '</b> — ' + nfmt(w.points) + ' نقطة — جايزة ' + nfmt(w.prize) + ' ج' : 'مفيش مرشحين') + '</div>'; }).join('') : '<div class="rp-sub">لسه مفيش قرعات.</div>') + '</div>'; }
@@ -12918,7 +12920,7 @@ document.addEventListener('click', function (e) {
     }
     else if (a === 'nwok' || a === 'nwno') { api('/api/admin/news/' + b.getAttribute('data-id') + '/' + (a === 'nwok' ? 'approve' : 'reject'), { method: 'POST', body: {} }).then(function () { NWX.pend = null; NWX._p = 0; NWX.list = null; NWX._l = 0; flash(a === 'nwok' ? 'اتنشر ✅' : 'اترفض'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'cmsave') {
-      var bd = {}; ['perCh', 'perDay', 'pts', 'minLen', 'dayPts', 'newsPerDay'].forEach(function (k) { bd[k] = +(($('rp-cm-' + k) || {}).value); });
+      var bd = {}; ['perCh', 'perDay', 'minLen', 'newsPerDay'].forEach(function (k) { bd[k] = +(($('rp-cm-' + k) || {}).value); });
       api('/api/admin/cmt', { method: 'PUT', body: bd }).then(function (d) { PT.cf = d; flash('اتحفظت إعدادات التعليقات ✅'); render(); }).catch(function (x) { flash(x.message); });
     }
     else if (a === 'wpimp') {
