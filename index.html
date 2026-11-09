@@ -6528,6 +6528,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -13898,6 +13900,8 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   function hint(m) { var h = document.getElementById('tts-hint'); if (h) h.textContent = m; }
   function upsell() {
     var r = R(), logged = !!(r && r.token());
+    var open = typeof READY !== 'undefined' && READY.open;
+    if (open && !logged) { toast('سجّل دخولك مجانًا علشان تسمع الروايات بصوت مصري 🎧'); try { if (window.rpOpenAccount) window.rpOpenAccount(); } catch (e) {} return; }
     toast(logged ? 'الاستماع للروايات لمشتركي Premium 👑' : 'سجّل دخولك واشترك في Premium علشان تسمع الروايات بصوت مصري 🎧');
     try { if (logged && window.__rpOpenPremium) { window.rpOpenAccount(); setTimeout(function () { try { window.__rpOpenPremium(); } catch (e) {} }, 150); } else if (window.rpOpenAccount) window.rpOpenAccount(); } catch (e) {}
   }
