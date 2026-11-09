@@ -6522,6 +6522,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -11812,6 +11814,7 @@ document.addEventListener('click', function (e) {
     api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
     api('/api/admin/orders').then(function (d) { S.orders = d.orders || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
     api('/api/admin/news/pending').then(function (d) { NWX.pend = d.items || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
+    api('/api/admin/withdrawals').then(function (d) { WL.list = d.items || []; if (S.view === 'home' && S.menu) render(); }).catch(function () {});
   }
   function achCard() {
     var A = window.__rpAch; if (!A) return ''; var s = A.get(); try { A.check(); } catch (e) {}
@@ -11969,9 +11972,9 @@ document.addEventListener('click', function (e) {
     if (S.myPts == null && !S._pt) { S._pt = 1; api('/api/me/points').then(function (d) { S.myPts = d.points || 0; if (S.view === 'home' && S.tab === 'about') render(); }).catch(function () {}); }
     hero += streakCard() + achCard() + premCard() + libraryCard() + earnCard() + ptsMini();
     var html = '';
-    var tabs = [['about', 'user', 'عني'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز'], ['news', 'newspaper', 'الأخبار الأدبية', isAdmin() ? unseenN('news') : 0], ['quotes', 'quote-right', 'اقتباساتي'], ['contact', 'envelope', 'تواصل معنا']];
-    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['actest', 'gavel', 'إدارة المسابقات'], ['backup', 'database', 'النسخ الاحتياطي']);
-    var MI = { about: ['#0f766e', 'اللي يخصك: بياناتك ومحفظتك ومكتبتك'], novels: ['#7c3aed', 'اكتب وانشر رواياتك'], settings: ['#475569', 'الصوت، الأجهزة، الحساب'], contest: ['#d97706', 'اشترك واكسب جوايز'], points: ['#ca8a04', 'نقاطك وقرعة الأسبوع'], pending: ['#dc2626', 'روايات مستنية موافقتك'], live: ['#059669', 'اللي نزل من الناس'], users: ['#2563eb', 'الحسابات والزوار والـ IP'], sales: ['#db2777', 'الطلبات والأرباح'], premium: ['#9333ea', 'الاشتراكات والصوت'], bc: ['#ea580c', 'ابعت إشعار لكل الناس'], news: ['#0d9488', 'آخر أخبار عالم الأدب'], quotes: ['#e11d48', 'جمل حفظتها من الروايات'], contact: ['#4f46e5', 'استفسار أو شكوى أو اقتراح'], msgs: ['#7c3aed', 'رسائل المستخدمين'], actest: ['#0891b2', 'أسئلة وجوايز المسابقات'], backup: ['#64748b', 'نسخة احتياطية'] };
+    var tabs = [['about', 'user', 'عني'], ['wallet', 'wallet', 'محفظتي'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز'], ['news', 'newspaper', 'الأخبار الأدبية', isAdmin() ? unseenN('news') : 0], ['quotes', 'quote-right', 'اقتباساتي'], ['contact', 'envelope', 'تواصل معنا']];
+    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['wd', 'money-bill-transfer', 'طلبات السحب', WL.list ? WL.list.filter(function (x) { return x.status === 'pending'; }).length : 0], ['actest', 'gavel', 'إدارة المسابقات'], ['backup', 'database', 'النسخ الاحتياطي']);
+    var MI = { wallet: ['#f59e0b', 'نقاطك الذهبية ورصيدك بالجنيه وسحب الأموال'], wd: ['#16a34a', 'اقبل أو ارفض طلبات سحب الأموال'], about: ['#0f766e', 'اللي يخصك: بياناتك ومحفظتك ومكتبتك'], novels: ['#7c3aed', 'اكتب وانشر رواياتك'], settings: ['#475569', 'الصوت، الأجهزة، الحساب'], contest: ['#d97706', 'اشترك واكسب جوايز'], points: ['#ca8a04', 'نقاطك وقرعة الأسبوع'], pending: ['#dc2626', 'روايات مستنية موافقتك'], live: ['#059669', 'اللي نزل من الناس'], users: ['#2563eb', 'الحسابات والزوار والـ IP'], sales: ['#db2777', 'الطلبات والأرباح'], premium: ['#9333ea', 'الاشتراكات والصوت'], bc: ['#ea580c', 'ابعت إشعار لكل الناس'], news: ['#0d9488', 'آخر أخبار عالم الأدب'], quotes: ['#e11d48', 'جمل حفظتها من الروايات'], contact: ['#4f46e5', 'استفسار أو شكوى أو اقتراح'], msgs: ['#7c3aed', 'رسائل المستخدمين'], actest: ['#0891b2', 'أسئلة وجوايز المسابقات'], backup: ['#64748b', 'نسخة احتياطية'] };
     if (S.menu) {
       var av = u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : '<span>' + esc((u.name || '؟').trim().charAt(0)) + '</span>';
       var sub = isPremium0() ? '<span class="rp-mh-chip">👑 Premium</span>' : '<span class="rp-mh-chip dim">حساب عادي</span>';
@@ -12004,6 +12007,8 @@ document.addEventListener('click', function (e) {
     if (t === 'settings') return settingsTab();
     if (t === 'contest') return contestTab();
     if (t === 'points') return pointsTab();
+    if (t === 'wallet') return walletTab();
+    if (t === 'wd' && isAdmin()) return wdAdminTab();
     if (admin_only(t) && !isAdmin()) return '';
     if (t === 'pending') return '<div class="rp-card"><h3>' + ic('inbox') + ' طلبات النشر</h3><p class="rp-sub">الروايات اللي مستنية موافقتك.</p>' + (S.pending.length ? S.pending.map(function (n) {
       return '<div class="rp-item"><div class="rp-nv">' + coverBox(n) + '<div class="rp-nv-main"><b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:2px 0">بقلم: ' + esc(n.owner) + ' — ' + esc(n.ownerEmail) + '</div><div class="rp-meta">' + (n.lockAll ? '<span class="rp-pill lock">' + ic('lock') + ' مقفولة</span>' : '') + (n.promoUrl ? '<span class="rp-pill lock">' + ic('film') + ' برومو</span>' : '') + '</div><button type="button" class="rp-btn sm" data-act="review" data-id="' + n.id + '">' + ic('magnifying-glass') + ' مراجعة</button></div></div></div>';
@@ -12025,7 +12030,7 @@ document.addEventListener('click', function (e) {
       (1 ? '<div class="rp-card"><h3>' + ic('cloud-arrow-down') + ' استيراد رواية من واتباد</h3><p class="rp-sub">حط لينك روايتك على واتباد، والتطبيق يجيب كل فصولها وينشئ الرواية بدل ما تنسخ فصل فصل. ' + (isAdmin() ? 'بتتنشر علطول.' : 'وبعدها بتتبعت للمراجعة قبل النشر.') + '</p><input id="rp-wp-url" class="rp-in" dir="ltr" placeholder="https://www.wattpad.com/story/..."><label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-weight:700;font-size:.82rem"><input type="checkbox" id="rp-wp-own"> أؤكد إن الرواية دي بتاعتي أو معايا إذن بنشرها</label><button type="button" class="rp-btn block" data-act="wpimp">' + ic('cloud-arrow-down') + (isAdmin() ? ' استيراد ونشر' : ' استيراد وإرسال للمراجعة') + '</button><div id="rp-wp-prog" class="rp-sub" style="margin-top:8px"></div></div>' : '') +
       siteCard() + (S.mine.length ? S.mine.filter(function (x) { return !x.siteId; }).map(novelRow).join('') : siteMine().length ? '' : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
   }
-  function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium' || t === 'actest' || t === 'bc' || t === 'msgs'; }
+  function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium' || t === 'actest' || t === 'wd' || t === 'bc' || t === 'msgs'; }
   function settingsTab() {
     var u = me();
     var cld = cldReady();
@@ -12620,7 +12625,7 @@ document.addEventListener('click', function (e) {
     var d = PT.d; if (!d) return '<div class="rp-card"><p class="rp-sub">جاري التحميل…</p></div>';
     if (d.error) return '<div class="rp-card"><div class="rp-err">' + esc(d.error) + '</div></div>';
     var h = '';
-    if (PT.w) { var w = PT.w, cm = w.cmt || {}, ea = w.earn || {}; h += '<div class="rp-card rp-wallet"><h3>💎 رصيد التشجيع</h3><div class="rp-wbig">' + nfmt(w.wallet || 0) + '<small> نقطة</small></div><p class="rp-sub">كل تقييم لفصل = <b>' + nfmt(ea.per || 0.1) + ' نقطة</b> وكل تعليق تشجيع حقيقي = <b>' + nfmt(ea.per || 0.1) + ' نقطة</b> (بحد أقصى ' + (ea.max || 3) + ' مرات في اليوم للتقييم والتعليق مع بعض)، وسلسلة 7 أيام ورا بعض بتدّيك <b>' + nfmt((w.streak || {}).pts || 2) + ' نقطة</b>.' + (w.mult === 2 ? ' 👑 بما إنك Premium نقاطك <b>ضعف</b> في كل حاجة.' : ' 👑 مشتركين Premium بياخدوا ضعف النقاط في كل حاجة.') + ' النقط بتتجمّع في رصيدك وبس، ومفيش استخدام ليها دلوقتي.</p><div><span class="rp-chip">⭐ نقاط النهارده: ' + (ea.today || 0) + '/' + (ea.max || 3) + '</span><span class="rp-chip">📖 تعليقات لكل فصل: ' + (cm.perCh || 2) + '</span></div>' + streakBox(w.streak) + '</div>'; }
+    if (PT.w) { var w = PT.w, cm = w.cmt || {}, ea = w.earn || {}; h += '<div class="rp-card rp-wallet"><h3>⭐ نقاطي الذهبية</h3><div class="rp-wbig">' + nfmt(w.wallet || 0) + '<small> نقطة</small></div><p class="rp-sub">كل تقييم لفصل = <b>' + nfmt(ea.per || 0.1) + ' نقطة</b> وكل تعليق تشجيع حقيقي = <b>' + nfmt(ea.per || 0.1) + ' نقطة</b> (بحد أقصى ' + (ea.max || 3) + ' مرات في اليوم للتقييم والتعليق مع بعض)، وسلسلة 7 أيام ورا بعض بتدّيك <b>' + nfmt((w.streak || {}).pts || 2) + ' نقطة</b>.' + (w.mult === 2 ? ' 👑 بما إنك Premium نقاطك <b>ضعف</b> في كل حاجة.' : ' 👑 مشتركين Premium بياخدوا ضعف النقاط في كل حاجة.') + ' النقاط بتتحوّل لجنيه تلقائي وتقدر تسحبها من تابة «محفظتي».</p><div><span class="rp-chip">⭐ نقاط النهارده: ' + (ea.today || 0) + '/' + (ea.max || 3) + '</span><span class="rp-chip">📖 تعليقات لكل فصل: ' + (cm.perCh || 2) + '</span></div>' + streakBox(w.streak) + '</div>'; }
     if (isAdmin() && PT.cf) { var cf = PT.cf; var fld = function (k, l) { return '<label class="rp-lbl">' + l + '</label><input id="rp-cm-' + k + '" class="rp-in" type="number" min="0" value="' + (cf[k] == null ? '' : cf[k]) + '">'; }; h += '<div class="rp-card"><h3>' + ic('gear') + ' إعدادات التعليقات والنقاط (أدمن)</h3>' + fld('perCh', 'أقصى تعليقات لكل قارئ في الفصل الواحد') + fld('perDay', 'أقصى تعليقات للقارئ في اليوم') + fld('minLen', 'أقل عدد حروف للتعليق اللي ياخد نقطة') + fld('newsPerDay', 'أقصى بوستات للكاتب في الأخبار يوميًا') + '<button type="button" class="rp-btn block" style="margin-top:10px" data-act="cmsave">حفظ</button></div>'; }
     h += d.latest ? winBanner(d.latest, d.thisWeek ? '🎉 كاتب الأسبوع ده (قرعة النقاط)' : 'آخر فايز بقرعة النقاط', (d.thisWeek ? '' : 'أسبوع ' + d.latest.week + ' — ') + (d.latest.points ? nfmt(d.latest.points) + ' نقطة' : '')) : '';
     var myId = (me() || {}).id;
@@ -12664,6 +12669,43 @@ document.addEventListener('click', function (e) {
     api('/api/admin/dues').then(function (d) { S.dues = d; if (S.view === 'home' && S.tab === 'sales') render(); }).catch(function () {});
   }
   function lockedAdminNovels() { try { return novels.filter(function (n) { return !n.isUser && !n.isHidden && (n.isLocked || n.isPdfLocked || (n.chapters || []).some(function (c) { return c.isLocked; })); }); } catch (e) { return []; } }
+  /* ================== محفظتي: نقاط ذهبية + رصيد بالجنيه + سحب ================== */
+  var WL = { d: null, list: null, cfg: null, kind: 'wallet', value: '', name: '', open: false, msg: '' };
+  function egpTxt(n) { return (Math.round((+n || 0) * 100) / 100).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function loadWallet() { api('/api/me/wallet').then(function (d) { WL.d = d; if (!WL.value && d.payout) { WL.kind = d.payout.kind; WL.value = d.payout.value; WL.name = d.payout.name || ''; } if (S.view === 'home' && S.tab === 'wallet') render(); }).catch(function () { WL._l = 0; }); }
+  function wlRead() { var v = $('rp-wd-v'), n = $('rp-wd-n'); if (v) WL.value = v.value; if (n) WL.name = n.value; }
+  var WST = { pending: ['مستني المراجعة', 'pending'], approved: ['تم التأكيد ✅', 'approved'], rejected: ['مرفوض', 'rejected'] };
+  function walletTab() {
+    if (WL.d == null && !WL._l) { WL._l = 1; loadWallet(); }
+    var d = WL.d; if (!d) return '<div class="rp-card"><div class="rp-empty">' + ic('wallet') + 'بنحمّل محفظتك…</div></div>';
+    var h = '<div class="rp-card" style="background:linear-gradient(135deg,#fef3c7,#fcd34d 55%,#f59e0b);border-color:#d97706;color:#78350f"><div style="font-size:.85rem;opacity:.85">⭐ نقاطي الذهبية</div><div style="font-size:2.4rem;font-weight:900;line-height:1.2">' + nfmt(d.points) + '</div>' +
+      '<div style="margin-top:6px;font-size:.85rem;opacity:.85">💵 رصيدي بالجنيه</div><div style="font-size:1.9rem;font-weight:900">' + egpTxt(d.egp) + ' <small style="font-size:.9rem">جنيه</small></div>' +
+      '<p class="rp-sub" style="color:#78350f;margin:8px 0 0">كل ' + nfmt(d.rate) + ' نقطة ذهبية = 1 جنيه. النقاط بتتحوّل لجنيه تلقائي وبتفضل ظاهرة قدامك.</p></div>';
+    h += '<div class="rp-card"><h3>' + ic('money-bill-transfer') + ' سحب الأموال</h3><p class="rp-sub">أقل مبلغ للسحب: <b>' + egpTxt(d.min) + ' جنيه</b>.</p>';
+    if (WL.open && !d.can) h += '<div class="rp-err">معذرةً، أنت لم تصل إلى حد السحب بعد. محتاج ' + egpTxt(Math.max(0, d.min - d.egp)) + ' جنيه كمان.</div>';
+    if (WL.open && d.can) {
+      h += '<div class="rp-item"><div class="rp-sub" style="margin:0">أنت معاك <b>' + nfmt(d.points) + ' نقطة</b> وبتساوي <b>' + egpTxt(d.egp) + ' جنيه</b></div></div>' +
+        '<label class="rp-lbl">توصلك الفلوس إزاي؟</label><div class="rp-seg"><button type="button" class="' + (WL.kind === 'wallet' ? 'on' : '') + '" data-act="wdkind" data-v="wallet">محفظة إلكترونية</button><button type="button" class="' + (WL.kind === 'instapay' ? 'on' : '') + '" data-act="wdkind" data-v="instapay">انستا باي</button></div>' +
+        '<label class="rp-lbl">' + (WL.kind === 'instapay' ? 'لينك أو عنوان انستا باي' : 'رقم المحفظة') + '</label><input id="rp-wd-v" class="rp-in" dir="ltr" maxlength="60" value="' + esc(WL.value) + '" placeholder="' + (WL.kind === 'instapay' ? 'name@instapay أو رابط الدفع' : '01xxxxxxxxx') + '">' +
+        '<label class="rp-lbl">الاسم (اختياري)</label><input id="rp-wd-n" class="rp-in" maxlength="60" value="' + esc(WL.name) + '">' +
+        '<div class="rp-err" id="rp-wd-err">' + esc(WL.msg) + '</div><button type="button" class="rp-btn block" style="margin-top:10px" data-act="wdsend">' + ic('paper-plane') + ' تقديم طلب السحب</button><p class="rp-sub">بمجرد التقديم نقاطك بتتصفّر ومش بترجع تاني، والطلب بيتراجع قبل التحويل.</p>';
+    } else h += '<button type="button" class="rp-btn block gold" data-act="wdopen">' + ic('money-bill-transfer') + ' سحب الأموال</button>';
+    h += '</div>';
+    if (d.history && d.history.length) h += '<div class="rp-card"><h3>' + ic('clock-rotate-left') + ' طلبات السحب</h3>' + d.history.map(function (x) { var s = WST[x.status] || [x.status, '']; return '<div class="rp-item"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div><b>' + egpTxt(x.egp) + ' جنيه</b><div class="rp-sub" style="margin:0">' + nfmt(x.points) + ' نقطة · ' + esc(fdate(x.ts)) + '</div></div><span class="rp-pill ' + s[1] + '">' + s[0] + '</span></div></div>'; }).join('') + '</div>';
+    return h;
+  }
+  function loadWd() { api('/api/admin/withdrawals').then(function (d) { WL.list = d.items || []; if (S.view === 'home' && (S.tab === 'wd' || S.menu)) render(); }).catch(function () { WL._a = 0; }); api('/api/admin/gold').then(function (d) { WL.cfg = d; if (S.view === 'home' && S.tab === 'wd') render(); }).catch(function () {}); }
+  function wdAdminTab() {
+    if (WL.list == null && !WL._a) { WL._a = 1; loadWd(); }
+    var c = WL.cfg || { rate: 10, min: 50 }, L = WL.list || [];
+    var h = '<div class="rp-card"><h3>' + ic('gear') + ' سعر النقطة وحد السحب</h3><label class="rp-lbl">كل كام نقطة ذهبية = 1 جنيه؟</label><input id="rp-gd-rate" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(c.rate) + '"><label class="rp-lbl">أقل مبلغ للسحب (بالجنيه)</label><input id="rp-gd-min" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(c.min) + '"><p class="rp-sub">بيتطبق على كل المستخدمين فورًا. مثال: 10 = كل 10 نقاط بجنيه.</p><button type="button" class="rp-btn block" data-act="goldsave">حفظ</button></div>';
+    h += '<div class="rp-card"><h3>' + ic('money-bill-transfer') + ' طلبات السحب' + (L.length ? ' (' + L.length + ')' : '') + '</h3>' + (L.length ? L.map(function (w) {
+      var s = WST[w.status] || [w.status, '']; return '<div class="rp-item"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><b>' + esc(w.user) + '</b><div class="rp-sub" style="margin:0" dir="ltr">' + esc(w.email) + '</div></div><span class="rp-pill ' + s[1] + '">' + s[0] + '</span></div>' +
+        '<div class="rp-sub" style="margin:8px 0 0">المبلغ: <b>' + egpTxt(w.egp) + ' جنيه</b> (' + nfmt(w.points) + ' نقطة، السعر وقتها ' + nfmt(w.rate) + '=1)<br>الطريقة: ' + (w.kind === 'instapay' ? 'انستا باي' : 'محفظة') + ' — <b dir="ltr">' + esc(w.value) + '</b>' + (w.name ? '<br>الاسم: ' + esc(w.name) : '') + '<br>' + esc(fdate(w.ts)) + '</div>' +
+        (w.status === 'pending' ? '<div class="rp-row" style="margin-top:10px"><button type="button" class="rp-btn sm" data-act="wdok" data-id="' + w.id + '">' + ic('check') + ' موافق</button><button type="button" class="rp-btn sm sec" data-act="wdno" data-id="' + w.id + '">' + ic('xmark') + ' رفض</button></div>' : '') + '</div>';
+    }).join('') : '<div class="rp-empty">' + ic('circle-check') + 'مفيش طلبات سحب</div>') + '</div>';
+    return h;
+  }
   function salesTab() {
     var L = S.orders || [], D = S.dues, np = (PREM.info || {}).novelPrices || {};
     var h = '<div class="rp-card"><h3>' + ic('inbox') + ' طلبات شراء الروايات' + (L.length ? ' (' + L.length + ')' : '') + '</h3><p class="rp-sub">راجع صورة التحويل وقارنها بحسابك. «تأكيد» بيفتح الرواية دي بس لصاحب الطلب.</p>' + (L.length ? L.map(function (o) {
@@ -12748,7 +12790,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'resetdev') { if (confirm('تفرّغ أجهزة ' + b.getAttribute('data-e') + ' علشان يقدر يسجّل من جهاز جديد؟')) api('/api/admin/users/' + id + '/devices/reset', { method: 'POST' }).then(function () { flash('اتفرّغت الأجهزة ✅'); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'logout') { try { api('/api/logout', { method: 'POST', body: {} }).catch(function () {}); } catch (x) {} dropTopics(); window.__rpFeed = []; try { window.__rpPaintBell && window.__rpPaintBell(); } catch (x) {} lsSet(TOKEN_KEY, ''); lsSet(USER_KEY, ''); S = fresh(); render(); flash('تم تسجيل الخروج'); }
     else if (a === 'menu') { S.menu = true; S.err = ''; render(); top(); }
-    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.menu = false; S.err = ''; markSeen(S.tab); if (S.tab === 'msgs' && isAdmin()) api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; markSeen('msgs'); if (S.view === 'home' && S.tab === 'msgs') render(); }).catch(function () {}); render(); if (S.tab === 'sales') loadSales(); if (S.tab === 'contest') loadContest(); if (S.tab === 'points') loadPoints(); if (S.tab === 'actest') { loadCA(CA.week); loadCP(); } if (S.tab === 'about') { loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); loadEarn(); } if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
+    else if (a === 'tab') { S.tab = b.getAttribute('data-t'); S.menu = false; S.err = ''; if (S.tab === 'wallet') { WL.open = false; WL.msg = ''; loadWallet(); } else if (S.tab === 'wd') loadWd(); markSeen(S.tab); if (S.tab === 'msgs' && isAdmin()) api('/api/admin/contact').then(function (d) { CTX.list = d.items || []; markSeen('msgs'); if (S.view === 'home' && S.tab === 'msgs') render(); }).catch(function () {}); render(); if (S.tab === 'sales') loadSales(); if (S.tab === 'contest') loadContest(); if (S.tab === 'points') loadPoints(); if (S.tab === 'actest') { loadCA(CA.week); loadCP(); } if (S.tab === 'about') { loadLibrary(function () { if (S.view === 'home' && S.tab === 'about') render(); }); loadEarn(); } if (S.tab === 'premium') { loadTts(); loadPremInfo(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); loadPays(); } if (S.tab === 'premium') syncVault().then(function () { if (S.tab === 'premium' && S.view === 'home') render(); }); }
     else if (a === 'qpaper') { var pv = b.getAttribute('data-v') === '1'; api('/api/my/novels/' + id + '/paper', { method: 'PUT', body: { paper: pv } }).then(function () { flash(pv ? 'اتنقلت لصف الروايات الورقية 📖' : 'اتنقلت للروايات الإلكترونية 📱'); refresh(); try { loadUserNovels(); } catch (x) {} }).catch(function (x) { flash(x.message); }); }
     else if (a === 'vis') { var hide = v === '1'; if (hide && !confirm('تخفي الرواية؟ مش هتظهر لأي حد في الموقع ولا التطبيق لحد ما تظهرها تاني.')) return; api('/api/my/novels/' + id + '/visibility', { method: 'PUT', body: { hidden: hide } }).then(function () { flash(hide ? 'الرواية اتخبّت عن الناس 🙈' : 'الرواية ظهرت للناس ✅'); refresh(); try { loadUserNovels(); } catch (x) {} }).catch(function (x) { flash(x.message); }); }
     else if (a === 'siteread') { close(); try { requestNovelAccess(id, 'details'); } catch (x) {} }
@@ -12919,6 +12961,18 @@ document.addEventListener('click', function (e) {
       api('/api/my/news', { method: 'POST', body: { title: mt.trim(), text: mx.trim(), img: ($('rp-mn-i') || {}).value || '' } }).then(function () { NWX.my = null; NWX._m = 0; flash('اتبعت للمراجعة ✅'); render(); }).catch(function (x) { b.disabled = false; flash(x.message); });
     }
     else if (a === 'nwok' || a === 'nwno') { api('/api/admin/news/' + b.getAttribute('data-id') + '/' + (a === 'nwok' ? 'approve' : 'reject'), { method: 'POST', body: {} }).then(function () { NWX.pend = null; NWX._p = 0; NWX.list = null; NWX._l = 0; flash(a === 'nwok' ? 'اتنشر ✅' : 'اترفض'); render(); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'wdopen') { WL.open = true; WL.msg = ''; render(); }
+    else if (a === 'wdkind') { wlRead(); WL.kind = b.getAttribute('data-v'); render(); }
+    else if (a === 'wdsend') {
+      wlRead(); if (!WL.value.trim()) { WL.msg = 'اكتب ' + (WL.kind === 'instapay' ? 'عنوان انستا باي' : 'رقم المحفظة'); render(); return; }
+      if (!confirm('هتقدّم طلب سحب ونقاطك هتتصفّر نهائي ومش هترجع تاني. تكمّل؟')) return;
+      api('/api/me/withdraw', { method: 'POST', body: { kind: WL.kind, value: WL.value, name: WL.name } }).then(function (r) { WL.open = false; WL.msg = ''; WL.d = null; WL._l = 0; flash('اتقدّم طلب السحب (' + egpTxt(r.egp) + ' جنيه) ✅'); render(); }).catch(function (x) { WL.msg = x.message || 'حصل خطأ'; if (/حد السحب/.test(WL.msg)) { WL.d = null; WL._l = 0; } render(); });
+    }
+    else if (a === 'goldsave') { api('/api/admin/gold', { method: 'PUT', body: { rate: +(($('rp-gd-rate') || {}).value), min: +(($('rp-gd-min') || {}).value) } }).then(function (d) { WL.cfg = d; flash('اتحفظ سعر النقطة وحد السحب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'wdok' || a === 'wdno') {
+      if (!confirm(a === 'wdok' ? 'تأكد إنك راجعت الطلب. تأكيد السحب وإشعار المستخدم؟' : 'ترفض الطلب؟ النقاط مش هترجع للمستخدم.')) return;
+      api('/api/admin/withdrawals/' + b.getAttribute('data-id') + (a === 'wdok' ? '/approve' : '/reject'), { method: 'POST', body: {} }).then(function () { flash(a === 'wdok' ? 'تم التأكيد وبعتنا إشعار للمستخدم ✅' : 'تم الرفض'); loadWd(); }).catch(function (x) { flash(x.message); });
+    }
     else if (a === 'cmsave') {
       var bd = {}; ['perCh', 'perDay', 'minLen', 'newsPerDay'].forEach(function (k) { bd[k] = +(($('rp-cm-' + k) || {}).value); });
       api('/api/admin/cmt', { method: 'PUT', body: bd }).then(function (d) { PT.cf = d; flash('اتحفظت إعدادات التعليقات ✅'); render(); }).catch(function (x) { flash(x.message); });
@@ -15037,4 +15091,94 @@ window.addEventListener('load', () => {
     }
 })();
 </script>
-   <script src="android-bridge.js"></script></body></html>
+   <script id="rp-offline-module">
+/* RadPad: تحميل الرواية للقراءة بدون إنترنت (نسخة محلية على الموبايل) */
+(function () {
+  'use strict';
+  var LS = 'rp_off_v1', DB = 'rp_offline', ST = 'novels';
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function toast(m) { try { if (typeof showToast === 'function') showToast(m); } catch (e) {} }
+  function G(k) { try { return window.eval(k); } catch (e) { return undefined; } }
+  function findNovel(id) { try { return novels.filter(function (n) { return String(n.id) === String(id); })[0] || null; } catch (e) { return null; } }
+  function rp() { return window.__rp || {}; }
+  function meta() { try { return JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) { return {}; } }
+  function setMeta(m) { try { localStorage.setItem(LS, JSON.stringify(m)); } catch (e) {} }
+  var MEM = {}, busy = {};
+  function idb() {
+    return new Promise(function (res, rej) {
+      if (!window.indexedDB) return rej(new Error('noidb'));
+      var q = indexedDB.open(DB, 1);
+      q.onupgradeneeded = function () { q.result.createObjectStore(ST, { keyPath: 'id' }); };
+      q.onsuccess = function () { res(q.result); }; q.onerror = function () { rej(q.error); };
+    });
+  }
+  function tx(mode, fn) { return idb().then(function (db) { return new Promise(function (res, rej) { var t = db.transaction(ST, mode), r = fn(t.objectStore(ST)); t.oncomplete = function () { res(r && r.result); }; t.onerror = function () { rej(t.error); }; }); }); }
+  function put(rec) { return tx('readwrite', function (s) { return s.put(rec); }); }
+  function del(id) { return tx('readwrite', function (s) { return s.delete(id); }); }
+  function all() { return tx('readonly', function (s) { return s.getAll(); }); }
+  function has(id) { return !!meta()[String(id)]; }
+  function list() { var m = meta(); return Object.keys(m).map(function (k) { return { id: k, title: m[k].t, ts: m[k].ts, n: m[k].n, bytes: m[k].b, partial: !!m[k].p }; }).sort(function (a, b) { return b.ts - a.ts; }); }
+  all().then(function (rs) { (rs || []).forEach(function (r) { MEM[r.id] = r; }); }).catch(function () {});
+
+  function download(id) {
+    id = String(id); var n = findNovel(id); if (!n) { toast('الرواية مش متاحة دلوقتي'); return Promise.resolve(false); }
+    if (busy[id]) return Promise.resolve(false); busy[id] = 1; paint();
+    var job;
+    if (n.isUser && n.apiId) {
+      var h = {}; if (n.unlockTok) h['X-Unlock'] = n.unlockTok; if (rp().token && rp().token()) h.Authorization = 'Bearer ' + rp().token();
+      job = fetch(rp().base() + '/api/novels/' + n.apiId + '/full', { headers: h }).then(function (r) { if (!r.ok) throw new Error('x'); return r.json(); }).then(function (d) {
+        var chs = [], bytes = 0, skipped = 0;
+        (d.chapters || []).forEach(function (c, i) { if (c.locked || c.content == null) { skipped++; chs[i] = null; } else { chs[i] = String(c.content); bytes += chs[i].length * 2; } });
+        return { id: id, title: n.title, ts: Date.now(), chapters: chs, bytes: bytes, skipped: skipped, kind: 'user' };
+      });
+    } else {
+      var cnt = (n.chapters || []).length, bytes0 = 0; (n.chapters || []).forEach(function (c) { bytes0 += String(c.content || '').length; });
+      job = Promise.resolve({ id: id, title: n.title, ts: Date.now(), chapters: null, bytes: bytes0 * 2, skipped: 0, kind: 'site' });
+    }
+    return job.then(function (rec) {
+      return put(rec).then(function () {
+        MEM[id] = rec; var m = meta(); m[id] = { t: rec.title, ts: rec.ts, n: (n.chapters || []).length, b: rec.bytes, p: rec.skipped > 0 ? 1 : 0 }; setMeta(m);
+        toast(rec.skipped ? 'اتحمّلت ✅ (الفصول المقفولة ما اتحمّلتش)' : 'اتحمّلت ✅ تقدر تقراها من غير نت');
+        return true;
+      });
+    }).catch(function () { toast('تعذّر التحميل. تأكد من الاتصال بالنت وجرّب تاني'); return false; }).then(function (ok) { delete busy[id]; paint(); try { document.dispatchEvent(new CustomEvent('rp-offline-changed')); } catch (e) {} return ok; });
+  }
+  function remove(id) {
+    id = String(id); var m = meta(); delete m[id]; setMeta(m); delete MEM[id];
+    return del(id).catch(function () {}).then(function () { toast('اتمسح التحميل'); paint(); try { document.dispatchEvent(new CustomEvent('rp-offline-changed')); } catch (e) {} });
+  }
+  window.rpOffline = { has: has, list: list, download: download, remove: remove };
+
+  /* القراءة من النسخة المحلية لو الفصل لسه ما اتحمّلش من السيرفر */
+  function wrapOpen() {
+  var orig = window.openChapterReader; if (!orig || orig.__rpOff) return;
+  window.openChapterReader = function (nid, idx) {
+    try {
+      var n = findNovel(nid), rec = MEM[String(nid)];
+      if (n && rec && rec.chapters && n.chapters[idx] && n.chapters[idx].lazy && rec.chapters[idx] != null) { n.chapters[idx].content = esc(rec.chapters[idx]); n.chapters[idx].lazy = false; }
+    } catch (e) {}
+    return orig.apply(this, arguments);
+  };
+  window.openChapterReader.__rpOff = 1;
+  }
+  setTimeout(wrapOpen, 2500); setTimeout(wrapOpen, 6000);
+
+  /* الزر الدائري في صفحة الرواية */
+  var CSS = '#rp-off-btn{position:absolute;top:10px;left:10px;z-index:30;width:46px;height:46px;border-radius:50%;border:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;background:linear-gradient(135deg,#10b981,#047857);box-shadow:0 6px 18px rgba(4,120,87,.45),0 0 0 3px rgba(255,255,255,.55);cursor:pointer;transition:transform .18s}#rp-off-btn:active{transform:scale(.92)}#rp-off-btn.on{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 6px 18px rgba(217,119,6,.45),0 0 0 3px rgba(255,255,255,.55)}#rp-off-btn small{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:800;white-space:nowrap;color:#065f46;text-shadow:0 1px 0 rgba(255,255,255,.7)}html.dark #rp-off-btn small{color:#6ee7b7;text-shadow:none}';
+  function paint() {
+    var v = $('view-novel-details');
+    if (!v || v.classList.contains('hidden')) { var o = $('rp-off-btn'); if (o) o.remove(); return; }
+    var id = G('currentNovelId'); if (!id) return;
+    var st = $('rp-off-css'); if (!st) { st = document.createElement('style'); st.id = 'rp-off-css'; st.textContent = CSS; document.head.appendChild(st); }
+    if (getComputedStyle(v).position === 'static') v.style.position = 'relative';
+    var b = $('rp-off-btn');
+    if (!b) { b = document.createElement('button'); b.id = 'rp-off-btn'; b.type = 'button'; v.appendChild(b); b.addEventListener('click', function () { var cid = G('currentNovelId'); if (!cid || busy[String(cid)]) return; if (has(cid)) { if (confirm('تمسح النسخة المحمّلة من الموبايل؟')) remove(cid); } else download(cid); }); }
+    var isB = busy[String(id)], on = has(id);
+    b.className = on ? 'on' : ''; b.setAttribute('aria-label', on ? 'محمّلة — اضغط للحذف' : 'تحميل للقراءة بدون إنترنت'); b.setAttribute('data-id', id);
+    b.innerHTML = '<i class="fa-solid ' + (isB ? 'fa-spinner fa-spin' : on ? 'fa-check' : 'fa-arrow-down') + '"></i><small>' + (isB ? 'بيحمّل…' : on ? 'محمّلة' : 'أوفلاين') + '</small>';
+  }
+  setInterval(function () { try { paint(); } catch (e) {} }, 700);
+})();
+</script>
+<script src="android-bridge.js"></script></body></html>

@@ -529,6 +529,12 @@
   '.pg-h{font-size:1.35rem;font-weight:900;margin:2px 4px 2px;display:flex;align-items:center;gap:.5rem}',
   '.pg-h i{color:var(--brand-accent)}',
   '.pg-sub{font-size:.78rem;opacity:.65;margin:0 4px 16px}',
+  '.lib-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px;scrollbar-width:none}',
+  '.lib-tabs::-webkit-scrollbar{display:none}',
+  '.lib-tab{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:8px 11px;border-radius:999px;border:1px solid rgba(100,116,139,.25);background:rgba(100,116,139,.08);color:inherit;font:inherit;font-size:.76rem;font-weight:800;white-space:nowrap}',
+  '.lib-tab.on{background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-dark));border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18)}',
+  '.lib-tab em{font-style:normal;font-size:.68rem;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:rgba(255,255,255,.28);text-align:center;padding:0 5px}',
+  '.lib-tab:not(.on) em{background:rgba(100,116,139,.2)}',
   '.pg-h3{font-size:.9rem;font-weight:800;margin:20px 4px 10px;opacity:.75;display:flex;align-items:center;gap:.4rem}',
   '.lib-card{display:flex;gap:12px;align-items:center;background:#fff;border-radius:20px;padding:12px;margin-bottom:12px;box-shadow:0 2px 16px rgba(15,23,42,.08);position:relative;transition:transform .15s}',
   '.lib-card:active{transform:scale(.98)}',
@@ -648,6 +654,15 @@
       '<div class="lib-info"><div class="lib-title">' + esc(n.title) + '</div><div class="lib-meta">' + esc(n.author || '') + (n.genre ? ' · ' + esc(n.genre) : '') + ' · ' + n.chapters.length + ' فصول</div></div>' +
       '<button class="lib-heart" data-fav="' + esc(n.id) + '" aria-label="إزالة من المفضلة"><i class="fa-solid fa-heart"></i></button></div>';
   }
+  var libTab = null;
+  function fmtB(b) { b = +b || 0; return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+  function dlCard(r) {
+    var n = novelById(r.id);
+    return '<div class="lib-card" data-act="open" data-id="' + esc(r.id) + '">' + (n ? coverEl(n) : '<div class="lib-cover"><i class="fa-solid fa-book"></i></div>') +
+      '<div class="lib-info"><div class="lib-title">' + esc(r.title || (n && n.title) || '') + '</div><div class="lib-meta">' + (r.n ? r.n + ' فصول · ' : '') + fmtB(r.bytes) + (r.partial ? ' · بدون الفصول المقفولة' : '') + '</div>' +
+      '<div class="lib-meta" style="color:#059669;font-weight:800"><i class="fa-solid fa-circle-check"></i> متاحة بدون إنترنت</div></div>' +
+      '<button class="lib-heart" data-rmdl="' + esc(r.id) + '" aria-label="حذف التحميل" style="background:rgba(100,116,139,.12);color:#64748b"><i class="fa-solid fa-trash-can"></i></button></div>';
+  }
   function paintLib() {
     var d = readerData();
     var items = Object.keys(d.last).map(function (id) { return { n: novelById(id), l: d.last[id] }; })
@@ -656,14 +671,14 @@
     items.forEach(function (x) { x.done = (x.l.ch || 0) >= x.n.chapters.length - 1 && (x.l.pct || 0) >= 93; });
     var cont = items.filter(function (x) { return !x.done; }), done = items.filter(function (x) { return x.done; });
     var favs = d.favs.map(novelById).filter(Boolean);
-    var h = '<h2 class="pg-h"><i class="fa-solid fa-bookmark"></i>مكتبتي</h2><p class="pg-sub">تابع قراءتك وروائعك المفضلة في مكان واحد</p>';
-    if (!cont.length && !favs.length && !done.length) {
-      h += '<div class="lib-empty"><i class="fa-solid fa-book-open-reader"></i><b>مكتبتك فارغة</b><span>الروايات التي تبدأ قراءتها وتلك التي تضيفها للمفضلة<br>ستظهر هنا لتصل إليها بسرعة</span></div>';
-    } else {
-      if (cont.length) h += '<h3 class="pg-h3"><i class="fa-solid fa-book-open-reader"></i>أكمل القراءة</h3>' + cont.map(function (x) { return progCard(x.n, x.l, false); }).join('');
-      if (favs.length) h += '<h3 class="pg-h3"><i class="fa-solid fa-heart" style="color:#e11d48"></i>المفضلة</h3>' + favs.map(favCard).join('');
-      if (done.length) h += '<h3 class="pg-h3"><i class="fa-solid fa-circle-check"></i>أنهيتها</h3>' + done.map(function (x) { return progCard(x.n, x.l, true); }).join('');
-    }
+    var dls = window.rpOffline ? window.rpOffline.list() : [];
+    var T = [['dl', 'fa-arrow-down', 'المحمّلة', dls.length], ['cont', 'fa-book-open-reader', 'أكمل القراءة', cont.length], ['fav', 'fa-heart', 'المفضلة', favs.length], ['done', 'fa-circle-check', 'أنهيتها', done.length]];
+    if (!libTab || !T.some(function (t) { return t[0] === libTab; })) libTab = (T.filter(function (t) { return t[3]; })[0] || T[1])[0];
+    var h = '<h2 class="pg-h"><i class="fa-solid fa-bookmark"></i>مكتبتي</h2><p class="pg-sub">رواياتك المحمّلة، ومتابعة قراءتك، ومفضلتك في مكان واحد</p>' +
+      '<div class="lib-tabs">' + T.map(function (t) { return '<button type="button" class="lib-tab' + (libTab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '"><i class="fa-solid ' + t[1] + '"></i><span>' + t[2] + '</span>' + (t[3] ? '<em>' + t[3] + '</em>' : '') + '</button>'; }).join('') + '</div>';
+    var EMPTY = { dl: ['fa-arrow-down', 'مفيش روايات محمّلة', 'افتح أي رواية واضغط الزر الدائري الأخضر لتحميلها وقراءتها بدون إنترنت'], cont: ['fa-book-open-reader', 'مفيش روايات قيد القراءة', 'الروايات التي تبدأ قراءتها ستظهر هنا لتكمل من حيث توقفت'], fav: ['fa-heart', 'مفيش مفضلة لسه', 'اضغط على القلب في أي رواية لتظهر هنا'], done: ['fa-circle-check', 'لسه ما أنهيتش رواية', 'الروايات التي تنهيها ستظهر هنا'] };
+    var body = libTab === 'dl' ? dls.map(dlCard).join('') : libTab === 'cont' ? cont.map(function (x) { return progCard(x.n, x.l, false); }).join('') : libTab === 'fav' ? favs.map(favCard).join('') : done.map(function (x) { return progCard(x.n, x.l, true); }).join('');
+    h += body || '<div class="lib-empty"><i class="fa-solid ' + EMPTY[libTab][0] + '"></i><b>' + EMPTY[libTab][1] + '</b><span>' + EMPTY[libTab][2] + '</span></div>';
     lib.innerHTML = h;
     paintBg(lib);
   }
@@ -672,9 +687,14 @@
     if (!bg || bg === 'transparent' || /rgba\(.*,\s*0\)$/.test(bg)) bg = root.classList.contains('dark') ? '#020617' : '#fcf8f2';
     el.style.background = bg;
   }
-  function openLib() { closeSearch(true); paintLib(); root.classList.add('lib-open'); lib.scrollTop = 0; }
+  function openLib() { closeSearch(true); libTab = null; paintLib(); root.classList.add('lib-open'); lib.scrollTop = 0; }
   function closeLib() { root.classList.remove('lib-open'); }
+  document.addEventListener('rp-offline-changed', function () { if (libOpen()) paintLib(); });
   lib.addEventListener('click', function (e) {
+    var tb = e.target.closest('[data-tab]');
+    if (tb) { libTab = tb.dataset.tab; paintLib(); lib.scrollTop = 0; return; }
+    var rm = e.target.closest('[data-rmdl]');
+    if (rm) { if (window.rpOffline && confirm('تمسح النسخة المحمّلة من الموبايل؟')) window.rpOffline.remove(rm.dataset.rmdl); return; }
     var hb = e.target.closest('[data-fav]');
     if (hb) { if (typeof window.nxToggleFav === 'function') window.nxToggleFav(hb.dataset.fav); paintLib(); return; }
     var c = e.target.closest('.lib-card');
