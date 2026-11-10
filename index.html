@@ -6546,6 +6546,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -15399,5 +15401,14 @@ html.is-native-app.lib-open #app-lib,html.is-native-app.search-open #app-search{
 .rp-seg button.on,html.dark .rp-seg button.on{background:var(--g-bg)!important;color:rgb(var(--g-a))!important;box-shadow:4px 4px 9px var(--g-d),-4px -4px 9px var(--g-l)!important}
 .rp-tab,.rp-subtabs button{background:var(--g-bg)!important;color:var(--g-s)!important;border:0!important;box-shadow:4px 4px 9px var(--g-d),-4px -4px 9px var(--g-l)!important}
 .rp-tab.on,.rp-subtabs button.on{color:rgb(var(--g-a))!important;box-shadow:inset 4px 4px 8px var(--g-d),inset -4px -4px 8px var(--g-l)!important}
+/* صفحة البروفايل */
+.rp-pf-hero,html.dark .rp-pf-hero{background:var(--g-bg)!important;border:0!important;box-shadow:10px 10px 22px var(--g-d),-10px -10px 22px var(--g-l)!important;color:var(--g-t)}
+.rp-pf-body{background:transparent!important}
+.rp-pf-st div,html.dark .rp-pf-st div{background:var(--g-bg)!important;box-shadow:inset 4px 4px 9px var(--g-d),inset -4px -4px 9px var(--g-l)!important;border-radius:18px}
+.rp-pf-st b{color:rgb(var(--g-a))!important}.rp-pf-st span{color:var(--g-s)!important}
+.rp-pf-name,.rp-pf-title{color:var(--g-t)!important}.rp-pf-bio{color:var(--g-s)!important}
+.rp-pf-tag{box-shadow:inset 2px 2px 5px rgba(0,0,0,.1)}
+.rp-pf-soc a,.rp-pf-soc button{box-shadow:5px 5px 11px var(--g-d),-5px -5px 11px var(--g-l)!important}
+.rp-pf-av{box-shadow:7px 7px 14px var(--g-d),-7px -7px 14px var(--g-l)!important}
 </style>
 <script src="android-bridge.js"></script></body></html>
