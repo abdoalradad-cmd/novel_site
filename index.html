@@ -6534,6 +6534,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -12567,7 +12569,7 @@ document.addEventListener('click', function (e) {
     var rd = false; try { rd = !!isReaderOnlyMode; } catch (e) {}
     set('جاري مقارنة الروايات…');
     api('/api/admin/tts/fix-short', { method: 'POST', body: { max: 5 } }).catch(function () { return { n: 0 }; }).then(function (fx) { TT.fixed = fx && fx.n || 0; return Promise.all([api('/api/admin/tts/known'), rd ? getKeys().catch(function () { return {}; }) : Promise.resolve({})]).then(function (rs) {
-      var d = rs[0], keys = rs[1] || {}, known = d.sigs || {}, mkm = d.mk || {}, items = [], list = novels.slice(), miss = 0, jobs = [], hasMk = function (x) { return /[«“"]/.test(x) || /(^|\n)\s*[-–—]/.test(x); };
+      var d = rs[0], keys = rs[1] || {}, known = d.sigs || {}, lens = d.lens || {}, redo = 0, mkm = d.mk || {}, items = [], list = novels.slice(), miss = 0, jobs = [], hasMk = function (x) { return /[«“"]/.test(x) || /(^|\n)\s*[-–—]/.test(x); };
       list.forEach(function (n, ni) { (n.chapters || []).forEach(function (c, i) { jobs.push({ n: n, ni: ni, c: c, i: i }); }); });
       function plain(j) {
         var c = j.c;
@@ -12589,11 +12591,13 @@ document.addEventListener('click', function (e) {
           if (!String(c.content || '').replace(/<[^>]*>|&nbsp;/g, '').trim()) return; /* من غير نص = ما نبعتش العنوان لوحده */
           var ct = ttsChapText(c); if (!ct.text) return; var sig = ct.sig;
           if (known[j.n.id + '#' + j.i] === sig && (mkm[j.n.id + '#' + j.i] || !hasMk(ct.text))) return;
-          items.push({ nid: String(j.n.id), idx: j.i, ntitle: String(j.n.title || ''), ctitle: String(c.title || ''), ord: list.length - j.ni, sig: sig, text: ct.text });
+          var kk = j.n.id + '#' + j.i, ln = lens[kk], rd2 = ln != null && known[kk] !== sig && ct.text.length > ln * 1.25 + 80; /* النص المخزّن على السيرفر أقصر بكتير من نص الفصل الحالي = الصوت ناقص */
+          if (rd2) redo++;
+          items.push({ nid: String(j.n.id), idx: j.i, ntitle: String(j.n.title || ''), ctitle: String(c.title || ''), ord: list.length - j.ni, sig: sig, text: ct.text, redo: rd2 || undefined });
         }).then(scan);
       }
       return scan().then(function () {
-        var warn = (TT.fixed ? ' — اتمسح ' + TT.fixed + ' فصل صوته كان قصير وهيتعاد تحويله' : '') + (miss ? ' (⚠️ ' + miss + ' فصل مقفول أو مش متاح متقدرش أجيب نصه)' : '');
+        var warn = (TT.fixed ? ' — اتمسح ' + TT.fixed + ' فصل صوته ناقص (أقصر من نصه) وهيتعاد تحويله' : '') + (redo ? ' — ' + redo + ' فصل نصه على السيرفر كان ناقص وهيتعاد تحويله' : '') + (miss ? ' (⚠️ ' + miss + ' فصل مقفول أو مش متاح متقدرش أجيب نصه)' : '');
         if (!items.length) { set('كله متبعت قبل كده ✅ مفيش جديد.' + warn); return; }
         var total = items.length, sent = 0, added = 0, upd = 0;
         function next() {
