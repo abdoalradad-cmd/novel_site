@@ -6542,6 +6542,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -15354,8 +15356,8 @@ body,html body.bg-parchment{background:var(--g-bg)!important}
 header.sticky{background:var(--g-bg)!important;border:0!important;box-shadow:0 10px 24px -10px var(--g-d)!important;backdrop-filter:none!important}
 footer.mt-16{background:var(--g-bg)!important;border:0!important;box-shadow:inset 0 12px 20px -14px var(--g-d)!important}
 /* الكروت */
-.dynamic-card-radius:not(.theme-bg-gradient),.rp-card,.rp-adm-card{background:var(--g-bg)!important;border:0!important;box-shadow:9px 9px 20px var(--g-d),-9px -9px 20px var(--g-l)!important}
-.rp-item,.rp-note,.rp-row{background:var(--g-bg)!important;border:0!important;box-shadow:inset 4px 4px 9px var(--g-d),inset -4px -4px 9px var(--g-l)!important;border-radius:18px}
+.dynamic-card-radius:not(.theme-bg-gradient):not(#reader-paper),.rp-card,.rp-adm-card{background:var(--g-bg)!important;border:0!important;box-shadow:9px 9px 20px var(--g-d),-9px -9px 20px var(--g-l)!important}
+.rp-item,.rp-note{background:var(--g-bg)!important;border:0!important;box-shadow:inset 4px 4px 9px var(--g-d),inset -4px -4px 9px var(--g-l)!important;border-radius:18px}
 /* الحقول */
 .rp-in,.rp-adm-in,input[type=text],input[type=email],input[type=password],input[type=search],input[type=number],input[type=url],textarea,select{background:var(--g-bg)!important;border:0!important;outline:0;color:var(--g-t)!important;box-shadow:inset 5px 5px 10px var(--g-d),inset -5px -5px 10px var(--g-l)!important;border-radius:16px}
 .rp-in:focus,.rp-adm-in:focus,input:focus,textarea:focus,select:focus{box-shadow:inset 5px 5px 10px var(--g-d),inset -5px -5px 10px var(--g-l),0 0 0 2px rgba(var(--g-a),.45)!important}
@@ -15370,7 +15372,6 @@ input[type=checkbox],input[type=radio],input[type=range]{box-shadow:none!importa
 #control-panel-modal>div,#pdf-modal>div,#content-password-modal>div,#secret-pin-modal>div{background:var(--g-bg)!important;border:0!important;box-shadow:14px 14px 30px var(--g-d),-14px -14px 30px var(--g-l)!important;color:var(--g-t)}
 header.sticky button:not(#header-logo-icon),header.sticky a.rounded-full{background:var(--g-bg)!important;border:0!important;box-shadow:5px 5px 10px var(--g-d),-5px -5px 10px var(--g-l)!important;color:rgb(var(--g-a))!important}
 header.sticky button:active{box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}
-.rp-bk{background:var(--g-bg)!important;box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important;border:0!important;border-radius:20px}
 .rp-rhead h3{color:var(--g-t)}
 .rp-sub,.rp-lbl{color:var(--g-s)!important}
 html.dark .rp-card,html.dark .rp-item{color:var(--g-t)}
@@ -15383,7 +15384,6 @@ html.is-native-app #app-tabbar{background:var(--g-bg)!important;box-shadow:0 -8p
 html.is-native-app.lib-open #app-lib,html.is-native-app.search-open #app-search{background:var(--g-bg)!important;color:var(--g-t)!important}
 #app-lib button[data-tab]{background:var(--g-bg)!important;border:0!important;box-shadow:5px 5px 10px var(--g-d),-5px -5px 10px var(--g-l)!important;color:var(--g-s)!important}
 #app-lib button[data-tab].on{box-shadow:inset 4px 4px 8px var(--g-d),inset -4px -4px 8px var(--g-l)!important;color:rgb(var(--g-a))!important}
-#app-lib .rp-bk,#app-lib [class*=card],#app-lib [class*=item]{background:var(--g-bg)!important;border:0!important;box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important}
-.rp-hs{padding:10px 12px 24px!important}
+#app-lib #app-lib [class*=card],#app-lib [class*=item]{background:var(--g-bg)!important;border:0!important;box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important}
 </style>
 <script src="android-bridge.js"></script></body></html>
