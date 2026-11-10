@@ -6540,6 +6540,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -15343,4 +15345,45 @@ window.addEventListener('load', () => {
   setInterval(function () { try { paint(); } catch (e) {} }, 700);
 })();
 </script>
+<style id="rp-nm-global">
+:root{--g-bg:#e6ede8;--g-d:#c3cdc6;--g-l:#fbfffc;--g-t:#0f3d2e;--g-s:#6b7f74;--g-a:15,107,74}
+html.dark{--g-bg:#17261f;--g-d:#0d1712;--g-l:#213629;--g-t:#f1f5f3;--g-s:#8aa095;--g-a:52,211,153}
+body,html body.bg-parchment{background:var(--g-bg)!important}
+#rp-acct-page,#rp-all-page,#rp-prof-page,#rp-notif-page{background:var(--g-bg)!important;color:var(--g-t)}
+/* هيدر وفوتر */
+header.sticky{background:var(--g-bg)!important;border:0!important;box-shadow:0 10px 24px -10px var(--g-d)!important;backdrop-filter:none!important}
+footer.mt-16{background:var(--g-bg)!important;border:0!important;box-shadow:inset 0 12px 20px -14px var(--g-d)!important}
+/* الكروت */
+.dynamic-card-radius:not(.theme-bg-gradient),.rp-card,.rp-adm-card{background:var(--g-bg)!important;border:0!important;box-shadow:9px 9px 20px var(--g-d),-9px -9px 20px var(--g-l)!important}
+.rp-item,.rp-note,.rp-row{background:var(--g-bg)!important;border:0!important;box-shadow:inset 4px 4px 9px var(--g-d),inset -4px -4px 9px var(--g-l)!important;border-radius:18px}
+/* الحقول */
+.rp-in,.rp-adm-in,input[type=text],input[type=email],input[type=password],input[type=search],input[type=number],input[type=url],textarea,select{background:var(--g-bg)!important;border:0!important;outline:0;color:var(--g-t)!important;box-shadow:inset 5px 5px 10px var(--g-d),inset -5px -5px 10px var(--g-l)!important;border-radius:16px}
+.rp-in:focus,.rp-adm-in:focus,input:focus,textarea:focus,select:focus{box-shadow:inset 5px 5px 10px var(--g-d),inset -5px -5px 10px var(--g-l),0 0 0 2px rgba(var(--g-a),.45)!important}
+input[type=checkbox],input[type=radio],input[type=range]{box-shadow:none!important}
+/* الأزرار */
+.rp-btn{box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important;border-radius:16px}
+.rp-btn:active{box-shadow:inset 4px 4px 8px rgba(0,0,0,.3)!important}
+.rp-btn.sec,.rp-btn.ghost,.rp-btn.gray{background:var(--g-bg)!important;color:rgb(var(--g-a))!important}
+.rp-pill{box-shadow:inset 2px 2px 5px var(--g-d),inset -2px -2px 5px var(--g-l)}
+.rp-chip{box-shadow:inset 2px 2px 5px rgba(0,0,0,.12)}
+/* مودالات وقوائم */
+#control-panel-modal>div,#pdf-modal>div,#content-password-modal>div,#secret-pin-modal>div{background:var(--g-bg)!important;border:0!important;box-shadow:14px 14px 30px var(--g-d),-14px -14px 30px var(--g-l)!important;color:var(--g-t)}
+header.sticky button:not(#header-logo-icon),header.sticky a.rounded-full{background:var(--g-bg)!important;border:0!important;box-shadow:5px 5px 10px var(--g-d),-5px -5px 10px var(--g-l)!important;color:rgb(var(--g-a))!important}
+header.sticky button:active{box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}
+.rp-bk{background:var(--g-bg)!important;box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important;border:0!important;border-radius:20px}
+.rp-rhead h3{color:var(--g-t)}
+.rp-sub,.rp-lbl{color:var(--g-s)!important}
+html.dark .rp-card,html.dark .rp-item{color:var(--g-t)}
+.text-slate-800,.dark .text-slate-100{color:var(--g-t)}
+/* شريط التطبيق السفلي والمكتبة */
+html.is-native-app #app-tabbar{background:var(--g-bg)!important;box-shadow:0 -8px 22px -8px var(--g-d),0 -2px 0 var(--g-l)!important;border-radius:26px 26px 0 0!important}
+#app-tabbar button{color:var(--g-s)!important}
+#app-tabbar button.on{color:rgb(var(--g-a))!important}
+#app-tabbar button.on i{background:var(--g-bg)!important;box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important;color:rgb(var(--g-a))!important}
+html.is-native-app.lib-open #app-lib,html.is-native-app.search-open #app-search{background:var(--g-bg)!important;color:var(--g-t)!important}
+#app-lib button[data-tab]{background:var(--g-bg)!important;border:0!important;box-shadow:5px 5px 10px var(--g-d),-5px -5px 10px var(--g-l)!important;color:var(--g-s)!important}
+#app-lib button[data-tab].on{box-shadow:inset 4px 4px 8px var(--g-d),inset -4px -4px 8px var(--g-l)!important;color:rgb(var(--g-a))!important}
+#app-lib .rp-bk,#app-lib [class*=card],#app-lib [class*=item]{background:var(--g-bg)!important;border:0!important;box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important}
+.rp-hs{padding:10px 12px 24px!important}
+</style>
 <script src="android-bridge.js"></script></body></html>
