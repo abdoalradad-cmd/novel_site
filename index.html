@@ -6532,6 +6532,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -12564,28 +12566,34 @@ document.addEventListener('click', function (e) {
     var set = function (m) { TT.sync = m; var e = $('rp-tt-sync'); if (e) e.textContent = m; };
     var rd = false; try { rd = !!isReaderOnlyMode; } catch (e) {}
     set('جاري مقارنة الروايات…');
-    Promise.all([api('/api/admin/tts/known'), rd ? getKeys().catch(function () { return {}; }) : Promise.resolve({})]).then(function (rs) {
+    api('/api/admin/tts/fix-short', { method: 'POST', body: { max: 5 } }).catch(function () { return { n: 0 }; }).then(function (fx) { TT.fixed = fx && fx.n || 0; return Promise.all([api('/api/admin/tts/known'), rd ? getKeys().catch(function () { return {}; }) : Promise.resolve({})]).then(function (rs) {
       var d = rs[0], keys = rs[1] || {}, known = d.sigs || {}, mkm = d.mk || {}, items = [], list = novels.slice(), miss = 0, jobs = [], hasMk = function (x) { return /[«“"]/.test(x) || /(^|\n)\s*[-–—]/.test(x); };
       list.forEach(function (n, ni) { (n.chapters || []).forEach(function (c, i) { jobs.push({ n: n, ni: ni, c: c, i: i }); }); });
       function plain(j) {
-        var c = j.c; if (c.content || !c.enc) return Promise.resolve(c);
+        var c = j.c;
+        if (!c.content && c.lazy && j.n.isUser && j.n.apiId) { // فصول روايات السيرفر بتتحمّل بالطلب: لازم نجيب نصها الكامل قبل ما نبعته للتحويل
+          var fp = fullP[j.n.id] || (fullP[j.n.id] = fetchAll(j.n).catch(function () {}));
+          return fp.then(function () { return j.n.chapters[j.i].content ? j.n.chapters[j.i] : (miss++, null); });
+        }
+        if (c.content || !c.enc) return Promise.resolve(c);
         var k = keys[j.n.id] || {}, pw = (k.c && k.c[j.i]) || k.n || '';
         if (!pw || !window.AC) { miss++; return Promise.resolve(null); }
         return window.AC.decrypt(c.enc, pw).then(function (tx) { if (tx == null) { miss++; return null; } var o = {}; for (var kk in c) o[kk] = c[kk]; o.content = tx; return o; });
       }
-      var p = 0;
+      var p = 0, fullP = {};
       function scan() {
         if (p >= jobs.length) return Promise.resolve();
         var j = jobs[p++];
         return plain(j).then(function (c) {
           if (!c) return;
+          if (!String(c.content || '').replace(/<[^>]*>|&nbsp;/g, '').trim()) return; /* من غير نص = ما نبعتش العنوان لوحده */
           var ct = ttsChapText(c); if (!ct.text) return; var sig = ct.sig;
           if (known[j.n.id + '#' + j.i] === sig && (mkm[j.n.id + '#' + j.i] || !hasMk(ct.text))) return;
           items.push({ nid: String(j.n.id), idx: j.i, ntitle: String(j.n.title || ''), ctitle: String(c.title || ''), ord: list.length - j.ni, sig: sig, text: ct.text });
         }).then(scan);
       }
       return scan().then(function () {
-        var warn = miss ? ' (⚠️ ' + miss + ' فصل مقفول متقدرش أفكه لأن مفتاحه مش متسجّل في السيرفر)' : '';
+        var warn = (TT.fixed ? ' — اتمسح ' + TT.fixed + ' فصل صوته كان قصير وهيتعاد تحويله' : '') + (miss ? ' (⚠️ ' + miss + ' فصل مقفول أو مش متاح متقدرش أجيب نصه)' : '');
         if (!items.length) { set('كله متبعت قبل كده ✅ مفيش جديد.' + warn); return; }
         var total = items.length, sent = 0, added = 0, upd = 0;
         function next() {
@@ -12595,7 +12603,7 @@ document.addEventListener('click', function (e) {
         }
         next();
       });
-    }).catch(function (x) { set(x.message); });
+    }); }).catch(function (x) { set(x.message); });
   }
 
   /* ---------- مسابقات بفلوس + نقاط الفوز ---------- */
