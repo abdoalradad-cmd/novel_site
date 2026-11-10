@@ -6536,6 +6536,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -11869,31 +11871,49 @@ document.addEventListener('click', function (e) {
     return '<div class="rp-field"><i class="lead fa-solid fa-' + icon + '"></i><input id="' + id + '" type="' + type + '" class="rp-in" placeholder="' + ph + '" ' + (extra || '') + '>' +
       (type === 'password' ? '<button type="button" class="eye" data-act="eye" data-t="' + id + '" aria-label="إظهار">' + ic('eye') + '</button>' : '') + '</div>';
   }
+  function nmCss() {
+    if (document.getElementById('rp-nm-css')) return;
+    var s = document.createElement('style'); s.id = 'rp-nm-css'; s.textContent = NMCSS; document.head.appendChild(s);
+  }
+  var NMCSS = '\n.nmw{position:relative;overflow:hidden;border-radius:30px;padding:26px 14px 18px;background:var(--nm-bg);isolation:isolate}\n.nmw .c{position:absolute;border-radius:50%;background:var(--nm-bg);box-shadow:14px 14px 28px var(--nm-d),-14px -14px 28px var(--nm-l);z-index:-1;animation:nmFloat 9s ease-in-out infinite}\n.nmw .c1{width:170px;height:170px;top:-50px;right:-60px}.nmw .c2{width:70px;height:70px;top:46%;left:-26px;animation-delay:-3s}.nmw .c3{width:120px;height:120px;bottom:-34px;right:12%;animation-delay:-6s}\n@keyframes nmFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}\n.nmc{position:relative;border-radius:30px;padding:26px 20px 22px;background:var(--nm-bg);box-shadow:16px 16px 34px var(--nm-d),-16px -16px 34px var(--nm-l);animation:nmIn .45s cubic-bezier(.2,.8,.2,1)}\n@keyframes nmIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}\n.nmb{width:78px;height:78px;margin:0 auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--nm-bg);box-shadow:8px 8px 16px var(--nm-d),-8px -8px 16px var(--nm-l)}\n.nmb svg{width:50px;height:50px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}\n.nmc h2{margin:0;text-align:center;font:900 1.55rem Cairo,sans-serif;color:var(--nm-t)}\n.nmc .sub{margin:4px 0 20px;text-align:center;font-size:.8rem;color:var(--nm-s);font-weight:700}\n.nmf{position:relative;margin-bottom:14px}\n.nmf .lead{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--nm-s);font-size:.95rem;pointer-events:none;transition:color .2s}\n.nmf input{width:100%;height:54px;border:0;outline:0;border-radius:16px;padding:0 44px 0 46px;font:700 .95rem Cairo,sans-serif;color:var(--nm-t);background:var(--nm-bg);box-shadow:inset 6px 6px 12px var(--nm-d),inset -6px -6px 12px var(--nm-l);transition:box-shadow .25s}\n.nmf input:placeholder-shown{text-align:right}\n.nmf input::placeholder{color:var(--nm-s);opacity:.8;font-weight:600}\n.nmf input:focus{box-shadow:inset 7px 7px 14px var(--nm-d),inset -7px -7px 14px var(--nm-l),0 0 0 2px rgba(var(--nm-a),.45)}\n.nmf:focus-within .lead{color:rgb(var(--nm-a))}\n.nmf:after{content:"";position:absolute;right:18px;left:18px;bottom:6px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgb(var(--nm-a)),transparent);transform:scaleX(0);transition:transform .35s}\n.nmf:focus-within:after{transform:scaleX(1)}\n.nmf .eye{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:var(--nm-s);cursor:pointer}\n.nmfg{display:flex;justify-content:flex-start;margin:-4px 2px 14px}\n.nmfg button{background:none;border:0;padding:4px;font:800 .75rem Cairo,sans-serif;color:rgb(var(--nm-a));cursor:pointer}\n.nmerr{min-height:18px;margin:0 4px 8px;font-size:.78rem;font-weight:800;color:#dc2626;text-align:center}\n.nmbtn{width:100%;height:54px;border:0;border-radius:18px;cursor:pointer;font:900 1rem Cairo,sans-serif;display:flex;align-items:center;justify-content:center;gap:9px;color:rgb(var(--nm-a));background:var(--nm-bg);box-shadow:8px 8px 16px var(--nm-d),-8px -8px 16px var(--nm-l);transition:all .3s;-webkit-tap-highlight-color:transparent}\n.nmbtn:active{box-shadow:inset 5px 5px 10px var(--nm-d),inset -5px -5px 10px var(--nm-l)}\n.nmbtn.ready,.nmbtn:active{color:#fff;background:linear-gradient(135deg,#22b07d,#0f6b4a);box-shadow:0 10px 24px rgba(15,107,74,.42)}\n.nmbtn[disabled]{opacity:.65}\n.nmsw{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:22px;font-size:.8rem;font-weight:700;color:var(--nm-s)}\n.nmsw button{width:44px;height:44px;border:0;border-radius:50%;cursor:pointer;color:rgb(var(--nm-a));font-size:1rem;background:var(--nm-bg);box-shadow:6px 6px 12px var(--nm-d),-6px -6px 12px var(--nm-l);transition:all .25s}\n.nmsw button:active{box-shadow:inset 4px 4px 8px var(--nm-d),inset -4px -4px 8px var(--nm-l);color:#fff;background:linear-gradient(135deg,#22b07d,#0f6b4a)}\n.nmft{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}\n.nmft span{padding:8px 12px;border-radius:999px;font-size:.7rem;font-weight:800;color:var(--nm-s);background:var(--nm-bg);box-shadow:inset 3px 3px 6px var(--nm-d),inset -3px -3px 6px var(--nm-l)}\n.nmft i{margin-left:6px;color:rgb(var(--nm-a))}\n.nmw{--nm-bg:#e6ede8;--nm-d:#c3cdc6;--nm-l:#fbfffc;--nm-t:#0f3d2e;--nm-s:#6b7f74;--nm-a:15,107,74}\nhtml.dark .nmw{--nm-bg:#17261f;--nm-d:#0d1712;--nm-l:#213629;--nm-t:#f1f5f3;--nm-s:#8aa095;--nm-a:52,211,153}\n';
+  function nmField(id, type, icon, ph, extra) {
+    return '<div class="nmf"><i class="lead fa-solid fa-' + icon + '"></i><input id="' + id + '" type="' + type + '" placeholder="' + ph + '" ' + (extra || '') + '>' +
+      (type === 'password' ? '<button type="button" class="eye" data-act="eye" data-t="' + id + '" aria-label="إظهار">' + ic('eye') + '</button>' : '') + '</div>';
+  }
+  function nmReady() {
+    var b = body().querySelector('[data-act="auth"]'); if (!b) return; var reg = S.mode === 'register', g = function (i) { var e = $(i); return e ? e.value.trim() : ''; };
+    var ok = g('rp-f-email') && g('rp-f-pass') && (!reg || (g('rp-f-name') && g('rp-f-pass2')));
+    b.classList.toggle('ready', !!ok);
+  }
   function renderAuth() {
-    setTitle('حسابي');
-    var reg = S.mode === 'register';
-    var hero = '<div class="rp-auth-hero"><svg viewBox="0 0 100 100"><use href="#rp-logo-sym"/></svg><h2>RadPad</h2><p>' + (reg ? 'انضم واكتب روايتك بنفسك' : 'أهلًا بيك تاني، كمّل من حيث وقفت') + '</p></div>';
+    setTitle('حسابي'); nmCss();
+    var reg = S.mode === 'register', logo = '<div class="nmb"><svg viewBox="0 0 100 100"><use href="#rp-logo-sym"/></svg></div>';
     if (S.forgot) {
-      body().innerHTML = hero + '<div class="rp-card"><h3>' + ic('key') + ' نسيت الباسورد؟</h3><p class="rp-sub">من غير قلق! الباسورد بيتحفظ مشفّر ومحدّش يقدر يشوفه، لكن الأدمن يقدر يديك باسورد مؤقت جديد:</p>' +
+      body().innerHTML = '<div class="nmw"><div class="c c1"></div><div class="c c2"></div><div class="c c3"></div><div class="nmc">' + logo + '<h2>نسيت الباسورد؟</h2><p class="sub">الباسورد مشفّر ومحدّش يقدر يشوفه، لكن الأدمن يقدر يديك باسورد مؤقت</p>' +
         '<div class="rp-note g">' + ic('1') + '<div>ابعت للأدمن (من صفحات التواصل الموجودة في الموقع) الإيميل اللي سجّلت بيه.</div></div>' +
         '<div class="rp-note g">' + ic('2') + '<div>هيبعتلك باسورد مؤقت — ادخل بيه.</div></div>' +
         '<div class="rp-note g">' + ic('3') + '<div>روح «حسابي ← الإعدادات ← تغيير الباسورد» وحط باسورد جديد من اختيارك.</div></div>' +
-        '<button type="button" class="rp-btn block" data-act="forgot" data-v="0" style="margin-top:14px">' + ic('arrow-right') + ' رجوع لتسجيل الدخول</button></div>';
+        '<div class="nmsw" style="margin-top:18px"><span>رجوع لتسجيل الدخول</span><button type="button" data-act="forgot" data-v="0" aria-label="رجوع">' + ic('arrow-right') + '</button></div></div></div>';
       return;
     }
-    body().innerHTML = hero +
-      '<div class="rp-card"><div class="rp-seg"><button type="button" data-act="mode" data-m="login" class="' + (!reg ? 'on' : '') + '">تسجيل الدخول</button><button type="button" data-act="mode" data-m="register" class="' + (reg ? 'on' : '') + '">حساب جديد</button></div>' +
-      (reg ? '<label class="rp-lbl">اسمك (هيظهر كاسم الكاتب)</label>' + field('rp-f-name', 'text', 'user', 'مثال: أحمد محمد', 'autocomplete="name" maxlength="40"') : '') +
-      '<label class="rp-lbl">الإيميل</label>' + field('rp-f-email', 'email', 'envelope', 'name@example.com', 'dir="ltr" autocomplete="email"') +
-      '<label class="rp-lbl">الباسورد' + (reg ? ' (8 حروف أو أكتر)' : '') + '</label>' + field('rp-f-pass', 'password', 'lock', '••••••••', 'dir="ltr" autocomplete="' + (reg ? 'new-password' : 'current-password') + '"') +
-      '<div class="rp-err" id="rp-f-err">' + esc(S.err) + '</div>' +
-      '<button type="button" class="rp-btn block" data-act="auth" style="margin-top:8px;padding:14px">' + (reg ? ic('user-plus') + ' إنشاء الحساب' : ic('right-to-bracket') + ' دخول') + '</button>' +
-      (!reg ? '<div style="text-align:center;margin-top:6px"><button type="button" class="rp-link" data-act="forgot" data-v="1">نسيت الباسورد؟</button></div>' : '') + '</div>' +
-      '<div class="rp-feats"><div class="rp-feat">' + ic('pen-nib') + 'انشر رواياتك بنفسك</div><div class="rp-feat">' + ic('lock') + 'قفل بباسورد وبرومو</div><div class="rp-feat">' + ic('chart-line') + 'تابع حالة كل رواية</div></div>' + themeCard();
+    body().innerHTML = '<div class="nmw"><div class="c c1"></div><div class="c c2"></div><div class="c c3"></div><div class="nmc" data-nm="' + (reg ? 'r' : 'l') + '">' + logo +
+      '<h2>' + (reg ? 'إنشاء حساب جديد' : 'أهلًا بيك') + '</h2><p class="sub">' + (reg ? 'انضم واكتب روايتك بنفسك' : 'سجّل دخولك وكمّل من حيث وقفت') + '</p>' +
+      (reg ? nmField('rp-f-name', 'text', 'user', 'اسمك (هيظهر كاسم الكاتب)', 'autocomplete="name" maxlength="40"') : '') +
+      nmField('rp-f-email', 'email', 'envelope', 'الإيميل', 'dir="ltr" autocomplete="email"') +
+      nmField('rp-f-pass', 'password', 'lock', reg ? 'الباسورد (8 حروف أو أكتر)' : 'الباسورد', 'dir="ltr" autocomplete="' + (reg ? 'new-password' : 'current-password') + '"') +
+      (reg ? nmField('rp-f-pass2', 'password', 'shield-halved', 'تأكيد الباسورد', 'dir="ltr" autocomplete="new-password"') : '<div class="nmfg"><button type="button" data-act="forgot" data-v="1">نسيت الباسورد؟</button></div>') +
+      '<div class="nmerr" id="rp-f-err">' + esc(S.err) + '</div>' +
+      '<button type="button" class="nmbtn" data-act="auth">' + (reg ? ic('user-plus') + ' إنشاء الحساب' : ic('right-to-bracket') + ' دخول') + '</button>' +
+      '<div class="nmsw"><span>' + (reg ? 'عندك حساب بالفعل؟' : 'معندكش حساب؟') + '</span><button type="button" data-act="mode" data-m="' + (reg ? 'login' : 'register') + '" aria-label="' + (reg ? 'تسجيل الدخول' : 'حساب جديد') + '">' + ic(reg ? 'arrow-right' : 'plus') + '</button></div></div>' +
+      '<div class="nmft"><span><i class="fa-solid fa-pen-nib"></i>انشر رواياتك</span><span><i class="fa-solid fa-lock"></i>قفل وبرومو</span><span><i class="fa-solid fa-chart-line"></i>تابع روايتك</span></div></div>' + themeCard();
+    var bd = body(); bd.oninput = nmReady; nmReady();
+    var fe = $(reg ? 'rp-f-name' : 'rp-f-email'); if (fe && !S.err) { /* مفيش auto-focus عشان الكيبورد ما يغطيش الصفحة */ }
+    bd.onkeydown = function (e) { if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT') { e.preventDefault(); doAuth(); } };
   }
   function doAuth() {
     var reg = S.mode === 'register';
     var email = ($('rp-f-email').value || '').trim(), pass = $('rp-f-pass').value || '', name = reg ? ($('rp-f-name').value || '').trim() : '';
+    if (reg && $('rp-f-pass2') && $('rp-f-pass2').value !== pass) { S.err = 'الباسوردين مش متطابقين'; $('rp-f-err').textContent = S.err; return; }
     var btn = body().querySelector('[data-act="auth"]'); btn.disabled = true; S.err = ''; $('rp-f-err').textContent = '';
     api(reg ? '/api/register' : '/api/login', { method: 'POST', noAuth: true, body: { email: email, password: pass, name: name } }).then(function (d) {
       lsSet(TOKEN_KEY, d.token); lsSet(USER_KEY, JSON.stringify(d.user)); S = fresh(); render(); refresh(); applyVault(); loadFeed(); syncTopics();
