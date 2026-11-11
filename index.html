@@ -6548,6 +6548,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -12018,8 +12020,8 @@ document.addEventListener('click', function (e) {
     hero += streakCard() + achCard() + premCard() + libraryCard() + earnCard() + ptsMini();
     var html = '';
     var tabs = [['about', 'user', 'عني'], ['wallet', 'wallet', 'محفظتي'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز'], ['news', 'newspaper', 'الأخبار الأدبية', isAdmin() ? unseenN('news') : 0], ['quotes', 'quote-right', 'اقتباساتي'], ['contact', 'envelope', 'تواصل معنا']];
-    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['wd', 'money-bill-transfer', 'طلبات السحب', WL.list ? WL.list.filter(function (x) { return x.status === 'pending'; }).length : 0], ['actest', 'gavel', 'إدارة المسابقات'], ['backup', 'database', 'النسخ الاحتياطي']);
-    var MI = { wallet: ['#f59e0b', 'نقاطك الذهبية ورصيدك بالجنيه وسحب الأموال'], wd: ['#16a34a', 'اقبل أو ارفض طلبات سحب الأموال'], about: ['#0f766e', 'اللي يخصك: بياناتك ومحفظتك ومكتبتك'], novels: ['#7c3aed', 'اكتب وانشر رواياتك'], settings: ['#475569', 'الصوت، الأجهزة، الحساب'], contest: ['#d97706', 'اشترك واكسب جوايز'], points: ['#ca8a04', 'نقاطك وقرعة الأسبوع'], pending: ['#dc2626', 'روايات مستنية موافقتك'], live: ['#059669', 'اللي نزل من الناس'], users: ['#2563eb', 'الحسابات والزوار والـ IP'], sales: ['#db2777', 'الطلبات والأرباح'], premium: ['#9333ea', 'الاشتراكات والصوت'], bc: ['#ea580c', 'ابعت إشعار لكل الناس'], news: ['#0d9488', 'آخر أخبار عالم الأدب'], quotes: ['#e11d48', 'جمل حفظتها من الروايات'], contact: ['#4f46e5', 'استفسار أو شكوى أو اقتراح'], msgs: ['#7c3aed', 'رسائل المستخدمين'], actest: ['#0891b2', 'أسئلة وجوايز المسابقات'], backup: ['#64748b', 'نسخة احتياطية'] };
+    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['wd', 'money-bill-transfer', 'طلبات السحب', WL.list ? WL.list.filter(function (x) { return x.status === 'pending'; }).length : 0], ['actest', 'gavel', 'إدارة المسابقات'], ['rd1', 'microphone', 'أداة الرداد 1'], ['rd2', 'microphone', 'أداة الرداد 2'], ['rd3', 'microphone', 'أداة الرداد 3'], ['rd4', 'microphone', 'أداة الرداد 4'], ['rd5', 'microphone', 'أداة الرداد 5'], ['rd6', 'microphone', 'أداة الرداد 6'], ['backup', 'database', 'النسخ الاحتياطي']);
+    var MI = { rd1: ['#16a34a', 'مفاتيح وطابور وروايات حساب جوجل 1'], rd2: ['#ca8a04', 'مفاتيح وطابور وروايات حساب جوجل 2'], rd3: ['#ea580c', 'مفاتيح وطابور وروايات حساب جوجل 3'], rd4: ['#dc2626', 'مفاتيح وطابور وروايات حساب جوجل 4'], rd5: ['#9333ea', 'مفاتيح وطابور وروايات حساب جوجل 5'], rd6: ['#92400e', 'مفاتيح وطابور وروايات حساب جوجل 6'], wallet: ['#f59e0b', 'نقاطك الذهبية ورصيدك بالجنيه وسحب الأموال'], wd: ['#16a34a', 'اقبل أو ارفض طلبات سحب الأموال'], about: ['#0f766e', 'اللي يخصك: بياناتك ومحفظتك ومكتبتك'], novels: ['#7c3aed', 'اكتب وانشر رواياتك'], settings: ['#475569', 'الصوت، الأجهزة، الحساب'], contest: ['#d97706', 'اشترك واكسب جوايز'], points: ['#ca8a04', 'نقاطك وقرعة الأسبوع'], pending: ['#dc2626', 'روايات مستنية موافقتك'], live: ['#059669', 'اللي نزل من الناس'], users: ['#2563eb', 'الحسابات والزوار والـ IP'], sales: ['#db2777', 'الطلبات والأرباح'], premium: ['#9333ea', 'الاشتراكات والصوت'], bc: ['#ea580c', 'ابعت إشعار لكل الناس'], news: ['#0d9488', 'آخر أخبار عالم الأدب'], quotes: ['#e11d48', 'جمل حفظتها من الروايات'], contact: ['#4f46e5', 'استفسار أو شكوى أو اقتراح'], msgs: ['#7c3aed', 'رسائل المستخدمين'], actest: ['#0891b2', 'أسئلة وجوايز المسابقات'], backup: ['#64748b', 'نسخة احتياطية'] };
     if (S.menu) {
       var av = u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : '<span>' + esc((u.name || '؟').trim().charAt(0)) + '</span>';
       var sub = isPremium0() ? '<span class="rp-mh-chip">👑 Premium</span>' : '<span class="rp-mh-chip dim">حساب عادي</span>';
@@ -12067,6 +12069,7 @@ document.addEventListener('click', function (e) {
     if (t === 'quotes') return quotesTab();
     if (t === 'contact') return contactTab();
     if (t === 'msgs') return msgsTab();
+    if (/^rd[1-6]$/.test(t)) return rdTab(t);
     if (t === 'premium') return premAdminTab();
     if (t === 'actest') return contestAdminTab();
     if (t === 'sales') return salesTab();
@@ -12075,7 +12078,7 @@ document.addEventListener('click', function (e) {
       (1 ? '<div class="rp-card"><h3>' + ic('cloud-arrow-down') + ' استيراد رواية من واتباد</h3><p class="rp-sub">حط لينك روايتك على واتباد، والتطبيق يجيب كل فصولها وينشئ الرواية بدل ما تنسخ فصل فصل. ' + (isAdmin() ? 'بتتنشر علطول.' : 'وبعدها بتتبعت للمراجعة قبل النشر.') + '</p><input id="rp-wp-url" class="rp-in" dir="ltr" placeholder="https://www.wattpad.com/story/..."><label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-weight:700;font-size:.82rem"><input type="checkbox" id="rp-wp-own"> أؤكد إن الرواية دي بتاعتي أو معايا إذن بنشرها</label><button type="button" class="rp-btn block" data-act="wpimp">' + ic('cloud-arrow-down') + (isAdmin() ? ' استيراد ونشر' : ' استيراد وإرسال للمراجعة') + '</button><div id="rp-wp-prog" class="rp-sub" style="margin-top:8px"></div></div>' : '') +
       siteCard() + (S.mine.length ? S.mine.filter(function (x) { return !x.siteId; }).map(novelRow).join('') : siteMine().length ? '' : '<div class="rp-card"><div class="rp-empty">' + ic('book-open') + (S.loading ? 'جاري التحميل…' : 'لسه ما كتبتش أي رواية.<br>ابدأ بأول رواية دلوقتي!') + '</div></div>');
   }
-  function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium' || t === 'actest' || t === 'wd' || t === 'bc' || t === 'msgs'; }
+  function admin_only(t) { return t === 'sales' || t === 'pending' || t === 'live' || t === 'users' || t === 'backup' || t === 'premium' || /^rd[1-6]$/.test(t) || t === 'actest' || t === 'wd' || t === 'bc' || t === 'msgs'; }
   function settingsTab() {
     var u = me();
     var cld = cldReady();
@@ -12463,7 +12466,7 @@ document.addEventListener('click', function (e) {
 
   /* ---------- الصوت المصري (Gemini): لوحة الأدمن ---------- */
   var TT = { st: null, voices: null, raw: '', msg: '', sync: '' };
-  function loadTts() { api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && S.tab === 'premium') render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
+  function loadTts() { api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
   function usd(n) { n = +n || 0; return '$' + (n < 1 ? n.toFixed(3) : n.toFixed(2)); }
   function mins(sec) { return (Math.round((+sec || 0) / 6) / 10).toLocaleString('en') + ' د'; }
   function provStatus(d, prov) {
@@ -12542,7 +12545,7 @@ document.addEventListener('click', function (e) {
     var h = '<div class="rp-item" style="border:1.5px solid ' + I[3] + '"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><b style="font-size:1.08rem">' + I[2] + ' ' + (az ? 'مايكروسوفت Azure' : 'حساب ' + I[1]) + '</b>' + (has ? '<span class="rp-ok">✅ جاهز</span>' : '<span class="rp-err">❌ مش جاهز</span>') + '</div>';
     if (!az) {
       h += '<h4 style="margin:12px 0 4px">🔑 مفتاح الحساب (API Key)</h4><div class="rp-sub" style="margin:0 0 6px">' + (keySrc === 'app' ? '✅ المفتاح متسجّل من التطبيق' : (has ? '✅ المفتاح موجود (متحط في إعدادات Cloudflare)' : '❌ لسه مفيش مفتاح للحساب ده')) + '. المفتاح بيتخزّن على السيرفر بس ومبيرجعش ظاهر تاني. اعمله من <b dir="ltr">aistudio.google.com/apikey</b> من حساب جوجل مختلف.</div>' +
-        '<input id="rp-key-' + prov + '" class="rp-in" type="password" dir="ltr" autocomplete="off" placeholder="الصق المفتاح هنا (بيبدأ بـ AIza)"><div class="rp-row" style="margin-top:6px"><button type="button" class="rp-btn sm" data-act="ttskey" data-p="' + prov + '">' + ic('floppy-disk') + ' حفظ المفتاح</button>' + (keySrc === 'app' ? '<button type="button" class="rp-btn sm red" data-act="ttskeydel" data-p="' + prov + '">مسح المفتاح</button>' : '') + '</div>';
+        '<textarea id="rp-key-' + prov + '" class="rp-in" rows="3" dir="ltr" autocomplete="off" style="font-family:monospace;font-size:.78rem" placeholder="الصق المفاتيح هنا — كل مفتاح في سطر (AIza…)"></textarea><div class="rp-row" style="margin-top:6px"><button type="button" class="rp-btn sm" data-act="ttskey" data-p="' + prov + '">' + ic('floppy-disk') + ' حفظ المفتاح</button>' + (keySrc === 'app' ? '<button type="button" class="rp-btn sm red" data-act="ttskeydel" data-p="' + prov + '">مسح المفتاح</button>' : '') + '</div>';
     }
     h += provStatus(d, prov);
     h += '<h4 style="margin:14px 0 4px">⚙️ إعدادات الحساب ده</h4>';
@@ -12562,6 +12565,15 @@ document.addEventListener('click', function (e) {
   }
   function readsResetCard() {
     return '<div class="rp-card"><h3>👁 عدّادات القراءة</h3><p class="rp-sub">القراءة بتتحسب مرة واحدة لكل فصل لكل IP. الزرار ده بيصفّر كل العدّادات (القديمة والجديدة) ويبدأ العدّ من الصفر، وكل زائر هيتحسب له كل فصل مرة تانية.</p><button type="button" class="rp-btn sm red" data-act="readsreset">' + ic('rotate') + ' صفّر كل عدّادات القراءة</button></div>';
+  }
+  function rdTab(t) {
+    var prov = t === 'rd1' ? 'gemini' : 'gemini' + t.slice(2), d = TT.st, n = t.slice(2);
+    if (!d && !TT._rdreq) { TT._rdreq = 1; loadTts(); }
+    if (!d) return '<div class="rp-card"><h3>🎙️ أداة الرداد ' + n + '</h3><p class="rp-sub">جاري التحميل…</p></div>';
+    if (d.error) return '<div class="rp-card"><h3>🎙️ أداة الرداد ' + n + '</h3><div class="rp-err">' + esc(d.error) + '</div><button type="button" class="rp-btn sm" data-act="ttsload">' + ic('rotate') + ' إعادة المحاولة</button></div>';
+    TT.tab = prov;
+    var nk = ((d.nkeys || {})[prov]) || 0;
+    return '<div class="rp-card"><h3>🎙️ أداة الرداد ' + n + '</h3><p class="rp-sub">بتقسّم الفصل لراوي وشخصيات وانفعالات وتحوّله لصوت لوحدها. <b>السرد فصحى والحوار عامية مصرية 100%</b> (ثابت). الصق أكتر من مفتاح (كل مفتاح في سطر) وبيبدّل بينهم تلقائي لحد ما يخلصوا. ' + (nk ? '🔑 عدد المفاتيح الحالية: <b>' + nk + '</b>' : '') + '</p>' + ttsProv(d, prov) + '</div>';
   }
   function ttsAdminCard() {
     var d = TT.st, T = '<h3>🎧 الصوت المصري</h3>';
@@ -12597,6 +12609,8 @@ document.addEventListener('click', function (e) {
     add(c.title); String(c.content || '').split('\n').filter(function (p) { return p.trim() !== ''; }).forEach(add);
     return { text: out.join('\n'), sig: ttsSig(outOld.join('\n')) };
   }
+  function ttsAuto() { try { if (!isAdmin() || document.hidden) return; var k = 'rp_tts_auto', l = +localStorage.getItem(k) || 0; if (Date.now() - l < 6 * 3600e3) return; localStorage.setItem(k, String(Date.now())); ttsSync(); } catch (e) {} }
+  setInterval(ttsAuto, 10 * 60e3); setTimeout(ttsAuto, 25000);
   function ttsSync() {
     var set = function (m) { TT.sync = m; var e = $('rp-tt-sync'); if (e) e.textContent = m; };
     var rd = false; try { rd = !!isReaderOnlyMode; } catch (e) {}
