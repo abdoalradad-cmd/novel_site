@@ -6550,6 +6550,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -12487,9 +12489,9 @@ document.addEventListener('click', function (e) {
     h += '<div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttsrun" data-p="' + prov + '">' + ic('play') + ' شغّل دفعة</button>' + (q.failed || (P.pausedUntil && P.pausedUntil > Date.now()) ? '<button type="button" class="rp-btn sm sec" data-act="ttsretry" data-p="' + prov + '">' + ic('rotate') + ' إعادة المحاولة</button>' : '') + '</div></div>';
     return h;
   }
-  var PV = [['gemini', 'جوجل 1', '🟩', '#bbf7d0'], ['gemini2', 'جوجل 2', '🟨', '#fde68a'], ['gemini3', 'جوجل 3', '🟧', '#fed7aa'], ['gemini4', 'جوجل 4', '🟥', '#fecaca'], ['gemini5', 'جوجل 5', '🟪', '#e9d5ff'], ['gemini6', 'جوجل 6', '🟫', '#e7d5c3'], ['azure', 'Azure', '🟦', '#bfdbfe']];
+  var PV = [['gemini', 'جوجل 1', '🟩', '#bbf7d0'], ['gemini2', 'جوجل 2', '🟨', '#fde68a'], ['gemini3', 'جوجل 3', '🟧', '#fed7aa'], ['gemini4', 'جوجل 4', '🟥', '#fecaca'], ['gemini5', 'جوجل 5', '🟪', '#e9d5ff'], ['gemini6', 'جوجل 6', '🟫', '#e7d5c3'], ['rd1', 'الرداد 1', '🎙️', '#bbf7d0'], ['rd2', 'الرداد 2', '🎙️', '#fde68a'], ['rd3', 'الرداد 3', '🎙️', '#fed7aa'], ['rd4', 'الرداد 4', '🎙️', '#fecaca'], ['rd5', 'الرداد 5', '🎙️', '#e9d5ff'], ['rd6', 'الرداد 6', '🎙️', '#e7d5c3'], ['azure', 'Azure', '🟦', '#bfdbfe']];
   function pvInfo(id) { for (var i = 0; i < PV.length; i++) if (PV[i][0] === id) return PV[i]; return PV[0]; }
-  function gcf(c, prov) { return prov === 'gemini' ? (c || {}) : ((c || {})['g' + String(prov).slice(6)] || {}); }
+  function gcf(c, prov) { return prov === 'gemini' ? (c || {}) : ((c || {})[(String(prov).charAt(0) === 'r' ? 'r' + String(prov).slice(2) : 'g' + String(prov).slice(6))] || {}); }
   function ttsInp(id, lbl, val, ph, ltr) { return '<label class="rp-lbl">' + lbl + '</label><input id="' + id + '" class="rp-in"' + (ltr ? ' dir="ltr"' : '') + ' value="' + esc(val == null ? '' : val) + '" placeholder="' + (ph || '') + '">'; }
   function ttsSel(id, lbl, opts, cur) { return '<label class="rp-lbl">' + lbl + '</label><select id="' + id + '" class="rp-in">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'; }
   function nvCard(n, rank, act, prov) {
@@ -12505,6 +12507,7 @@ document.addEventListener('click', function (e) {
   function ttsTabs(d) {
     var has = d.has || {}, h = '<div class="rp-ttabs"><button type="button" class="' + (TT.tab === 'general' ? 'on' : '') + '" data-act="tttab" data-t="general">⚙️ عام</button>';
     PV.forEach(function (p) {
+      if (/^rd/.test(p[0])) return;
       var q = ((d.prov || {})[p[0]] || {}).chapters || {}, ok = !!has[p[0]], P = (d.prov || {})[p[0]] || {}, pz = P.pausedUntil && P.pausedUntil > Date.now();
       h += '<button type="button" class="' + (TT.tab === p[0] ? 'on' : '') + '" data-act="tttab" data-t="' + p[0] + '">' + p[2] + ' ' + p[1] + ' <small>' + (ok ? (pz ? '⏸' : '✅') : '❌') + ((q.queued || 0) ? ' · ' + q.queued : '') + '</small></button>';
     });
@@ -12523,6 +12526,7 @@ document.addEventListener('click', function (e) {
     var provOpts = PV.map(function (p) { return [p[0], p[2] + ' ' + p[1]]; });
     h += '<h3 style="margin-top:16px">⚙️ الإعدادات العامة</h3>' +
       ttsSel('rp-tt-dp', 'الحساب الافتراضي للروايات الجديدة', provOpts, c.defProv || 'gemini') +
+      ttsSel('rp-tt-eng', 'نمط التحويل (خط الرداد)', [['mega', '🚀 دمج فائق (Mega-Batch): كل 7 مشاهد في طلب واحد — يوفر حوالي 90% من الطلبات (الافتراضي)'], ['single', '🎯 طلب لكل جملة بصوت شخصيتها — دقة أعلى واستهلاك طلبات أكبر'], ['old', '🗂️ الطريقة القديمة الاقتصادية (من غير تحليل الشخصيات)']], c.radad === false ? 'old' : (c.engine === 'single' ? 'single' : 'mega')) +
       ttsSel('rp-tt-rb', 'توزيع تلقائي على الحسابات الفاضية', [['1', 'شغّال: أي حساب طابوره خلص بياخد 1–2 رواية لسه ما اتبدأتش من طوابير الحسابات التانية'], ['0', 'مقفول: كل رواية تفضل في حسابها']], c.rebalance !== false ? '1' : '0') +
       ttsSel('rp-tt-open', 'مين يقدر يسمع الروايات الصوتية', [['0', 'مشتركو Premium بس'], ['1', 'كل اللي مسجّلين دخول']], c.listenAll ? '1' : '0') +
       ttsSel('rp-tt-hide', 'زرار «استمع للفصل» عند المستخدمين', [['0', 'ظاهر'], ['1', 'مخفي من التطبيق والموقع كله']], c.hideListen ? '1' : '0') +
@@ -12567,7 +12571,7 @@ document.addEventListener('click', function (e) {
     return '<div class="rp-card"><h3>👁 عدّادات القراءة</h3><p class="rp-sub">القراءة بتتحسب مرة واحدة لكل فصل لكل IP. الزرار ده بيصفّر كل العدّادات (القديمة والجديدة) ويبدأ العدّ من الصفر، وكل زائر هيتحسب له كل فصل مرة تانية.</p><button type="button" class="rp-btn sm red" data-act="readsreset">' + ic('rotate') + ' صفّر كل عدّادات القراءة</button></div>';
   }
   function rdTab(t) {
-    var prov = t === 'rd1' ? 'gemini' : 'gemini' + t.slice(2), d = TT.st, n = t.slice(2);
+    var prov = t, d = TT.st, n = t.slice(2);
     if (!d && !TT._rdreq) { TT._rdreq = 1; loadTts(); }
     if (!d) return '<div class="rp-card"><h3>🎙️ أداة الرداد ' + n + '</h3><p class="rp-sub">جاري التحميل…</p></div>';
     if (d.error) return '<div class="rp-card"><h3>🎙️ أداة الرداد ' + n + '</h3><div class="rp-err">' + esc(d.error) + '</div><button type="button" class="rp-btn sm" data-act="ttsload">' + ic('rotate') + ' إعادة المحاولة</button></div>';
@@ -12945,10 +12949,11 @@ document.addEventListener('click', function (e) {
       var g = function (i) { var e = $(i); return e ? e.value.trim() : null; }, bd = {}, put = function (k, v) { if (v !== null) bd[k] = v; }, RL = ['narrator', 'man', 'woman', 'boy', 'girl'];
       put('defProv', g('rp-tt-dp')); put('annModel', g('rp-tt-ann')); put('style', g('rp-tt-st')); put('model', g('rp-tt-mod')); put('priceIn', g('rp-tt-pin')); put('priceOut', g('rp-tt-pout'));
       var bl = function (i, v1) { var x = g(i); if (x !== null) bd[{ 'rp-tt-multi': 'multi', 'rp-tt-smart': 'smart', 'rp-tt-econ': 'econ', 'rp-tt-mm': 'mm', 'rp-tt-hide': 'hideListen', 'rp-tt-rb': 'rebalance', 'rp-tt-open': 'listenAll' }[i]] = v1 ? x === '1' : x !== '0'; };
+      var eg = g('rp-tt-eng'); if (eg !== null) { bd.radad = eg !== 'old'; bd.engine = eg === 'single' ? 'single' : 'mega'; }
       bl('rp-tt-multi'); bl('rp-tt-smart'); bl('rp-tt-econ'); bl('rp-tt-mm'); bl('rp-tt-rb'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
       if ($('rp-tt-dict')) bd.dict = $('rp-tt-dict').value;
       var gvv = {}; RL.forEach(function (r) { var x = g('rp-gv-' + r); if (x !== null) gvv[r] = x; }); if (Object.keys(gvv).length) bd.gv = gvv;
-      if ($('rp-pc-cap')) { var pc = { dailyMin: g('rp-pc-cap'), freeMin: g('rp-pc-free'), concurrency: g('rp-pc-conc') }; if (TT.tab === 'gemini') { bd.dailyMin = pc.dailyMin; bd.freeMin = pc.freeMin; bd.concurrency = pc.concurrency; } else bd['g' + String(TT.tab).slice(6)] = pc; }
+      if ($('rp-pc-cap')) { var pc = { dailyMin: g('rp-pc-cap'), freeMin: g('rp-pc-free'), concurrency: g('rp-pc-conc') }; if (TT.tab === 'gemini') { bd.dailyMin = pc.dailyMin; bd.freeMin = pc.freeMin; bd.concurrency = pc.concurrency; } else bd[(String(TT.tab).charAt(0) === 'r' ? 'r' + String(TT.tab).slice(2) : 'g' + String(TT.tab).slice(6))] = pc; }
       if ($('rp-az-cap')) { var azv = {}; RL.forEach(function (r) { azv[r] = { v: g('rp-azv-' + r), pitch: g('rp-azp-' + r), rate: g('rp-azr-' + r) }; }); bd.az = { region: g('rp-az-region'), dailyMin: g('rp-az-cap'), freeChars: g('rp-az-free'), price: g('rp-az-price'), concurrency: g('rp-az-conc'), voices: azv }; }
       api('/api/admin/tts', { method: 'PUT', body: bd }).then(function (d) { TT.st = d; TT.msg = ''; render(); flash('اتحفظ ✅'); }).catch(function (x) { var o = $('rp-tt-out'); if (o) o.textContent = x.message; });
     }
@@ -15424,5 +15429,29 @@ html.is-native-app.lib-open #app-lib,html.is-native-app.search-open #app-search{
 .rp-pf-tag{box-shadow:inset 2px 2px 5px rgba(0,0,0,.1)}
 .rp-pf-soc a,.rp-pf-soc button{box-shadow:5px 5px 11px var(--g-d),-5px -5px 11px var(--g-l)!important}
 .rp-pf-av{box-shadow:7px 7px 14px var(--g-d),-7px -7px 14px var(--g-l)!important}
+/* الإشعارات */
+.rp-np-top{background:var(--g-bg)!important;color:var(--g-t)!important;box-shadow:0 10px 22px -10px var(--g-d)!important}
+.rp-np-back{background:var(--g-bg)!important;color:rgb(var(--g-a))!important;box-shadow:5px 5px 10px var(--g-d),-5px -5px 10px var(--g-l)!important}
+.rp-np-back:active{box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}
+.rp-n-card,html.dark .rp-n-card{background:var(--g-bg)!important;border:0!important;box-shadow:8px 8px 18px var(--g-d),-8px -8px 18px var(--g-l)!important;border-radius:22px;color:var(--g-t)}
+.rp-n-card.new{box-shadow:8px 8px 18px var(--g-d),-8px -8px 18px var(--g-l),inset 4px 0 0 rgb(var(--g-a))!important}
+.rp-n-text,html.dark .rp-n-text{color:var(--g-s)!important}.rp-n-date{color:var(--g-s)!important}
+/* صفحة الرواية من جوا */
+#novel-details-content,#novel-chapters-section{background:var(--g-bg)!important;border:0!important;box-shadow:10px 10px 22px var(--g-d),-10px -10px 22px var(--g-l)!important}
+.rpnd-title{color:var(--g-t)!important}
+.rpnd-chip,html.dark .rpnd-chip{background:var(--g-bg)!important;color:rgb(var(--g-a))!important;box-shadow:inset 2px 2px 5px var(--g-d),inset -2px -2px 5px var(--g-l)}
+.rpnd-tile{box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important}
+.rpnd-tile:active{box-shadow:inset 4px 4px 9px rgba(0,0,0,.35)!important}
+#rp-fav-btn.rpnd-fav,#rp-fav-btn.rpnd-fav:not(.nx-fav-on){background:var(--g-bg)!important;border:0!important;color:#e11d48!important;box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important}
+#rp-fav-btn.rpnd-fav.nx-fav-on{background:linear-gradient(135deg,#f43f5e,#be123c)!important;color:#fff!important}
+.rpnd-stats,.rpnd-sts{background:var(--g-bg)!important;border:0!important;box-shadow:inset 5px 5px 11px var(--g-d),inset -5px -5px 11px var(--g-l)!important;border-radius:20px}
+.rpnd-st .v{color:var(--g-t)!important}.rpnd-st .l,.rpnd-hint{color:var(--g-s)!important}
+.rpnd-syn,.rpnd-syn h3{color:var(--g-t)!important}.rpnd-syn p{color:var(--g-s)!important}
+/* قايمة الفصول */
+#chapters-list-grid>div,html.dark #chapters-list-grid>div{background:var(--g-bg)!important;border:0!important;box-shadow:7px 7px 15px var(--g-d),-7px -7px 15px var(--g-l)!important;border-radius:20px}
+#chapters-list-grid>div:hover{background:var(--g-bg)!important}
+#chapters-list-grid>div:active{box-shadow:inset 4px 4px 9px var(--g-d),inset -4px -4px 9px var(--g-l)!important}
+#chapters-list-grid>div>div:first-child>div:first-child{background:var(--g-bg)!important;box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}
+#chapters-list-grid h4,#chapters-list-grid>div:hover h4{color:var(--g-t)!important}
 </style>
 <script src="android-bridge.js"></script></body></html>
