@@ -6554,6 +6554,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -9678,7 +9680,9 @@ document.addEventListener('click', function (e) {
   }
 
   /* ---------- التشغيل ---------- */
-  function markCurrent() {
+  function markCurrent() { // الشاشة الجديدة: مفيش تظليل فقرات ولا تمرير — الصوت بس
+    document.querySelectorAll('.tts-active').forEach(e => e.classList.remove('tts-active'));
+    return;
     const c = TTS.chunks[TTS.idx];
     document.querySelectorAll('.tts-active').forEach(e => e.classList.remove('tts-active'));
     if (!c) return;
@@ -9830,8 +9834,41 @@ document.addEventListener('click', function (e) {
     toast(novel && novel.chapters[next] ? 'انتهى الفصل' : 'انتهت الرواية 🎉');
   }
 
-  /* ---------- واجهة المشغّل ---------- */
+  /* ---------- واجهة المشغّل (وقت بالدقايق فقط — من غير فقرات) ---------- */
   let seeking = false;
+  const RATES = [1, 1.25, 1.5, 2], CPS = 14;
+  if (RATES.indexOf(TTS.rate) < 0) TTS.rate = 1;
+
+  function fmt(s) { s = Math.max(0, Math.round(s || 0)); const m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+  function cumChars(i) { let n = 0; for (let k = 0; k < i && k < TTS.chunks.length; k++) n += TTS.chunks[k].text.length + 1; return n; }
+  // الوقت الحالي/الكلي: من ملف الصوت الحقيقي لو متاح، وإلا تقدير من عدد الحروف
+  function timeInfo() {
+    const NXC = window.NXCloudTTS;
+    try { const p = NXC && NXC.pos && NXC.pos(); if (p && p.tot > 0) return { cur: p.cur, tot: p.tot, real: true }; } catch (e) {}
+    const tot = cumChars(TTS.chunks.length) / CPS;
+    return { cur: cumChars(TTS.idx) / CPS, tot: tot, real: false };
+  }
+  function seekTime(t) {
+    if (TTS.state === 'idle' || !TTS.chunks.length) return;
+    const NXC = window.NXCloudTTS, info = timeInfo();
+    t = Math.max(0, Math.min(info.tot - 0.3, t));
+    if (info.real && NXC.seekAbs) {
+      const r = NXC.seekAbs(t, TTS.chunks);
+      if (r === -2) { updateUI(); return; }
+      if (r >= 0) { if (TTS.state === 'playing') startFrom(r); else { TTS.idx = r; updateUI(); } return; }
+    }
+    let i = 0, n = 0; const goal = t * CPS;
+    for (let k = 0; k < TTS.chunks.length; k++) { if (n >= goal) break; n += TTS.chunks[k].text.length + 1; i = k; }
+    if (TTS.state === 'playing') startFrom(i); else { TTS.idx = i; updateUI(); }
+  }
+  function skip(d) { const info = timeInfo(); seekTime(info.cur + d); }
+  function setRateTo(r) {
+    TTS.rate = r; lsSet('tts_rate', String(r));
+    const NXC = window.NXCloudTTS, info = timeInfo();
+    if (info.real && NXC && NXC.setRate) NXC.setRate(r);
+    else if (TTS.state === 'playing') startFrom(TTS.idx);
+    updateUI();
+  }
 
   function updateUI() {
     const playIcon = document.querySelector('#tts-play i');
@@ -9843,18 +9880,17 @@ document.addEventListener('click', function (e) {
       const icon = TTS.state === 'playing' ? 'fa-pause' : (TTS.state === 'paused' ? 'fa-play' : 'fa-headphones');
       startBtn.innerHTML = `<i class="fa-solid ${icon}"></i><span>${label}</span>`;
     }
-
-    const seek = document.getElementById('tts-seek');
-    const pos = document.getElementById('tts-pos');
-    if (seek) {
-      seek.max = Math.max(0, TTS.chunks.length - 1);
-      if (!seeking) seek.value = TTS.idx;
-    }
-    if (pos) {
-      const paraNo = TTS.starts.filter(s => s <= TTS.idx).length;
-      pos.textContent = TTS.chunks.length ? `فقرة ${paraNo} / ${TTS.starts.length}` : '';
-    }
+    document.querySelectorAll('#tts-rates button').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.r) === TTS.rate));
+    const seek = document.getElementById('tts-seek'), pos = document.getElementById('tts-pos'), tot = document.getElementById('tts-tot');
+    if (!seek) return;
+    const info = timeInfo();
+    seek.max = Math.max(1, Math.round(info.tot));
+    if (!seeking) seek.value = Math.round(info.cur);
+    seek.style.setProperty('--p', (info.tot > 0 ? Math.min(100, info.cur / info.tot * 100) : 0) + '%');
+    if (pos) pos.textContent = fmt(seeking ? seek.value : info.cur);
+    if (tot) tot.textContent = (info.real ? '' : '≈') + fmt(info.tot);
   }
+  setInterval(function () { if (TTS.state !== 'idle') updateUI(); }, 400);
 
   function injectStyle() {
     const old = document.getElementById('tts-style');
@@ -9862,22 +9898,25 @@ document.addEventListener('click', function (e) {
     const st = document.createElement('style');
     st.id = 'tts-style';
     st.textContent = `
-      #tts-start-btn{display:inline-flex;align-items:center;gap:.5rem;margin-top:.9rem;padding:.65rem 1.3rem;border-radius:.9rem;background:var(--brand-primary,#065f46);color:#fff;font-weight:800;font-size:.95rem;border:0;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.2);font-family:inherit}
-      #tts-start-btn:active{transform:scale(.97)}
-      #tts-bar{position:fixed;left:0;right:0;bottom:0;z-index:9990;display:none;direction:rtl;background:#fff;color:#0f172a;border-top:1px solid rgba(0,0,0,.12);box-shadow:0 -8px 30px rgba(0,0,0,.2);padding:.6rem .8rem calc(.6rem + env(safe-area-inset-bottom,0px));font-family:var(--ui-font,'Cairo',sans-serif)}
-      .dark #tts-bar{background:#0f172a;color:#e2e8f0;border-top-color:rgba(255,255,255,.12)}
-      #tts-bar .tts-row{display:flex;align-items:center;gap:.5rem;max-width:56rem;margin:0 auto}
-      #tts-bar .tts-ctrl{justify-content:center;margin-top:.4rem;gap:.6rem}
-      #tts-bar button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:.8rem;display:inline-flex;align-items:center;gap:.35rem;padding:.55rem .8rem;border-radius:.8rem;background:rgba(100,116,139,.15);color:inherit}
-      #tts-bar button.tts-main{width:3.2rem;height:3.2rem;justify-content:center;border-radius:999px;background:var(--brand-primary,#065f46);color:#fff;font-size:1.1rem;padding:0}
-      #tts-seek{flex:1;accent-color:var(--brand-primary,#065f46);direction:rtl;min-width:0}
-      #tts-pos{font-size:.72rem;font-weight:700;opacity:.75;white-space:nowrap}
-      #tts-settings{flex-wrap:wrap;margin-top:.5rem;font-size:.78rem;font-weight:700}
-      #tts-settings select{max-width:15rem;padding:.35rem .5rem;border-radius:.6rem;border:1px solid rgba(100,116,139,.4);background:transparent;color:inherit;font-family:inherit}
-      #tts-settings select option{color:#0f172a}
-      #tts-hint{width:100%;margin:.2rem 0 0;font-size:.72rem;font-weight:600;opacity:.7}
-      body.tts-open{padding-bottom:170px}
-      .tts-active{background:rgba(245,158,11,.28);border-radius:.6rem;box-shadow:0 0 0 6px rgba(245,158,11,.28);transition:background .2s}
+      #tts-start-btn{display:inline-flex;align-items:center;gap:.5rem;margin-top:.9rem;padding:.7rem 1.4rem;border-radius:18px;background:var(--g-bg,#e6ede8)!important;color:rgb(var(--g-a,15,107,74))!important;font-weight:800;font-size:.95rem;border:0!important;cursor:pointer;box-shadow:7px 7px 15px var(--g-d,#c3cdc6),-7px -7px 15px var(--g-l,#fbfffc)!important;font-family:inherit}
+      #tts-start-btn:active{box-shadow:inset 4px 4px 9px var(--g-d,#c3cdc6),inset -4px -4px 9px var(--g-l,#fbfffc)!important}
+      #tts-bar{position:fixed;left:0;right:0;bottom:0;z-index:9990;display:none;direction:rtl;background:var(--g-bg,#e6ede8)!important;color:var(--g-t,#0f3d2e)!important;border:0!important;border-radius:28px 28px 0 0;box-shadow:0 -10px 26px -8px var(--g-d,#c3cdc6),0 -2px 0 var(--g-l,#fbfffc)!important;padding:.9rem 1.1rem calc(.9rem + env(safe-area-inset-bottom,0px))}
+      #tts-bar .tts-row{display:flex;align-items:center;gap:.7rem;max-width:34rem;margin:0 auto}
+      #tts-bar .tts-ctrl{justify-content:center;margin-top:.8rem;gap:1rem}
+      #tts-bar .tts-time{font:800 .78rem Cairo,sans-serif;min-width:2.6rem;text-align:center;color:var(--g-s,#6b7f74);font-variant-numeric:tabular-nums}
+      #tts-bar button{border:0!important;cursor:pointer;font-family:inherit;font-weight:800;font-size:.8rem;display:inline-flex;align-items:center;justify-content:center;gap:.25rem;background:var(--g-bg,#e6ede8)!important;color:var(--g-t,#0f3d2e)!important;box-shadow:5px 5px 11px var(--g-d,#c3cdc6),-5px -5px 11px var(--g-l,#fbfffc)!important;transition:box-shadow .15s}
+      #tts-bar button:active,#tts-bar #tts-rates button.on{box-shadow:inset 3px 3px 7px var(--g-d,#c3cdc6),inset -3px -3px 7px var(--g-l,#fbfffc)!important}
+      #tts-bar #tts-rates button.on{color:rgb(var(--g-a,15,107,74))!important}
+      #tts-bar .tts-skip{width:3rem;height:3rem;border-radius:50%;flex-direction:column;font-size:.62rem;line-height:1;padding:0}
+      #tts-bar .tts-skip i{font-size:1rem}
+      #tts-bar button.tts-main{width:4rem;height:4rem;border-radius:50%;font-size:1.3rem;padding:0;color:rgb(var(--g-a,15,107,74))!important}
+      #tts-bar #tts-stop{position:absolute;top:.6rem;left:.8rem;width:2rem;height:2rem;border-radius:50%;padding:0;font-size:.8rem;color:var(--g-s,#6b7f74)!important}
+      #tts-rates{justify-content:center;margin-top:.9rem;gap:.55rem}
+      #tts-rates button{padding:.4rem .85rem;border-radius:14px;font-size:.78rem}
+      #tts-seek{-webkit-appearance:none;appearance:none;flex:1;height:10px;border-radius:99px;min-width:0;direction:rtl;outline:0;cursor:pointer;background:linear-gradient(to left,rgb(var(--g-a,15,107,74)) var(--p,0%),transparent var(--p,0%)),var(--g-bg,#e6ede8);box-shadow:inset 3px 3px 6px var(--g-d,#c3cdc6),inset -3px -3px 6px var(--g-l,#fbfffc)}
+      #tts-seek::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--g-bg,#e6ede8);box-shadow:3px 3px 7px var(--g-d,#c3cdc6),-3px -3px 7px var(--g-l,#fbfffc),0 0 0 3px rgba(var(--g-a,15,107,74),.35)}
+      #tts-seek::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:var(--g-bg,#e6ede8);box-shadow:3px 3px 7px var(--g-d,#c3cdc6),-3px -3px 7px var(--g-l,#fbfffc),0 0 0 3px rgba(var(--g-a,15,107,74),.35)}
+      body.tts-open{padding-bottom:190px}
     `;
     document.head.appendChild(st);
   }
@@ -9902,73 +9941,38 @@ document.addEventListener('click', function (e) {
       title.parentNode.appendChild(btn);
     }
 
-    // شريط التحكم الثابت تحت
+    // شريط التحكم: الوقت + ±10 ثواني + السرعة بس
     const bar = document.createElement('div');
     bar.id = 'tts-bar';
     bar.innerHTML = `
+      <button id="tts-stop" type="button" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
       <div class="tts-row">
-        <input id="tts-seek" type="range" min="0" max="0" value="0" step="1" aria-label="موضع القراءة">
-        <span id="tts-pos"></span>
+        <span id="tts-pos" class="tts-time">0:00</span>
+        <input id="tts-seek" type="range" min="0" max="1" value="0" step="1" aria-label="موضع الاستماع">
+        <span id="tts-tot" class="tts-time">0:00</span>
       </div>
       <div class="tts-row tts-ctrl">
-        <button id="tts-prev" type="button" title="الفقرة السابقة"><i class="fa-solid fa-chevron-right"></i><span>السابقة</span></button>
+        <button id="tts-b10" type="button" class="tts-skip" title="رجوع 10 ثواني"><i class="fa-solid fa-rotate-right fa-flip-horizontal"></i>10</button>
         <button id="tts-play" type="button" class="tts-main" title="تشغيل / إيقاف مؤقت"><i class="fa-solid fa-play"></i></button>
-        <button id="tts-next" type="button" title="الفقرة التالية"><span>التالية</span><i class="fa-solid fa-chevron-left"></i></button>
-        <button id="tts-gear" type="button" title="السرعة والصوت"><i class="fa-solid fa-sliders"></i></button>
-        <button id="tts-stop" type="button" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+        <button id="tts-f10" type="button" class="tts-skip" title="تقديم 10 ثواني"><i class="fa-solid fa-rotate-right"></i>10</button>
       </div>
-      <div id="tts-settings" class="tts-row" style="display:none">
-        <label>السرعة
-          <select id="tts-rate">
-            <option value="0.7">×0.7</option><option value="0.85">×0.85</option>
-            <option value="1">×1</option><option value="1.15">×1.15</option>
-            <option value="1.3">×1.3</option><option value="1.5">×1.5</option>
-            <option value="1.75">×1.75</option><option value="2">×2</option>
-          </select>
-        </label>
-        <label>الصوت <select id="tts-voice"></select></label>
-        <label><input type="checkbox" id="tts-auto"> تشغيل الفصل التالي تلقائياً</label>
-        <p id="tts-hint"></p>
-      </div>`;
+      <div id="tts-rates" class="tts-row">${RATES.map(r => `<button type="button" data-r="${r}">×${r}</button>`).join('')}</div>`;
     document.body.appendChild(bar);
 
     const $ = id => document.getElementById(id);
-
     $('tts-play').onclick = function () {
       if (TTS.state === 'playing') pauseAudio();
       else if (TTS.state === 'paused') startFrom(TTS.idx);
       else begin(0);
     };
-    $('tts-prev').onclick = () => jumpPara(-1);
-    $('tts-next').onclick = () => jumpPara(1);
+    $('tts-b10').onclick = () => skip(-10);
+    $('tts-f10').onclick = () => skip(10);
     $('tts-stop').onclick = stopAll;
-    $('tts-gear').onclick = function () {
-      const s = $('tts-settings');
-      s.style.display = (s.style.display === 'none') ? 'flex' : 'none';
-    };
+    document.querySelectorAll('#tts-rates button').forEach(b => { b.onclick = () => setRateTo(parseFloat(b.dataset.r)); });
 
     const seek = $('tts-seek');
-    seek.addEventListener('input', () => { seeking = true; });
-    seek.addEventListener('change', () => { seeking = false; seekTo(parseInt(seek.value, 10) || 0); });
-
-    const rate = $('tts-rate');
-    rate.value = String(TTS.rate);
-    if (rate.value !== String(TTS.rate)) rate.value = '1';
-    rate.onchange = function () {
-      TTS.rate = parseFloat(rate.value) || 1;
-      lsSet('tts_rate', String(TTS.rate));
-      if (TTS.state === 'playing') startFrom(TTS.idx);
-    };
-
-    $('tts-voice').onchange = function () {
-      TTS.voiceURI = this.value;
-      lsSet('tts_voice', TTS.voiceURI);
-      if (TTS.state === 'playing') startFrom(TTS.idx);
-    };
-
-    const auto = $('tts-auto');
-    auto.checked = TTS.auto;
-    auto.onchange = function () { TTS.auto = auto.checked; lsSet('tts_auto', auto.checked ? '1' : '0'); };
+    seek.addEventListener('input', () => { seeking = true; const p = $('tts-pos'); if (p) p.textContent = fmt(seek.value); });
+    seek.addEventListener('change', () => { seeking = false; seekTime(parseFloat(seek.value) || 0); });
 
     loadVoices();
     updateUI();
@@ -9977,19 +9981,6 @@ document.addEventListener('click', function (e) {
   function init() {
     injectStyle();
     injectUI();
-
-    // اضغط على أي فقرة وقت تشغيل الصوت عشان تبدأ منها
-    const body = document.getElementById('reader-chapter-body');
-    if (body) {
-      body.addEventListener('click', function (e) {
-        if (TTS.state === 'idle') return;
-        if (window.getSelection && String(window.getSelection()).length > 0) return;
-        const p = e.target.closest('p');
-        if (!p) return;
-        const i = TTS.chunks.findIndex(c => c.el === p);
-        if (i > -1) seekTo(i);
-      });
-    }
 
     if (supported) {
       speechSynthesis.onvoiceschanged = loadVoices;
@@ -12511,6 +12502,7 @@ document.addEventListener('click', function (e) {
       ttsInp('rd-pchars', 'حجم الجزء بالحروف (0 = تلقائي)', r.partChars || 0, '0', 1) +
       ttsSel('rd-aw', 'لما الحد يوصل (429 مؤقت)', [['1', 'استنى وحاول تاني تلقائي'], ['0', 'بدّل المفتاح فورًا']], r.autoWait === false ? '0' : '1') +
       ttsInp('rd-ws', 'مدة الانتظار (ثانية)', r.waitSec || 16, '16', 1) +
+      ttsSel('rd-am', 'تحليل الفصل (تقسيم الشخصيات والانفعالات)', [['ai', 'ذكي بالـ AI (طلب واحد للفصل) — الأدق، ولو فشل بيتحول للمحلي'], ['local', 'محلي من الأداة (من غير أي طلب AI) — أسرع ويوفّر الطلبات']], r.analysis || 'ai') +
       ttsInp('rd-ana', 'موديل التحليل الذكي', r.anaModel || 'gemini-3-flash-preview', 'gemini-3-flash-preview', 1) +
       ttsSel('rd-nar', 'صوت الراوي', pl, r.narrator || 'kareem') +
       '<div class="rp-sub" style="margin-top:8px"><b>تثبيت صوت لكل نوع شخصية (فاضي = تلقائي):</b></div>' +
@@ -12978,7 +12970,7 @@ document.addEventListener('click', function (e) {
       bl('rp-tt-multi'); bl('rp-tt-smart'); bl('rp-tt-econ'); bl('rp-tt-mm'); bl('rp-tt-rb'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
       if ($('rp-tt-dict')) bd.dict = $('rp-tt-dict').value;
 
-      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), narrator: g('rd-nar'), archMap: {}, pers: {} };
+      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), analysis: g('rd-am'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), narrator: g('rd-nar'), archMap: {}, pers: {} };
         RDA.forEach(function (a) { var v = g('rd-am-' + a[0]); if (v) rdo.archMap[a[0]] = v; });
         RDP.forEach(function (p) { var v = g('rd-pv-' + p[0]), q = g('rd-pp-' + p[0]); if (v || (q && +q)) rdo.pers[p[0]] = { v: v, p: q }; }); bd.rd = rdo; }
       var gvv = {}; RL.forEach(function (r) { var x = g('rp-gv-' + r); if (x !== null) gvv[r] = x; }); if (Object.keys(gvv).length) bd.gv = gvv;
@@ -14020,7 +14012,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     var ks = Object.keys(blobs); if (ks.length > 4) { var old = ks[0]; blobs[old].then(function (u) { try { URL.revokeObjectURL(u); } catch (e) {} }).catch(function () {}); delete blobs[old]; }
     return pr;
   }
-  var tkr = 0;
+  var tkr = 0, cur = null;
   function stop() { audio.onended = null; audio.onerror = null; audio.ontimeupdate = null; if (tkr) { clearInterval(tkr); tkr = 0; } try { audio.pause(); } catch (e) {} }
   // موضع الحرف في الفقرة → رقم الجملة (chunk) والعكس
   function cum(chunks) { var a = [0], t = 0; for (var i = 0; i < chunks.length; i++) { t += chunks[i].text.length + 1; a.push(t); } return a; }
@@ -14080,7 +14072,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
       forced = null;
       partBlob(m.id, p).then(function (src) {
         if (cancelled()) return;
-        var lastI = idx;
+        var lastI = idx; cur = { key: key, m: m, P: P, T: T, p: p };
         audio.onended = function () {
           audio.onended = null; audio.ontimeupdate = null; if (tkr) { clearInterval(tkr); tkr = 0; }
           if (p + 1 >= P.length) { onEnd(chunks.length); return; }
@@ -14113,6 +14105,22 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
       onFail();
     });
   }
+  /* ---- موضع التشغيل بالثواني + تقديم/تأخير (من غير فقرات) ---- */
+  function partStart(c) { var secs = c.m.secs || 0; return secs ? (c.P[c.p][0] / c.T) * secs : 0; }
+  function pos() {
+    if (!cur || cur.key !== curKey() || !(cur.m.secs > 0)) return null;
+    var d = audio.duration, cs = audio.currentTime || 0; if (d && isFinite(d)) cs = Math.min(cs, d);
+    return { cur: Math.min(cur.m.secs, partStart(cur) + cs), tot: cur.m.secs, playing: !audio.paused && !audio.ended };
+  }
+  // بيرجّع -2 لو اتحرّك جوه نفس الجزء (فورًا)، أو رقم الجملة اللي لازم يبدأ منها، أو -1 لو مش متاح
+  function seekAbs(t, chunks) {
+    if (!cur || cur.key !== curKey() || !(cur.m.secs > 0)) return -1;
+    var secs = cur.m.secs, P = cur.P, T = cur.T; t = Math.max(0, Math.min(secs - 0.3, t));
+    var g = (t / secs) * T, p = 0; for (var i = 0; i < P.length; i++) { if (g >= P[i][0]) p = i; }
+    if (p === cur.p) { var d = audio.duration; if (d && isFinite(d)) { try { audio.currentTime = Math.max(0, Math.min(d - 0.05, t - partStart(cur))); return -2; } catch (e) {} } }
+    var C = cum(chunks), CT = C[C.length - 1] || 1; return chunkAt(C, (g / T) * CT);
+  }
+  function setRate(r) { r = Math.max(0.5, Math.min(2, r || 1)); try { audio.playbackRate = r; audio.defaultPlaybackRate = r; } catch (e) {} }
   function noteFail() { if (lastUnavail) { lastUnavail = false; return; } }
   try { var oc = window.speechSynthesis.cancel.bind(window.speechSynthesis); window.speechSynthesis.cancel = function () { stop(); return oc(); }; } catch (e) {}
 
@@ -14156,7 +14164,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   }
   try { var at = null; new MutationObserver(function () { clearTimeout(at); at = setTimeout(paintAud, 150); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
   setTimeout(loadReady, 1500); setInterval(loadReady, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) loadReady(); });
-  window.NXCloudTTS = { available: available, enabled: enabled, usable: usable, allowed: allowed, upsell: upsell, speak: speak, stop: stop, noteFail: noteFail, resetSession: function () { sessionOff = false; lastUnavail = false; forced = null; }, _opt: opt };
+  window.NXCloudTTS = { pos: pos, seekAbs: seekAbs, setRate: setRate, available: available, enabled: enabled, usable: usable, allowed: allowed, upsell: upsell, speak: speak, stop: stop, noteFail: noteFail, resetSession: function () { sessionOff = false; lastUnavail = false; forced = null; }, _opt: opt };
 })();
 </script>
 
