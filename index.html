@@ -6556,6 +6556,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -9880,7 +9882,7 @@ document.addEventListener('click', function (e) {
       const icon = TTS.state === 'playing' ? 'fa-pause' : (TTS.state === 'paused' ? 'fa-play' : 'fa-headphones');
       startBtn.innerHTML = `<i class="fa-solid ${icon}"></i><span>${label}</span>`;
     }
-    document.querySelectorAll('#tts-rates button').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.r) === TTS.rate));
+    document.querySelectorAll('#tts-rates button[data-r]').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.r) === TTS.rate));
     const seek = document.getElementById('tts-seek'), pos = document.getElementById('tts-pos'), tot = document.getElementById('tts-tot');
     if (!seek) return;
     const info = timeInfo();
@@ -9910,7 +9912,7 @@ document.addEventListener('click', function (e) {
       #tts-bar .tts-skip{width:3rem;height:3rem;border-radius:50%;flex-direction:column;font-size:.62rem;line-height:1;padding:0}
       #tts-bar .tts-skip i{font-size:1rem}
       #tts-bar button.tts-main{width:4rem;height:4rem;border-radius:50%;font-size:1.3rem;padding:0;color:rgb(var(--g-a,15,107,74))!important}
-      #tts-bar #tts-stop{position:absolute;top:.6rem;left:.8rem;width:2rem;height:2rem;border-radius:50%;padding:0;font-size:.8rem;color:var(--g-s,#6b7f74)!important}
+      #tts-bar #tts-stop{width:2.4rem;height:2.4rem;border-radius:50%;padding:0;font-size:.85rem;color:var(--g-s,#6b7f74)!important}
       #tts-rates{justify-content:center;margin-top:.9rem;gap:.55rem}
       #tts-rates button{padding:.4rem .85rem;border-radius:14px;font-size:.78rem}
       #tts-seek{-webkit-appearance:none;appearance:none;flex:1;height:10px;border-radius:99px;min-width:0;direction:rtl;outline:0;cursor:pointer;background:linear-gradient(to left,rgb(var(--g-a,15,107,74)) var(--p,0%),transparent var(--p,0%)),var(--g-bg,#e6ede8);box-shadow:inset 3px 3px 6px var(--g-d,#c3cdc6),inset -3px -3px 6px var(--g-l,#fbfffc)}
@@ -9945,7 +9947,6 @@ document.addEventListener('click', function (e) {
     const bar = document.createElement('div');
     bar.id = 'tts-bar';
     bar.innerHTML = `
-      <button id="tts-stop" type="button" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
       <div class="tts-row">
         <span id="tts-pos" class="tts-time">0:00</span>
         <input id="tts-seek" type="range" min="0" max="1" value="0" step="1" aria-label="موضع الاستماع">
@@ -9956,7 +9957,7 @@ document.addEventListener('click', function (e) {
         <button id="tts-play" type="button" class="tts-main" title="تشغيل / إيقاف مؤقت"><i class="fa-solid fa-play"></i></button>
         <button id="tts-f10" type="button" class="tts-skip" title="تقديم 10 ثواني"><i class="fa-solid fa-rotate-right"></i>10</button>
       </div>
-      <div id="tts-rates" class="tts-row">${RATES.map(r => `<button type="button" data-r="${r}">×${r}</button>`).join('')}</div>`;
+      <div id="tts-rates" class="tts-row">${RATES.map(r => `<button type="button" data-r="${r}">×${r}</button>`).join('')}<button id="tts-stop" type="button" title="إغلاق"><i class="fa-solid fa-xmark"></i></button></div>`;
     document.body.appendChild(bar);
 
     const $ = id => document.getElementById(id);
@@ -9968,7 +9969,7 @@ document.addEventListener('click', function (e) {
     $('tts-b10').onclick = () => skip(-10);
     $('tts-f10').onclick = () => skip(10);
     $('tts-stop').onclick = stopAll;
-    document.querySelectorAll('#tts-rates button').forEach(b => { b.onclick = () => setRateTo(parseFloat(b.dataset.r)); });
+    document.querySelectorAll('#tts-rates button[data-r]').forEach(b => { b.onclick = () => setRateTo(parseFloat(b.dataset.r)); });
 
     const seek = $('tts-seek');
     seek.addEventListener('input', () => { seeking = true; const p = $('tts-pos'); if (p) p.textContent = fmt(seek.value); });
@@ -13220,7 +13221,7 @@ document.addEventListener('click', function (e) {
   function section(icon, title, list, o) {
     o = o || {};
     if (!list.length) return '';
-    return '<div class="rp-rsec"><div class="rp-rhead"><h3 data-rp-all="' + (o.mode || 'all') + '" style="cursor:pointer"><i class="fa-solid fa-' + icon + '"></i>' + title + '</h3>' + '<button type="button" class="rp-rall" data-rp-all="' + (o.mode || 'all') + '">عرض الكل ‹</button>' + '</div><div class="rp-hs">' +
+    return '<div class="rp-rsec"><div class="rp-rhead"><h3 data-rp-all="' + (o.mode || 'all') + '" style="cursor:pointer"><i class="fa-solid fa-' + icon + '"></i>' + title + '</h3>' + '<button type="button" class="rp-rall" data-rp-all="' + (o.mode || 'all') + '">عرض الكل <i class="fa-solid fa-chevron-left"></i></button>' + '</div><div class="rp-hs">' +
       list.map(function (n, i) { return card(n, { rank: o.rank ? (i + 1) : 0, reads: o.reads }); }).join('') + '</div></div>';
   }
 
@@ -13269,7 +13270,7 @@ document.addEventListener('click', function (e) {
   function avHtml(a, cls) { return '<div class="' + cls + '">' + (a.avatar ? '<img src="' + esc(a.avatar) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : esc((a.name || '?').charAt(0))) + '</div>'; }
   function authorsRow(list) {
     if (!list.length) return '';
-    return '<div class="rp-rsec"><div class="rp-rhead"><h3 data-rp-all="authors" style="cursor:pointer"><i class="fa-solid fa-feather-pointed"></i>كُتّاب الموقع</h3><button type="button" class="rp-rall" data-rp-all="authors">عرض الكل ‹</button></div><div class="rp-hs">' +
+    return '<div class="rp-rsec"><div class="rp-rhead"><h3 data-rp-all="authors" style="cursor:pointer"><i class="fa-solid fa-feather-pointed"></i>كُتّاب الموقع</h3><button type="button" class="rp-rall" data-rp-all="authors">عرض الكل <i class="fa-solid fa-chevron-left"></i></button></div><div class="rp-hs">' +
       list.slice(0, 20).map(function (a) { return '<div class="rp-au" data-rp-author="' + esc(a.key) + '">' + avHtml(a, 'rp-au-av') + '<div class="rp-au-n">' + esc(a.name) + (a.isAdmin ? ' <i class="fa-solid fa-circle-check" style="color:#2563eb;font-size:.7em"></i>' : '') + '</div><div class="rp-au-f">' + fnum(a.followers) + ' متابع</div></div>'; }).join('') + '</div></div>';
   }
   function lists(vis) {
@@ -15432,6 +15433,7 @@ input[type=checkbox],input[type=radio],input[type=range]{box-shadow:none!importa
 #control-panel-modal>div,#pdf-modal>div,#content-password-modal>div,#secret-pin-modal>div{background:var(--g-bg)!important;border:0!important;box-shadow:14px 14px 30px var(--g-d),-14px -14px 30px var(--g-l)!important;color:var(--g-t)}
 header.sticky button:not(#header-logo-icon),header.sticky a.rounded-full{background:var(--g-bg)!important;border:0!important;box-shadow:5px 5px 10px var(--g-d),-5px -5px 10px var(--g-l)!important;color:rgb(var(--g-a))!important}
 header.sticky button:active{box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}
+.rp-rall{display:inline-flex!important;align-items:center;gap:7px;background:var(--g-bg)!important;color:rgb(var(--g-a))!important;padding:8px 15px!important;border-radius:16px;font:800 .78rem Cairo,sans-serif!important;box-shadow:5px 5px 11px var(--g-d),-5px -5px 11px var(--g-l)!important;transition:box-shadow .15s,transform .15s}.rp-rall i{font-size:.62rem;transition:transform .2s}.rp-rall:active{box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}.rp-rall:hover i{transform:translateX(-3px)}html.dark .rp-rall{color:rgb(var(--g-a))!important}
 .rp-rhead h3{color:var(--g-t)}
 .rp-sub,.rp-lbl{color:var(--g-s)!important}
 html.dark .rp-card,html.dark .rp-item{color:var(--g-t)}
