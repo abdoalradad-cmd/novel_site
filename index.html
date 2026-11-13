@@ -6568,6 +6568,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -12472,7 +12474,7 @@ document.addEventListener('click', function (e) {
 
   /* ---------- الصوت المصري (Gemini): لوحة الأدمن ---------- */
   var TT = { st: null, voices: null, raw: '', msg: '', sync: '' };
-  function loadTts() { api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
+  function loadTts() { api('/api/admin/engage').then(function (x) { TT.eng = x.conf; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function () {}); api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
   function usd(n) { n = +n || 0; return '$' + (n < 1 ? n.toFixed(3) : n.toFixed(2)); }
   function mins(sec) { return (Math.round((+sec || 0) / 6) / 10).toLocaleString('en') + ' د'; }
   function provStatus(d, prov) {
@@ -12501,6 +12503,17 @@ document.addEventListener('click', function (e) {
 
   var RDP = [['kareem','كريم','Charon'],['tarek','طارق','Fenrir'],['youssef','يوسف','Puck'],['mahmoud','محمود','Orus'],['noor','نور','Aoede'],['salma','سلمى','Kore'],['layla','ليلى','Zephyr'],['adam_child','طفل','Leda']],
     RDA = [['narrator_male','راوي رجل'],['adult_male_dramatic','رجل درامي'],['young_male','شاب'],['elder_male','رجل كبير'],['adult_female','سيدة'],['narrator_female','راوية'],['young_female','فتاة'],['child','طفل']];
+
+  function engCard() {
+    var e = TT.eng; if (!e) return '<div class="rp-sub">جاري تحميل إعدادات الإشعارات التلقائية…</div>';
+    return '<h3 style="margin-top:16px">🔔 إشعارات تلقائية</h3><div class="rp-sub">إشعار يومي بميزة من مميزات التطبيق، ورسالة لمن غاب عن التطبيق. بتتبعت لوحدها بدون تدخل.</div>' +
+      ttsSel('en-tip', 'إشعار الميزة اليومي', [['1', 'شغّال'], ['0', 'مقفول']], e.tip ? '1' : '0') +
+      ttsInp('en-hour', 'ساعته بتوقيت القاهرة (0–23)', e.hour, '13', 1) +
+      ttsSel('en-gone', 'رسالة الغياب', [['1', 'شغّالة'], ['0', 'مقفولة']], e.gone ? '1' : '0') +
+      ttsInp('en-d1', 'الغياب الأول (بالأيام)', e.d1, '2', 1) + ttsInp('en-t1', 'عنوان الرسالة الأولى', e.t1, '') + ttsInp('en-x1', 'نص الرسالة الأولى', e.x1, '') +
+      ttsInp('en-d2', 'الغياب الثاني (بالأيام)', e.d2, '7', 1) + ttsInp('en-t2', 'عنوان الرسالة الثانية', e.t2, '') + ttsInp('en-x2', 'نص الرسالة الثانية', e.x2, '') +
+      '<label class="rp-lbl">مميزات اليوم (سطر لكل ميزة: العنوان | النص) — فاضي = المميزات الجاهزة</label><textarea id="en-tips" class="rp-in" rows="5" placeholder="📖 اقرأ براحتك | غيّر لون الخلفية...">' + esc((e.tips || []).map(function (q) { return q.t + ' | ' + q.x; }).join('\n')) + '</textarea>';
+  }
   function rdCard(c) {
     var r = c.rd || {}, pe = r.pers || {}, am = r.archMap || {}, pl = RDP.map(function (p) { return [p[0], p[1] + ' (' + p[2] + ')']; }),
       pin = function (id, l) { return '<label class="rp-lbl">' + l + '</label>'; };
@@ -12563,7 +12576,7 @@ document.addEventListener('click', function (e) {
       ttsSel('rp-tt-econ', 'وضع توفير الطلبات (للحساب المجاني)', [['1', 'شغّال: أجزاء أكبر وطلبات أقل'], ['0', 'مقفول: أجزاء صغيرة وأصوات أدق (محتاج حساب بفوترة)']], c.econ !== false ? '1' : '0') +
       ttsSel('rp-tt-smart', 'التفكير الذكي في تحديد المتكلم', [['1', 'شغّال: نموذج جوجل بيقرا الفقرة ويحدد مين بيتكلم'], ['0', 'مقفول: تقدير بسيط بالكلمات']], c.smart !== false ? '1' : '0') +
       ttsInp('rp-tt-ann', 'موديل التفكير (نصي)', c.annModel, 'gemini-2.5-flash', 1) +
-      '<label class="rp-lbl">قاموس النطق (سطر لكل كلمة: الكلمة=الكلمة بالتشكيل)</label><textarea id="rp-tt-dict" class="rp-in" rows="5" placeholder="مثال:&#10;الرداد=الرَّدّاد">' + esc(c.dict || '') + '</textarea>' + rdCard(c);
+      '<label class="rp-lbl">قاموس النطق (سطر لكل كلمة: الكلمة=الكلمة بالتشكيل)</label><textarea id="rp-tt-dict" class="rp-in" rows="5" placeholder="مثال:&#10;الرداد=الرَّدّاد">' + esc(c.dict || '') + '</textarea>' + rdCard(c) + engCard();
     h += '<h3 style="margin-top:16px">🎙️ إعدادات مشتركة بين كل حسابات جوجل</h3><div class="rp-sub">الموديل والأسلوب والأصوات واحدة لكل حسابات جوجل الستة. الحد اليومي والمفتاح والطابور لكل حساب في تابته.</div>' +
       ttsInp('rp-tt-st', 'أسلوب القراءة (بالإنجليزي)', c.style, '', 1) + ttsInp('rp-tt-mod', 'الموديل', c.model, '', 1) +
       ttsInp('rp-tt-pin', 'سعر النص لكل مليون توكن (فاضي = تلقائي)', c.priceIn || '', '0.5', 1) + ttsInp('rp-tt-pout', 'سعر الصوت لكل مليون توكن (فاضي = تلقائي)', c.priceOut || '', '9', 1) +
@@ -12987,6 +13000,9 @@ document.addEventListener('click', function (e) {
       var gvv = {}; RL.forEach(function (r) { var x = g('rp-gv-' + r); if (x !== null) gvv[r] = x; }); if (Object.keys(gvv).length) bd.gv = gvv;
       if ($('rp-pc-cap')) { var pc = { dailyMin: g('rp-pc-cap'), freeMin: g('rp-pc-free'), concurrency: g('rp-pc-conc') }; if (TT.tab === 'gemini') { bd.dailyMin = pc.dailyMin; bd.freeMin = pc.freeMin; bd.concurrency = pc.concurrency; } else bd[(String(TT.tab).charAt(0) === 'r' ? 'r' + String(TT.tab).slice(2) : 'g' + String(TT.tab).slice(6))] = pc; }
       if ($('rp-az-cap')) { var azv = {}; RL.forEach(function (r) { azv[r] = { v: g('rp-azv-' + r), pitch: g('rp-azp-' + r), rate: g('rp-azr-' + r) }; }); bd.az = { region: g('rp-az-region'), dailyMin: g('rp-az-cap'), freeChars: g('rp-az-free'), price: g('rp-az-price'), concurrency: g('rp-az-conc'), voices: azv }; }
+
+      if ($('en-tip')) { var tp = ($('en-tips').value || '').split('\n').map(function (l) { var k = l.indexOf('|'); return k > 0 ? { t: l.slice(0, k).trim(), x: l.slice(k + 1).trim() } : null; }).filter(Boolean);
+        api('/api/admin/engage', { method: 'PUT', body: { tip: g('en-tip') !== '0', hour: g('en-hour'), gone: g('en-gone') !== '0', d1: g('en-d1'), d2: g('en-d2'), t1: g('en-t1'), x1: g('en-x1'), t2: g('en-t2'), x2: g('en-x2'), tips: tp } }).then(function (d) { TT.eng = d.conf; }).catch(function () {}); }
       api('/api/admin/tts', { method: 'PUT', body: bd }).then(function (d) { TT.st = d; TT.msg = ''; render(); flash('اتحفظ ✅'); }).catch(function (x) { var o = $('rp-tt-out'); if (o) o.textContent = x.message; });
     }
     else if (a === 'readsreset') { if (confirm('تصفّر كل عدّادات القراءة؟ مش هينفع ترجعها.') && confirm('متأكد 100%؟ كل الأرقام هترجع صفر.')) api('/api/admin/reads/reset', { method: 'POST', body: { confirm: 'RESET' } }).then(function (d) { flash('اتصفّرت ✅ (اتمسح ' + (d.cleared || 0) + ' قراءة)'); }).catch(function (x) { flash(x.message); }); }
