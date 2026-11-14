@@ -6572,6 +6572,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -12504,7 +12506,7 @@ document.addEventListener('click', function (e) {
 
   /* ---------- الصوت المصري (Gemini): لوحة الأدمن ---------- */
   var TT = { st: null, voices: null, raw: '', msg: '', sync: '' };
-  function loadTts() { api('/api/admin/engage').then(function (x) { TT.eng = x.conf; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function () {}); api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
+  function loadTts() { api('/api/admin/pubflow').then(function (x) { TT.pf = x; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function () {}); if (!TT.nv) api('/api/novels').then(function (x) { TT.nv = (Array.isArray(x) ? x : (x.novels || [])).filter(function (n) { return n && /^\d+$/.test(String(n.id)); }); }).catch(function () {}); api('/api/admin/engage').then(function (x) { TT.eng = x.conf; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function () {}); api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
   function usd(n) { n = +n || 0; return '$' + (n < 1 ? n.toFixed(3) : n.toFixed(2)); }
   function mins(sec) { return (Math.round((+sec || 0) / 6) / 10).toLocaleString('en') + ' د'; }
   function provStatus(d, prov) {
@@ -12544,12 +12546,24 @@ document.addEventListener('click', function (e) {
       ttsInp('en-d2', 'الغياب الثاني (بالأيام)', e.d2, '7', 1) + ttsInp('en-t2', 'عنوان الرسالة الثانية', e.t2, '') + ttsInp('en-x2', 'نص الرسالة الثانية', e.x2, '') +
       '<label class="rp-lbl">مميزات اليوم (سطر لكل ميزة: العنوان | النص) — فاضي = المميزات الجاهزة</label><textarea id="en-tips" class="rp-in" rows="5" placeholder="📖 اقرأ براحتك | غيّر لون الخلفية...">' + esc((e.tips || []).map(function (q) { return q.t + ' | ' + q.x; }).join('\n')) + '</textarea>';
   }
+  function pubCard() {
+    var p = TT.pf; if (!p) return '';
+    var c = p.conf || {}, nv = TT.nv || [], ln = p.learn || {};
+    return '<h3 style="margin-top:16px">✍️ نشر الكتّاب والصوت التلقائي</h3><div class="rp-sub">لما توافق على رواية كاتب: بيوصله إشعار، والفصول بتروح لوحدها للرداد الأفضى، ولما الفصل يتحوّل لصوت بيتبلّغ هو والمتابعين.</div>' +
+      ttsSel('pf-notify', 'إشعارات القبول وتحويل الفصل (للكاتب والمتابعين)', [['1', 'شغّالة'], ['0', 'مقفولة']], c.notify === false ? '0' : '1') +
+      ttsSel('pf-autoq', 'إرسال فصول الكاتب تلقائيًا للرداد بعد الموافقة', [['1', 'شغّال'], ['0', 'مقفول']], c.autoq === false ? '0' : '1') +
+      ttsSel('pf-fol', 'إشعار المتابعين لما فصل يتحوّل لصوت', [['1', 'شغّال'], ['0', 'مقفول']], c.followers === false ? '0' : '1') +
+      '<label class="rp-lbl">راوي الرواية (بيتحفظ للرواية كلها)</label><select id="pf-nv" class="rp-in"><option value="">— اختار رواية —</option>' + nv.map(function (n) { return '<option value="' + esc(n.id) + '">' + esc(n.title) + '</option>'; }).join('') + '</select>' +
+      ttsSel('pf-ng', 'صوت الراوي', [['m', 'راوي رجل (كريم)'], ['f', 'راوية ست (سلمى)']], 'm') +
+      '<div class="rp-sub">الكلمات اللي الأداة اتعلّمتها لحد دلوقتي: <b>' + (ln.total || 0) + '</b>' + (ln.last ? ' (آخر فصل اتعلّم ' + ln.last + ' كلمة)' : '') + '</div>';
+  }
   function rdCard(c) {
     var r = c.rd || {}, pe = r.pers || {}, am = r.archMap || {}, pl = RDP.map(function (p) { return [p[0], p[1] + ' (' + p[2] + ')']; }),
       pin = function (id, l) { return '<label class="rp-lbl">' + l + '</label>'; };
     var h = '<h3 style="margin-top:16px">🎛️ إعدادات أداة الرداد (كل زرار من الأداة)</h3><div class="rp-sub">كل اختيار موجود في الأداة هنا تثبّته أو تغيّره، وبيتطبق على كل الحسابات (جوجل 1–6 والرداد 1–6).</div>' +
       ttsSel('rd-mode', 'الوضع', [['B', 'B — سرد فصحى + حوار عامي (الافتراضي)'], ['A', 'A — سرد وحوار بروح مصرية'], ['C', 'C — تحويل السرد والحوار كله لعامية']], r.mode || 'B') +
       ttsSel('rd-skip', 'السرد', [['0', 'قراءة السرد بصوت الراوي'], ['1', 'تخطي السرد وقراءة الحوار بس']], r.skipNarration ? '1' : '0') +
+      ttsSel('rd-learn', 'تعلّم الكلمات العامية الجديدة قبل التحويل (Gemini يشكّلها ويحفظها في القاموس)', [['1', 'شغّال'], ['0', 'مقفول']], r.learn === false ? '0' : '1') +
       ttsSel('rd-hum', 'التحسين البشري (دفء + وقفات الانفعال)', [['1', 'شغّال'], ['0', 'مقفول (صوت خام)']], r.humanize === false ? '0' : '1') +
       ttsInp('rd-pause', 'الوقفة بين المشاهد (ملي ثانية)', r.pauseMs == null ? 380 : r.pauseMs, '380', 1) +
       ttsInp('rd-batch', 'عدد المشاهد في الطلب الواحد (Mega-Batch)', r.batch || 7, '7', 1) +
@@ -12606,7 +12620,7 @@ document.addEventListener('click', function (e) {
       ttsSel('rp-tt-econ', 'وضع توفير الطلبات (للحساب المجاني)', [['1', 'شغّال: أجزاء أكبر وطلبات أقل'], ['0', 'مقفول: أجزاء صغيرة وأصوات أدق (محتاج حساب بفوترة)']], c.econ !== false ? '1' : '0') +
       ttsSel('rp-tt-smart', 'التفكير الذكي في تحديد المتكلم', [['1', 'شغّال: نموذج جوجل بيقرا الفقرة ويحدد مين بيتكلم'], ['0', 'مقفول: تقدير بسيط بالكلمات']], c.smart !== false ? '1' : '0') +
       ttsInp('rp-tt-ann', 'موديل التفكير (نصي)', c.annModel, 'gemini-2.5-flash', 1) +
-      '<label class="rp-lbl">قاموس النطق (سطر لكل كلمة: الكلمة=الكلمة بالتشكيل)</label><textarea id="rp-tt-dict" class="rp-in" rows="5" placeholder="مثال:&#10;الرداد=الرَّدّاد">' + esc(c.dict || '') + '</textarea>' + rdCard(c) + engCard();
+      '<label class="rp-lbl">قاموس النطق (سطر لكل كلمة: الكلمة=الكلمة بالتشكيل)</label><textarea id="rp-tt-dict" class="rp-in" rows="5" placeholder="مثال:&#10;الرداد=الرَّدّاد">' + esc(c.dict || '') + '</textarea>' + rdCard(c) + engCard() + pubCard();
     h += '<h3 style="margin-top:16px">🎙️ إعدادات مشتركة بين كل حسابات جوجل</h3><div class="rp-sub">الموديل والأسلوب والأصوات واحدة لكل حسابات جوجل الستة. الحد اليومي والمفتاح والطابور لكل حساب في تابته.</div>' +
       ttsInp('rp-tt-st', 'أسلوب القراءة (بالإنجليزي)', c.style, '', 1) + ttsInp('rp-tt-mod', 'الموديل', c.model, '', 1) +
       ttsInp('rp-tt-pin', 'سعر النص لكل مليون توكن (فاضي = تلقائي)', c.priceIn || '', '0.5', 1) + ttsInp('rp-tt-pout', 'سعر الصوت لكل مليون توكن (فاضي = تلقائي)', c.priceOut || '', '9', 1) +
@@ -13034,13 +13048,14 @@ document.addEventListener('click', function (e) {
       bl('rp-tt-multi'); bl('rp-tt-smart'); bl('rp-tt-econ'); bl('rp-tt-mm'); bl('rp-tt-rb'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
       if ($('rp-tt-dict')) bd.dict = $('rp-tt-dict').value;
 
-      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), analysis: g('rd-am'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), narrator: g('rd-nar'), archMap: {}, pers: {} };
+      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), analysis: g('rd-am'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', learn: g('rd-learn') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), narrator: g('rd-nar'), archMap: {}, pers: {} };
         RDA.forEach(function (a) { var v = g('rd-am-' + a[0]); if (v) rdo.archMap[a[0]] = v; });
         RDP.forEach(function (p) { var v = g('rd-pv-' + p[0]), q = g('rd-pp-' + p[0]); if (v || (q && +q)) rdo.pers[p[0]] = { v: v, p: q }; }); bd.rd = rdo; }
       var gvv = {}; RL.forEach(function (r) { var x = g('rp-gv-' + r); if (x !== null) gvv[r] = x; }); if (Object.keys(gvv).length) bd.gv = gvv;
       if ($('rp-pc-cap')) { var pc = { dailyMin: g('rp-pc-cap'), freeMin: g('rp-pc-free'), concurrency: g('rp-pc-conc') }; if (TT.tab === 'gemini') { bd.dailyMin = pc.dailyMin; bd.freeMin = pc.freeMin; bd.concurrency = pc.concurrency; } else bd[(String(TT.tab).charAt(0) === 'r' ? 'r' + String(TT.tab).slice(2) : 'g' + String(TT.tab).slice(6))] = pc; }
       if ($('rp-az-cap')) { var azv = {}; RL.forEach(function (r) { azv[r] = { v: g('rp-azv-' + r), pitch: g('rp-azp-' + r), rate: g('rp-azr-' + r) }; }); bd.az = { region: g('rp-az-region'), dailyMin: g('rp-az-cap'), freeChars: g('rp-az-free'), price: g('rp-az-price'), concurrency: g('rp-az-conc'), voices: azv }; }
 
+      if ($('pf-notify')) { api('/api/admin/pubflow', { method: 'PUT', body: { notify: g('pf-notify') !== '0', autoq: g('pf-autoq') !== '0', followers: g('pf-fol') !== '0' } }).then(function (d) { TT.pf = d; }).catch(function () {}); if (g('pf-nv')) api('/api/admin/novels/' + g('pf-nv') + '/narrator', { method: 'PUT', body: { g: g('pf-ng') } }).catch(function () {}); }
       if ($('en-tip')) { var tp = ($('en-tips').value || '').split('\n').map(function (l) { var k = l.indexOf('|'); return k > 0 ? { t: l.slice(0, k).trim(), x: l.slice(k + 1).trim() } : null; }).filter(Boolean);
         api('/api/admin/engage', { method: 'PUT', body: { tip: g('en-tip') !== '0', hour: g('en-hour'), gone: g('en-gone') !== '0', d1: g('en-d1'), d2: g('en-d2'), t1: g('en-t1'), x1: g('en-x1'), t2: g('en-t2'), x2: g('en-x2'), tips: tp } }).then(function (d) { TT.eng = d.conf; }).catch(function () {}); }
       api('/api/admin/tts', { method: 'PUT', body: bd }).then(function (d) { TT.st = d; TT.msg = ''; render(); flash('اتحفظ ✅'); }).catch(function (x) { var o = $('rp-tt-out'); if (o) o.textContent = x.message; });
