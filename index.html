@@ -6570,6 +6570,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -7427,6 +7429,7 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
 
             document.getElementById('reader-novel-title').textContent = `رواية ${novel.title} — بقلم ${novel.author}`;
             document.getElementById('reader-chapter-title').textContent = chapter.title;
+            window.__rdCover = novel.coverImg || ''; window.__rdNT = novel.title || '';
 
             const paragraphs = chapter.content.split('\n').filter(p => p.trim() !== '');
             const bodyContainer = document.getElementById('reader-chapter-body');
@@ -9895,6 +9898,8 @@ document.addEventListener('click', function (e) {
       startBtn.innerHTML = `<i class="fa-solid ${icon}"></i><span>${label}</span>`;
     }
     document.querySelectorAll('#tts-rates button[data-r]').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.r) === TTS.rate));
+    const tb = document.getElementById('tts-bar'); if (tb) tb.classList.toggle('playing', TTS.state === 'playing');
+    const sb = document.getElementById('tts-sub'), rc = document.getElementById('reader-chapter-title'); if (sb && rc && sb.textContent !== rc.textContent) sb.textContent = rc.textContent;
     const seek = document.getElementById('tts-seek'), pos = document.getElementById('tts-pos'), tot = document.getElementById('tts-tot');
     if (!seek) return;
     const info = timeInfo();
@@ -9930,7 +9935,21 @@ document.addEventListener('click', function (e) {
       #tts-seek{-webkit-appearance:none;appearance:none;flex:1;height:10px;border-radius:99px;min-width:0;direction:rtl;outline:0;cursor:pointer;background:linear-gradient(to left,rgb(var(--g-a,15,107,74)) var(--p,0%),transparent var(--p,0%)),var(--g-bg,#e6ede8);box-shadow:inset 3px 3px 6px var(--g-d,#c3cdc6),inset -3px -3px 6px var(--g-l,#fbfffc)}
       #tts-seek::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--g-bg,#e6ede8);box-shadow:3px 3px 7px var(--g-d,#c3cdc6),-3px -3px 7px var(--g-l,#fbfffc),0 0 0 3px rgba(var(--g-a,15,107,74),.35)}
       #tts-seek::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:var(--g-bg,#e6ede8);box-shadow:3px 3px 7px var(--g-d,#c3cdc6),-3px -3px 7px var(--g-l,#fbfffc),0 0 0 3px rgba(var(--g-a,15,107,74),.35)}
-      body.tts-open{padding-bottom:190px}
+      body.tts-open{padding-bottom:470px}
+      body.tts-open.tts-min{padding-bottom:200px}
+      #tts-cov{display:flex;flex-direction:column;align-items:center;margin:0 auto .8rem;max-width:34rem}
+      #tts-bar.min #tts-cov{display:none}
+      #tts-art{width:7.6rem;aspect-ratio:2/3;border-radius:18px;overflow:hidden;background:linear-gradient(160deg,rgb(var(--g-a,15,107,74)),#0b3d2c);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.2rem;box-shadow:9px 9px 20px var(--g-d,#c3cdc6),-8px -8px 18px var(--g-l,#fbfffc);transition:transform .5s}
+      #tts-bar.playing #tts-art{transform:scale(1.04)}
+      #tts-art img{width:100%;height:100%;object-fit:cover;display:block}
+      #tts-ttl{margin-top:.75rem;font:800 .92rem Cairo,sans-serif;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--g-t,#0f3d2e)}
+      #tts-sub{font:700 .74rem Cairo,sans-serif;color:var(--g-s,#6b7f74);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:.1rem}
+      #tts-wave{display:flex;align-items:center;justify-content:center;gap:3px;height:34px;margin-top:.6rem;direction:ltr}
+      #tts-wave i{display:block;width:4px;height:100%;border-radius:4px;background:linear-gradient(to top,rgb(var(--g-a,15,107,74)),rgba(var(--g-a,15,107,74),.45));transform:scaleY(.14);transform-origin:center;animation:ttsw 1.1s ease-in-out infinite;animation-play-state:paused}
+      #tts-bar.playing #tts-wave i{animation-play-state:running}
+      @keyframes ttsw{0%,100%{transform:scaleY(.14)}50%{transform:scaleY(1)}}
+      #tts-min{width:2.4rem;height:2.4rem;border-radius:50%;padding:0;font-size:.85rem;color:var(--g-s,#6b7f74)!important}
+      #tts-bar.min #tts-min i{transform:rotate(180deg)}
     `;
     document.head.appendChild(st);
   }
@@ -9959,6 +9978,11 @@ document.addEventListener('click', function (e) {
     const bar = document.createElement('div');
     bar.id = 'tts-bar';
     bar.innerHTML = `
+      <div id="tts-cov">
+        <div id="tts-art"><i class="fa-solid fa-headphones"></i></div>
+        <div id="tts-ttl"></div><div id="tts-sub"></div>
+        <div id="tts-wave" aria-hidden="true">${Array.from({length: 26}, (_, i) => `<i style="animation-delay:${((i * 37) % 11) / 10 * 0.9}s;animation-duration:${0.7 + ((i * 53) % 9) / 10}s"></i>`).join('')}</div>
+      </div>
       <div class="tts-row">
         <span id="tts-pos" class="tts-time">0:00</span>
         <input id="tts-seek" type="range" min="0" max="1" value="0" step="1" aria-label="موضع الاستماع">
@@ -9969,7 +9993,7 @@ document.addEventListener('click', function (e) {
         <button id="tts-play" type="button" class="tts-main" title="تشغيل / إيقاف مؤقت"><i class="fa-solid fa-play"></i></button>
         <button id="tts-f10" type="button" class="tts-skip" title="تقديم 10 ثواني"><i class="fa-solid fa-rotate-right"></i>10</button>
       </div>
-      <div id="tts-rates" class="tts-row">${RATES.map(r => `<button type="button" data-r="${r}">×${r}</button>`).join('')}<button id="tts-stop" type="button" title="إغلاق"><i class="fa-solid fa-xmark"></i></button></div>`;
+      <div id="tts-rates" class="tts-row">${RATES.map(r => `<button type="button" data-r="${r}">×${r}</button>`).join('')}<button id="tts-min" type="button" title="تصغير / تكبير"><i class="fa-solid fa-chevron-down"></i></button><button id="tts-stop" type="button" title="إغلاق"><i class="fa-solid fa-xmark"></i></button></div>`;
     document.body.appendChild(bar);
 
     const $ = id => document.getElementById(id);
@@ -9981,6 +10005,12 @@ document.addEventListener('click', function (e) {
     $('tts-b10').onclick = () => skip(-10);
     $('tts-f10').onclick = () => skip(10);
     $('tts-stop').onclick = stopAll;
+    var mn = false; try { mn = localStorage.getItem('rp_tts_min') === '1'; } catch (x) {}
+    const applyMin = () => { bar.classList.toggle('min', mn); document.body.classList.toggle('tts-min', mn); };
+    applyMin(); $('tts-min').onclick = () => { mn = !mn; try { localStorage.setItem('rp_tts_min', mn ? '1' : '0'); } catch (x) {} applyMin(); };
+    (function () { const ct = document.getElementById('reader-chapter-title'), art = $('tts-art'), cv = window.__rdCover;
+      $('tts-ttl').textContent = window.__rdNT || ''; $('tts-sub').textContent = ct ? ct.textContent : '';
+      if (cv) { const im = new Image(); im.alt = ''; im.onload = () => { art.innerHTML = ''; art.appendChild(im); }; im.src = cv; } })();
     document.querySelectorAll('#tts-rates button[data-r]').forEach(b => { b.onclick = () => setRateTo(parseFloat(b.dataset.r)); });
 
     const seek = $('tts-seek');
@@ -12811,6 +12841,16 @@ document.addEventListener('click', function (e) {
     if (WL.list == null && !WL._a) { WL._a = 1; loadWd(); }
     var c = WL.cfg || { rate: 10, min: 50 }, L = WL.list || [];
     var h = '<div class="rp-card"><h3>' + ic('gear') + ' سعر النقطة وحد السحب</h3><label class="rp-lbl">كل كام نقطة ذهبية = 1 جنيه؟</label><input id="rp-gd-rate" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(c.rate) + '"><label class="rp-lbl">أقل مبلغ للسحب (بالجنيه)</label><input id="rp-gd-min" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(c.min) + '"><p class="rp-sub">بيتطبق على كل المستخدمين فورًا. مثال: 10 = كل 10 نقاط بجنيه.</p><button type="button" class="rp-btn block" data-act="goldsave">حفظ</button></div>';
+    var wc = WL.wc || {}, sk = wc.streak || {};
+    if (!WL.wc && !WL._w) { WL._w = 1; api('/api/admin/wallet').then(function (d) { WL.wc = d; render(); }).catch(function () {}); }
+    h += '<div class="rp-card"><h3>' + ic('gear') + ' النقاط الذهبية: كام لكل حاجة؟</h3><p class="rp-sub">غيّر الأرقام وهتتطبق فورًا على كل المستخدمين.</p>' +
+      '<label class="rp-lbl">نقاط كل تصويت/تقييم</label><input id="rp-wc-vote" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(wc.vote == null ? '' : wc.vote) + '">' +
+      '<label class="rp-lbl">نقاط كل تعليق</label><input id="rp-wc-comment" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(wc.comment == null ? '' : wc.comment) + '">' +
+      '<label class="rp-lbl">أقصى عدد مرات (تصويت + تعليق) في اليوم الواحد</label><input id="rp-wc-perDay" class="rp-in" dir="ltr" inputmode="numeric" value="' + esc(wc.perDay == null ? '' : wc.perDay) + '">' +
+      '<label class="rp-lbl">مضاعف المشتركين المميزين (2 = الضعف)</label><input id="rp-wc-premMult" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(wc.premMult == null ? '' : wc.premMult) + '">' +
+      '<label class="rp-lbl">عدد الأيام المتتالية لفتح التطبيق للمكافأة</label><input id="rp-wc-sdays" class="rp-in" dir="ltr" inputmode="numeric" value="' + esc(sk.days == null ? '' : sk.days) + '">' +
+      '<label class="rp-lbl">نقاط مكافأة الأيام المتتالية</label><input id="rp-wc-spts" class="rp-in" dir="ltr" inputmode="decimal" value="' + esc(sk.pts == null ? '' : sk.pts) + '">' +
+      '<button type="button" class="rp-btn block" data-act="walsave">حفظ</button></div>';
     h += '<div class="rp-card"><h3>' + ic('money-bill-transfer') + ' طلبات السحب' + (L.length ? ' (' + L.length + ')' : '') + '</h3>' + (L.length ? L.map(function (w) {
       var s = WST[w.status] || [w.status, '']; return '<div class="rp-item"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><b>' + esc(w.user) + '</b><div class="rp-sub" style="margin:0" dir="ltr">' + esc(w.email) + '</div></div><span class="rp-pill ' + s[1] + '">' + s[0] + '</span></div>' +
         '<div class="rp-sub" style="margin:8px 0 0">المبلغ: <b>' + egpTxt(w.egp) + ' جنيه</b> (' + nfmt(w.points) + ' نقطة، السعر وقتها ' + nfmt(w.rate) + '=1)<br>الطريقة: ' + (w.kind === 'instapay' ? 'انستا باي' : 'محفظة') + ' — <b dir="ltr">' + esc(w.value) + '</b>' + (w.name ? '<br>الاسم: ' + esc(w.name) : '') + '<br>' + esc(fdate(w.ts)) + '</div>' +
@@ -13088,6 +13128,7 @@ document.addEventListener('click', function (e) {
       if (!confirm('هتقدّم طلب سحب ونقاطك هتتصفّر نهائي ومش هترجع تاني. تكمّل؟')) return;
       api('/api/me/withdraw', { method: 'POST', body: { kind: WL.kind, value: WL.value, name: WL.name } }).then(function (r) { WL.open = false; WL.msg = ''; WL.d = null; WL._l = 0; flash('اتقدّم طلب السحب (' + egpTxt(r.egp) + ' جنيه) ✅'); render(); }).catch(function (x) { WL.msg = x.message || 'حصل خطأ'; if (/حد السحب/.test(WL.msg)) { WL.d = null; WL._l = 0; } render(); });
     }
+    else if (a === 'walsave') { var g = function (k) { return +(($('rp-wc-' + k) || {}).value); }; api('/api/admin/wallet', { method: 'PUT', body: { vote: g('vote'), comment: g('comment'), perDay: g('perDay'), premMult: g('premMult') } }).then(function () { return api('/api/admin/streak', { method: 'PUT', body: { days: g('sdays') || 7, pts: g('spts') } }); }).then(function () { WL.wc = null; WL._w = 0; flash('اتحفظت النقاط الذهبية ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'goldsave') { api('/api/admin/gold', { method: 'PUT', body: { rate: +(($('rp-gd-rate') || {}).value), min: +(($('rp-gd-min') || {}).value) } }).then(function (d) { WL.cfg = d; flash('اتحفظ سعر النقطة وحد السحب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'wdok' || a === 'wdno') {
       if (!confirm(a === 'wdok' ? 'تأكد إنك راجعت الطلب. تأكيد السحب وإشعار المستخدم؟' : 'ترفض الطلب؟ النقاط مش هترجع للمستخدم.')) return;
