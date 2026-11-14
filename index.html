@@ -6576,6 +6576,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -11563,6 +11565,7 @@ document.addEventListener('click', function (e) {
   var loadedOnce = false;
   function loadUserNovels() {
     if (!base()) return;
+    if (!loadedOnce) { try { var cc = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (cc && cc.novels) mergeNovels(cc); } catch (e) {} } /* عرض فوري من آخر نسخة ثم التحديث */
     fetch(base() + '/api/novels').then(function (r) { return r.json(); }).then(function (d) {
       if (d && d.novels) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {} mergeNovels(d); }
     }).catch(function () {
@@ -12565,6 +12568,34 @@ document.addEventListener('click', function (e) {
       ttsInp('en-d2', 'الغياب الثاني (بالأيام)', e.d2, '7', 1) + ttsInp('en-t2', 'عنوان الرسالة الثانية', e.t2, '') + ttsInp('en-x2', 'نص الرسالة الثانية', e.x2, '') +
       '<label class="rp-lbl">مميزات اليوم (سطر لكل ميزة: العنوان | النص) — فاضي = المميزات الجاهزة</label><textarea id="en-tips" class="rp-in" rows="5" placeholder="📖 اقرأ براحتك | غيّر لون الخلفية...">' + esc((e.tips || []).map(function (q) { return q.t + ' | ' + q.x; }).join('\n')) + '</textarea>';
   }
+  var LR = { rec: null, blob: null, busy: false, msg: '', t0: 0 };
+  function lrnLoad() { api('/api/admin/rd/learned').then(function (d) { TT.lrn = d; render(); }).catch(function () {}); }
+  function lrnCard() {
+    if (!TT.lrn && !LR._l) { LR._l = 1; lrnLoad(); }
+    var d = TT.lrn || { total: 0, words: [], log: [] };
+    return '<h3 style="margin-top:16px">🎙️ علّم الأداة نطق مصري</h3><div class="rp-sub">ارفع ملف صوت مصري أو سجّل صوتك: الأداة بتسمعه وبتحفظ النطق الصحيح للكلمات في قاموس دائم بيتطبق تلقائي على كل الفصول الجاية. (ده بيحسّن نطق الكلمات، مش بيغيّر نموذج الصوت نفسه.)</div>' +
+      '<label class="rp-lbl">لو بتصحّح كلمة معينة اكتبها (اختياري)</label><input id="lrn-word" class="rp-in" placeholder="مثال: لجنة">' +
+      '<label class="rp-lbl">نص الكلام (اختياري، بيساعد الدقة)</label><input id="lrn-text" class="rp-in" placeholder="لو الملف فيه جملة معينة">' +
+      '<div class="rp-row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><input id="lrn-file" type="file" accept="audio/*" class="rp-in" style="flex:1;min-width:0">' +
+      '<button type="button" class="rp-btn sm' + (LR.rec ? ' gold' : '') + '" data-act="lrnrec">' + (LR.rec ? '⏹ إيقاف التسجيل' : '🔴 سجّل صوتي') + '</button></div>' +
+      (LR.blob ? '<div class="rp-sub">✅ التسجيل جاهز (' + Math.round(LR.blob.size / 1024) + ' ك.ب). اضغط «علّمها».</div>' : '') +
+      '<div class="rp-row" style="margin-top:8px"><button type="button" class="rp-btn sm" data-act="lrnsend"' + (LR.busy ? ' disabled' : '') + '>' + (LR.busy ? 'بتسمع وتتعلّم…' : 'علّمها') + '</button></div>' +
+      (LR.msg ? '<div class="rp-sub"><b>' + esc(LR.msg) + '</b></div>' : '') +
+      '<label class="rp-lbl" style="margin-top:12px">أو تصحيح يدوي بالتشكيل</label><div class="rp-row" style="gap:8px"><input id="lrn-w2" class="rp-in" placeholder="الكلمة" style="flex:1"><input id="lrn-p2" class="rp-in" placeholder="مشكولة: لَجْنَة" style="flex:1"><button type="button" class="rp-btn sm" data-act="lrnman">حفظ</button></div>' +
+      '<div class="rp-sub" style="margin-top:10px">كلمات محفوظة: <b>' + (d.total || 0) + '</b></div>' +
+      (d.words.length ? d.words.slice(0, 15).map(function (w) { return '<div class="rp-item" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>' + esc(w[0]) + ' ← <b>' + esc(w[1]) + '</b></span><button type="button" class="rp-btn sm" data-act="lrndel" data-w="' + esc(w[0]) + '">حذف</button></div>'; }).join('') : '');
+  }
+  function lrnSend(blob, mime) {
+    var w = (($('lrn-word') || {}).value || '').trim(), tx = (($('lrn-text') || {}).value || '').trim();
+    var fr = new FileReader(); LR.busy = true; LR.msg = ''; render();
+    fr.onload = function () {
+      var b64 = String(fr.result).split(',')[1] || '';
+      api('/api/admin/rd/learn-audio', { method: 'POST', body: { audio: b64, mime: mime || blob.type || 'audio/webm', word: w, text: tx } }).then(function (r) {
+        LR.busy = false; LR.blob = null; LR.msg = r.n ? 'اتعلّمت ' + r.n + ' كلمة: ' + Object.keys(r.words).slice(0, 6).join('، ') : 'ما لقتش كلمات تتعلّم من التسجيل ده'; lrnLoad(); render();
+      }).catch(function (x) { LR.busy = false; LR.msg = 'فشل: ' + x.message; render(); });
+    };
+    fr.readAsDataURL(blob);
+  }
   function pubCard() {
     var p = TT.pf; if (!p) return '';
     var c = p.conf || {}, nv = TT.nv || [], ln = p.learn || {};
@@ -12639,7 +12670,7 @@ document.addEventListener('click', function (e) {
       ttsSel('rp-tt-econ', 'وضع توفير الطلبات (للحساب المجاني)', [['1', 'شغّال: أجزاء أكبر وطلبات أقل'], ['0', 'مقفول: أجزاء صغيرة وأصوات أدق (محتاج حساب بفوترة)']], c.econ !== false ? '1' : '0') +
       ttsSel('rp-tt-smart', 'التفكير الذكي في تحديد المتكلم', [['1', 'شغّال: نموذج جوجل بيقرا الفقرة ويحدد مين بيتكلم'], ['0', 'مقفول: تقدير بسيط بالكلمات']], c.smart !== false ? '1' : '0') +
       ttsInp('rp-tt-ann', 'موديل التفكير (نصي)', c.annModel, 'gemini-2.5-flash', 1) +
-      '<label class="rp-lbl">قاموس النطق (سطر لكل كلمة: الكلمة=الكلمة بالتشكيل)</label><textarea id="rp-tt-dict" class="rp-in" rows="5" placeholder="مثال:&#10;الرداد=الرَّدّاد">' + esc(c.dict || '') + '</textarea>' + rdCard(c) + engCard() + pubCard();
+      '<label class="rp-lbl">قاموس النطق (سطر لكل كلمة: الكلمة=الكلمة بالتشكيل)</label><textarea id="rp-tt-dict" class="rp-in" rows="5" placeholder="مثال:&#10;الرداد=الرَّدّاد">' + esc(c.dict || '') + '</textarea>' + rdCard(c) + engCard() + pubCard() + lrnCard();
     h += '<h3 style="margin-top:16px">🎙️ إعدادات مشتركة بين كل حسابات جوجل</h3><div class="rp-sub">الموديل والأسلوب والأصوات واحدة لكل حسابات جوجل الستة. الحد اليومي والمفتاح والطابور لكل حساب في تابته.</div>' +
       ttsInp('rp-tt-st', 'أسلوب القراءة (بالإنجليزي)', c.style, '', 1) + ttsInp('rp-tt-mod', 'الموديل', c.model, '', 1) +
       ttsInp('rp-tt-pin', 'سعر النص لكل مليون توكن (فاضي = تلقائي)', c.priceIn || '', '0.5', 1) + ttsInp('rp-tt-pout', 'سعر الصوت لكل مليون توكن (فاضي = تلقائي)', c.priceOut || '', '9', 1) +
@@ -13164,6 +13195,19 @@ document.addEventListener('click', function (e) {
       api('/api/me/withdraw', { method: 'POST', body: { kind: WL.kind, value: WL.value, name: WL.name } }).then(function (r) { WL.open = false; WL.msg = ''; WL.d = null; WL._l = 0; flash('اتقدّم طلب السحب (' + egpTxt(r.egp) + ' جنيه) ✅'); render(); }).catch(function (x) { WL.msg = x.message || 'حصل خطأ'; if (/حد السحب/.test(WL.msg)) { WL.d = null; WL._l = 0; } render(); });
     }
     else if (a === 'walsave') { var g = function (k) { return +(($('rp-wc-' + k) || {}).value); }; api('/api/admin/wallet', { method: 'PUT', body: { vote: g('vote'), comment: g('comment'), perDay: g('perDay'), premMult: g('premMult') } }).then(function () { return api('/api/admin/streak', { method: 'PUT', body: { days: g('sdays') || 7, pts: g('spts') } }); }).then(function () { WL.wc = null; WL._w = 0; flash('اتحفظت النقاط الذهبية ✅'); render(); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'lrnrec') {
+      if (LR.rec) { try { LR.rec.stop(); } catch (x) {} return; }
+      if (!navigator.mediaDevices || !window.MediaRecorder) { LR.msg = 'المتصفح/التطبيق مش بيدعم التسجيل. سجّل بتطبيق التسجيل في موبايلك وارفع الملف.'; render(); return; }
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) {
+        var ch = [], mr = new MediaRecorder(st); LR.rec = mr; LR.blob = null; LR.msg = '';
+        mr.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
+        mr.onstop = function () { st.getTracks().forEach(function (t) { t.stop(); }); LR.rec = null; LR.blob = new Blob(ch, { type: mr.mimeType || 'audio/webm' }); render(); };
+        mr.start(); render();
+      }).catch(function () { LR.msg = 'مفيش إذن للميكروفون. فعّله من إعدادات التطبيق، أو ارفع ملف مسجّل.'; render(); });
+    }
+    else if (a === 'lrnsend') { var fl = ($('lrn-file') || {}).files && $('lrn-file').files[0]; if (LR.blob) lrnSend(LR.blob, LR.blob.type); else if (fl) lrnSend(fl, fl.type); else { LR.msg = 'اختار ملف صوت أو سجّل الأول'; render(); } }
+    else if (a === 'lrnman') { api('/api/admin/rd/learn-word', { method: 'POST', body: { word: ($('lrn-w2') || {}).value, pron: ($('lrn-p2') || {}).value } }).then(function () { LR.msg = 'اتحفظت ✅'; lrnLoad(); }).catch(function (x) { LR.msg = x.message; render(); }); }
+    else if (a === 'lrndel') { api('/api/admin/rd/learned', { method: 'DELETE', body: { word: b.getAttribute('data-w') } }).then(lrnLoad).catch(function () {}); }
     else if (a === 'goldsave') { api('/api/admin/gold', { method: 'PUT', body: { rate: +(($('rp-gd-rate') || {}).value), min: +(($('rp-gd-min') || {}).value) } }).then(function (d) { WL.cfg = d; flash('اتحفظ سعر النقطة وحد السحب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'wdok' || a === 'wdno') {
       if (!confirm(a === 'wdok' ? 'تأكد إنك راجعت الطلب. تأكيد السحب وإشعار المستخدم؟' : 'ترفض الطلب؟ النقاط مش هترجع للمستخدم.')) return;
