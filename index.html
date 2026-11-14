@@ -11064,6 +11064,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -16040,10 +16042,33 @@ document.addEventListener('click', function (e) {
   }
   function userNovelsInList() { try { return novels.some(function (n) { return n.isUser; }); } catch (e) { return false; } }
   function stripUserNovels() { try { novels = novels.filter(function (n) { return !n.isUser; }); } catch (e) {} }
+  function nkey(t, a) { return String((t || '') + '|' + (a || '')).replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, '').replace(/[\u064B-\u0652\u0640\s]+/g, '').toLowerCase(); }
+  /* روايات الموقع المكررة (نفس العنوان+المؤلف): نسيب الأكتر فصول ثم الأعلى مشاهدات ثم الأقدم */
+  function dupStatic() {
+    var g = {}, drop = [];
+    try { novels.forEach(function (n, i) { if (n.isUser) return; var k = nkey(n.title, n.author); (g[k] = g[k] || []).push({ n: n, i: i }); }); } catch (e) { return []; }
+    Object.keys(g).forEach(function (k) {
+      var a = g[k]; if (a.length < 2) return;
+      a.sort(function (x, y) { var cx = (x.n.chapters || []).length, cy = (y.n.chapters || []).length; if (cx !== cy) return cy - cx; var vx = parseInt(String(x.n.views || '0').replace(/\D/g, ''), 10) || 0, vy = parseInt(String(y.n.views || '0').replace(/\D/g, ''), 10) || 0; if (vx !== vy) return vy - vx; return x.i - y.i; });
+      a.slice(1).forEach(function (x) { drop.push(x.n); });
+    });
+    return drop;
+  }
+  window.rpDedupeNovels = function (silent) {
+    var d = dupStatic(); if (!d.length) { if (!silent) { try { alert('مفيش روايات مكررة في الموقع ✅'); } catch (e) {} } return 0; }
+    if (!silent && !confirm('لقيت ' + d.length + ' نسخة مكررة. أشيلها وأسيب نسخة واحدة من كل رواية (الأكتر فصول والأعلى مشاهدات)؟')) return 0;
+    novels = novels.filter(function (n) { return d.indexOf(n) < 0; });
+    try { saveAllData(); } catch (e) {} try { applySiteConfiguration(); } catch (e) {} try { if (typeof renderAdminNovelsList === 'function') renderAdminNovelsList(); } catch (e) {}
+    try { if (typeof renderNovelsGrid === 'function') renderNovelsGrid(); } catch (e) {}
+    if (!silent) { try { alert('اتشالت ' + d.length + ' نسخة مكررة ✅ — دلوقتي صدّر الموقع وارفعه على GitHub.'); } catch (e) {} }
+    return d.length;
+  };
+  setInterval(function () { try { if (isReaderOnlyMode) return; var h = document.getElementById('novel-order-hint'); if (!h || document.getElementById('rp-dedupe-btn')) return; var n = dupStatic().length; var b = document.createElement('button'); b.id = 'rp-dedupe-btn'; b.type = 'button'; b.textContent = '🧹 إزالة الروايات المكررة' + (n ? ' (' + n + ')' : ''); b.style.cssText = 'display:block;margin:0 0 10px;padding:10px 14px;border-radius:12px;background:#b45309;color:#fff;font-weight:800;font-size:13px'; b.onclick = function () { window.rpDedupeNovels(false); b.remove(); }; h.parentNode.insertBefore(b, h); } catch (e) {} }, 2000);
+  setTimeout(function () { try { if (!isReaderOnlyMode) return; var dd = dupStatic(); if (dd.length) { novels = novels.filter(function (n) { return dd.indexOf(n) < 0; }); if (typeof renderHeroBanner === 'function') renderHeroBanner(); if (typeof renderNovelsGrid === 'function') renderNovelsGrid(); } } catch (e) {} }, 400);
   function mergeNovels(data) {
     if (!data || !Array.isArray(data.novels)) return;
     try { if (!isReaderOnlyMode) return; } catch (e) {}
-    stripUserNovels();
+    stripUserNovels(); try { var dd = dupStatic(); if (dd.length) novels = novels.filter(function (n) { return dd.indexOf(n) < 0; }); } catch (e) {}
     /* منع التكرار: نسخة السيرفر بتتخفى لو الرواية موجودة في الموقع (srcUserNovel أو نفس العنوان+المؤلف)، ولو متكررة على السيرفر بنعرض نسخة واحدة (الأكتر فصول ثم الأحدث) */
     var nk = function (t, a) { return String((t || '') + '|' + (a || '')).replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, '').replace(/[\u064B-\u0652\u0640\s]+/g, '').toLowerCase(); };
     var seenSite = {}, srcIds = {};
