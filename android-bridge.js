@@ -439,7 +439,7 @@
   'html.is-native-app[data-view="reader"] #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))!important}',
 
   /* ---- الهيدر: شريط أخضر يتحرك مع الصفحة ---- */
-  'html.is-native-app header.sticky{position:sticky!important;top:0!important;z-index:40!important;background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-dark))!important;border:0!important;border-radius:0 0 26px 26px;box-shadow:0 6px 24px rgba(2,44,34,.35)!important;backdrop-filter:none!important}',
+  'html.is-native-app header.sticky{position:sticky!important;top:var(--sat,0px)!important;z-index:40!important;background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-dark))!important;border:0!important;border-radius:0 0 26px 26px;box-shadow:0 6px 24px rgba(2,44,34,.35)!important;backdrop-filter:none!important}',
   'html.is-native-app header.sticky>div:first-child{height:60px!important;padding-left:14px!important;padding-right:14px!important}',
   'html.is-native-app header #header-site-title{font-size:0!important;line-height:1.3;color:#fff!important}',
   'html.is-native-app header #header-site-title::after{content:"RadPad";font-family:Poppins,Cairo,system-ui,sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:.3px;color:#fff}',
