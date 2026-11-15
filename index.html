@@ -11801,8 +11801,24 @@ document.addEventListener('click', function (e) {
     if (nid === 'news') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { window.__rpOpenNews(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
     if (nid === 'msgs' || nid === 'pend') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { (nid === 'msgs' ? window.__rpOpenMsgs : window.__rpOpenPending)(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
     if (nid === 'pay') { setTimeout(function () { try { window.rpOpenAccount(); setTimeout(function () { try { if (window.__rpOpenPremium) window.__rpOpenPremium(); } catch (e) {} }, 250); } catch (e) {} }, 150); return; }
+    var mc = /^(?:tts)?(.+?)#(\d+)$/.exec(String(nid));
+    if (mc) { setTimeout(function () { rpOpenRefChapter(mc[1], +mc[2], 0); }, 150); return; }
     setTimeout(function () { try { requestNovelAccess(nid, 'details'); } catch (e) { flash('الرواية مش متاحة دلوقتي'); } }, 150);
   };
+  /* يفتح الفصل مباشرة (الإشعار «الفصل العاشر اتحوّل لصوت» → يودّي على الفصل نفسه) */
+  function rpOpenRefChapter(nid, idx, tries) {
+    var n = null; try { n = novels.find(function (x) { return x.id === nid; }); } catch (e) {}
+    if (n && n.chapters && n.chapters[idx]) { try { openChapterReader(nid, idx); } catch (e) { try { requestNovelAccess(nid, 'details'); } catch (e2) {} } return; }
+    if (tries < 12) { if (tries === 3) { try { loadUserNovels(); } catch (e) {} } setTimeout(function () { rpOpenRefChapter(nid, idx, tries + 1); }, 700); return; }
+    try { if (n) requestNovelAccess(nid, 'details'); else flash('الفصل مش متاح دلوقتي'); } catch (e) { flash('الفصل مش متاح دلوقتي'); }
+  }
+  /* الضغط على إشعار الموبايل: التطبيق (native) بيبعت window.__rpPendingRef = 'token|ref' وده بيفتح المكان */
+  window.__rpDeepLink = function () {
+    var r = window.__rpPendingRef; if (!r) return; window.__rpPendingRef = ''; window.__rpDoneRef = r;
+    var ref = String(r).split('|').slice(1).join('|'); if (!ref) return;
+    setTimeout(function () { try { window.rpOpenFeedNovel(ref); } catch (e) {} }, 600);
+  };
+  setTimeout(function () { try { window.__rpDeepLink(); } catch (e) {} }, 2500);
   window.__rp = { api: api, base: base, me: me, token: token, isPrem: isPrem, esc: esc, flash: flash, cldUpload: cldUpload, cldReady: cldReady, findNovel: findNovel, lsGet: lsGet, lsSet: lsSet,
     topicSub: topicSub, topicUnsub: topicUnsub, loadFeed: loadFeed, syncTopics: syncTopics, loadUserNovels: function () { return loadUserNovels(); }, USER_KEY: USER_KEY };
 
