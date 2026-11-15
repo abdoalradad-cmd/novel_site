@@ -11855,6 +11855,7 @@ document.addEventListener('click', function (e) {
     document.documentElement.style.overflow = 'hidden';
     render(); refresh();
   };
+  window.rpCloseAccount = function () { close(); };
   function close() {
     var pg = $('rp-acct-page'); if (!pg) return;
     pg.classList.remove('open', 'editing'); pg.setAttribute('aria-hidden', 'true');
@@ -15794,49 +15795,76 @@ html.is-native-app.lib-open #app-lib,html.is-native-app.search-open #app-search{
 #chapters-list-grid>div:active{box-shadow:inset 4px 4px 9px var(--g-d),inset -4px -4px 9px var(--g-l)!important}
 #chapters-list-grid>div>div:first-child>div:first-child{background:var(--g-bg)!important;box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}
 #chapters-list-grid h4,#chapters-list-grid>div:hover h4{color:var(--g-t)!important}
-/* ===== الشريط السفلي: زجاج سائل (Liquid Glass) — الأيقونة النشطة بتطلع في فقاعة وبيتعمل حواليها تقعير ===== */
-html.is-native-app #app-tabbar{left:16px!important;right:16px!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;height:64px;padding:0 6px!important;border-radius:32px!important;background:transparent!important;border:0!important;align-items:center!important;box-shadow:0 14px 30px -10px rgba(15,23,42,.32),0 3px 8px rgba(15,23,42,.10)!important;isolation:isolate;z-index:9000}
-html.is-native-app.dark #app-tabbar{box-shadow:0 14px 30px -10px rgba(0,0,0,.65),0 3px 8px rgba(0,0,0,.3)!important}
-html.is-native-app #app-tabbar::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:32px;pointer-events:none;
-  background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.26) 55%,rgba(255,255,255,.4));
-  -webkit-backdrop-filter:blur(22px) saturate(190%) brightness(1.04);backdrop-filter:blur(22px) saturate(190%) brightness(1.04);
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.9),inset 0 -1.5px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.55),inset 0 -14px 22px -14px rgba(255,255,255,.55);
-  -webkit-mask-image:radial-gradient(circle 33px at var(--tb-x,50%) 2px,transparent 31px,#000 33px);mask-image:radial-gradient(circle 33px at var(--tb-x,50%) 2px,transparent 31px,#000 33px);transition:-webkit-mask-position .3s}
-html.is-native-app.dark #app-tabbar::before{background:linear-gradient(135deg,rgba(60,80,72,.5),rgba(18,28,26,.34) 55%,rgba(40,58,52,.42));
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.28),inset 0 -1.5px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.14)}
-/* مقبض الشريط الصغير تحت */
-html.is-native-app #app-tabbar::after{content:"";position:absolute;left:50%;bottom:6px;width:30%;max-width:130px;height:3.5px;border-radius:4px;transform:translateX(-50%);background:rgba(15,23,42,.38);pointer-events:none}
-html.is-native-app.dark #app-tabbar::after{background:rgba(255,255,255,.55)}
-html.is-native-app #app-tabbar button{height:100%;padding:0 0 8px!important;color:rgba(15,23,42,.72)!important;gap:0!important;background:none!important;-webkit-tap-highlight-color:transparent}
-html.is-native-app.dark #app-tabbar button{color:rgba(255,255,255,.78)!important}
-html.is-native-app #app-tabbar button span{display:none!important}
-html.is-native-app #app-tabbar button i{width:46px!important;height:46px!important;font-size:1.2rem!important;background:transparent!important;box-shadow:none!important;color:inherit!important;border-radius:50%!important;transition:transform .45s cubic-bezier(.2,1.5,.3,1),background .3s,box-shadow .3s,color .2s!important;animation:none!important}
+/* ===== الشريط السفلي: زجاج سائل شفاف — فقاعة بتنزلق بين التابات + تقعير متحرك + اسم تحت كل أيقونة ===== */
+@property --tb-x{syntax:'<length>';inherits:true;initial-value:0px}
+html.is-native-app #app-tabbar{left:14px!important;right:14px!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;height:66px;padding:0 4px!important;border-radius:33px!important;background:transparent!important;border:0!important;align-items:center!important;box-shadow:0 12px 26px -12px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.07)!important;isolation:isolate;z-index:9340;transition:--tb-x .55s cubic-bezier(.3,1.3,.4,1),transform .3s,opacity .2s}
+html.is-native-app.dark #app-tabbar{box-shadow:0 12px 26px -12px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.25)!important}
+html.is-native-app.kb-open #app-tabbar{transform:translateY(140%);opacity:0;pointer-events:none}
+html.is-native-app #app-tabbar::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:33px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.34),rgba(255,255,255,.1) 55%,rgba(255,255,255,.22));
+  -webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.75),inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.4);
+  -webkit-mask-image:radial-gradient(circle 34px at var(--tb-x,50%) 8px,transparent 32px,#000 34px);mask-image:radial-gradient(circle 34px at var(--tb-x,50%) 8px,transparent 32px,#000 34px)}
+html.is-native-app.dark #app-tabbar::before{background:linear-gradient(135deg,rgba(60,80,72,.36),rgba(18,28,26,.18) 55%,rgba(40,58,52,.28));
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.24),inset 0 -1px 0 rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.12)}
+html.is-native-app #app-tabbar::after{display:none!important}
+/* الفقاعة المشتركة اللي بتنزلق */
+#app-tabbar .tb-bub{display:none}
+html.is-native-app #app-tabbar .tb-bub{display:block;position:absolute;z-index:0;top:-18px;left:var(--tb-x,50%);width:52px;height:52px;margin-left:-26px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.4),transparent 55%),linear-gradient(150deg,rgba(var(--brand-primary-rgb),.98),rgba(var(--brand-primary-rgb),.74));
+  box-shadow:0 0 0 4px rgba(255,255,255,.3),0 10px 20px -4px rgba(var(--brand-primary-rgb),.5),inset 0 1.5px 1px rgba(255,255,255,.6)}
+html.is-native-app #app-tabbar .tb-bub.jelly{animation:tbJelly .6s ease}
+@keyframes tbJelly{0%{transform:scale(1,1)}30%{transform:scale(1.2,.84)}60%{transform:scale(.92,1.1)}100%{transform:scale(1,1)}}
+html.is-native-app #app-tabbar button{position:relative;z-index:1;height:100%;padding:0!important;color:rgba(15,23,42,.74)!important;gap:3px!important;background:none!important;-webkit-tap-highlight-color:transparent;justify-content:center!important}
+html.dark.is-native-app #app-tabbar button{color:rgba(255,255,255,.8)!important}
+html.is-native-app #app-tabbar button span{display:block!important;font-size:.64rem;line-height:1;font-weight:800;letter-spacing:0;text-shadow:0 1px 0 rgba(255,255,255,.45);transition:color .25s,transform .45s cubic-bezier(.3,1.4,.4,1)}
+html.dark.is-native-app #app-tabbar button span{text-shadow:none}
+html.is-native-app #app-tabbar button i{width:30px!important;height:26px!important;font-size:1.12rem!important;background:transparent!important;box-shadow:none!important;color:inherit!important;border-radius:0!important;transition:transform .5s cubic-bezier(.3,1.4,.4,1),color .25s!important;animation:none!important}
 html.is-native-app #app-tabbar button:active i{transform:scale(.88)!important}
-html.is-native-app #app-tabbar button.on i{transform:translateY(-28px)!important;color:#fff!important;
-  background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.38),transparent 55%),linear-gradient(150deg,rgba(var(--brand-primary-rgb),.98),rgba(var(--brand-primary-rgb),.72))!important;
-  box-shadow:0 0 0 4px rgba(255,255,255,.34),0 10px 20px -4px rgba(var(--brand-primary-rgb),.55),inset 0 1.5px 1px rgba(255,255,255,.6)!important}
-html.is-native-app #app-tabbar button.on:active i{transform:translateY(-28px) scale(.92)!important}
-/* مساحة تحت المحتوى علشان الشريط العايم ما يغطيش آخر الصفحة */
-html.is-native-app body{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important}
-html.is-native-app #toast{bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
+html.is-native-app #app-tabbar button.on i{transform:translateY(-21px)!important;color:#fff!important;background:transparent!important;box-shadow:none!important}
+html.is-native-app #app-tabbar button.on span{color:rgb(var(--brand-primary-rgb))!important;transform:translateY(1px)}
+html.dark.is-native-app #app-tabbar button.on span{color:var(--brand-accent)!important}
+html.is-native-app #app-tabbar button.on:active i{transform:translateY(-21px) scale(.9)!important}
+/* مساحة تحت المحتوى والصفحات الكاملة علشان الشريط العايم ما يغطيش آخر الصفحة */
+html.is-native-app body{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important}
+html.is-native-app #rp-all-page,html.is-native-app #rp-acct-page,html.is-native-app #rp-notif-page,html.is-native-app #rp-prof-page,html.is-native-app #app-search,html.is-native-app #app-lib{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;box-sizing:border-box}
+html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
 </style>
 <script id="rp-glassbar-module">
 (function () {
-  /* الشريط السفلي (زجاج سائل): بنحسب مكان الأيقونة النشطة علشان التقعير يتعمل حواليها بالظبط */
-  var bar = null, raf = 0;
-  function place() {
+  /* الشريط السفلي (زجاج سائل): فقاعة مشتركة بتنزلق + تقعير متحرك + قفل أي صفحة مفتوحة عند الضغط */
+  var bar = null, bub = null, raf = 0, root = document.documentElement;
+  function place(first) {
     raf = 0; if (!bar) return;
     var on = bar.querySelector('button.on') || bar.querySelector('button'); if (!on) return;
     var x = on.offsetLeft + on.offsetWidth / 2; if (!isFinite(x) || x <= 0) return;
-    bar.style.setProperty('--tb-x', x + 'px');
+    if (first) { var tr = bar.style.transition; bar.style.transition = 'none'; bar.style.setProperty('--tb-x', x + 'px'); void bar.offsetWidth; bar.style.transition = tr; }
+    else bar.style.setProperty('--tb-x', x + 'px');
   }
-  function sched() { if (!raf) raf = requestAnimationFrame(place); }
+  function sched() { if (!raf) raf = requestAnimationFrame(function () { place(false); }); }
+  function jelly() { if (!bub) return; bub.classList.remove('jelly'); void bub.offsetWidth; bub.classList.add('jelly'); setTimeout(function () { bub && bub.classList.remove('jelly'); }, 650); }
+  function closeOverlays() {
+    ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll', 'rpCloseAccount'].forEach(function (f) { try { if (window[f]) window[f](); } catch (e) {} });
+  }
   function attach(b) {
-    bar = b; place();
-    try { new MutationObserver(sched).observe(bar, { attributes: true, attributeFilter: ['class'], subtree: true, childList: true }); } catch (e) {}
-    try { if (window.ResizeObserver) new ResizeObserver(sched).observe(bar); } catch (e) {}
-    window.addEventListener('resize', sched); window.addEventListener('orientationchange', sched);
-    bar.addEventListener('click', function () { setTimeout(sched, 30); setTimeout(sched, 260); }, true);
+    bar = b;
+    bub = document.createElement('span'); bub.className = 'tb-bub'; bar.insertBefore(bub, bar.firstChild);
+    place(true);
+    try { new MutationObserver(sched).observe(bar, { attributes: true, attributeFilter: ['class'], subtree: true }); } catch (e) {}
+    try { if (window.ResizeObserver) new ResizeObserver(function () { place(true); }).observe(bar); } catch (e) {}
+    window.addEventListener('resize', function () { place(true); });
+    bar.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('button'); if (!btn) return;
+      var id = btn.dataset.tab;
+      // الضغط على أي تاب بيقفل الصفحات المفتوحة فوق (إلا حسابي/بحث/المكتبة اللي بيفتحوا صفحاتهم بنفسهم)
+      if (id === 'home' || id === 'library') closeOverlays();
+      else if (id === 'account') ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll'].forEach(function (f) { try { if (window[f]) window[f](); } catch (e) {} });
+      else ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll', 'rpCloseAccount'].forEach(function (f) { try { if (window[f]) window[f](); } catch (e) {} });
+      jelly(); setTimeout(sched, 30); setTimeout(sched, 300);
+    }, true);
+    // إخفاء الشريط وقت الكتابة (الكيبورد)
+    document.addEventListener('focusin', function (e) { var t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) && !/^(checkbox|radio|button|range|file)$/.test(t.type || '') && !(t.closest && t.closest('#app-search'))) root.classList.add('kb-open'); });
+    document.addEventListener('focusout', function () { setTimeout(function () { var a = document.activeElement; if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) root.classList.remove('kb-open'); }, 120); });
     setTimeout(sched, 400); setTimeout(sched, 1500);
   }
   var t = 0, iv = setInterval(function () {

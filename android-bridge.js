@@ -439,7 +439,7 @@
   'html.is-native-app[data-view="reader"] #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))!important}',
 
   /* ---- الهيدر: شريط أخضر يتحرك مع الصفحة ---- */
-  'html.is-native-app header.sticky{position:relative!important;top:auto!important;background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-dark))!important;border:0!important;border-radius:0 0 26px 26px;box-shadow:0 6px 24px rgba(2,44,34,.35)!important;backdrop-filter:none!important}',
+  'html.is-native-app header.sticky{position:sticky!important;top:0!important;z-index:40!important;background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-dark))!important;border:0!important;border-radius:0 0 26px 26px;box-shadow:0 6px 24px rgba(2,44,34,.35)!important;backdrop-filter:none!important}',
   'html.is-native-app header.sticky>div:first-child{height:60px!important;padding-left:14px!important;padding-right:14px!important}',
   'html.is-native-app header #header-site-title{font-size:0!important;line-height:1.3;color:#fff!important}',
   'html.is-native-app header #header-site-title::after{content:"RadPad";font-family:Poppins,Cairo,system-ui,sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:.3px;color:#fff}',
@@ -511,7 +511,7 @@
   '#app-tabbar{display:none}',
   'html.is-native-app #app-tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:9000;direction:rtl;justify-content:space-around;align-items:stretch;background:#fff;border-radius:24px 24px 0 0;box-shadow:0 -6px 28px rgba(15,23,42,.14);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));font-family:var(--ui-font,Cairo,sans-serif)}',
   'html.is-native-app.dark #app-tabbar{background:#0f1a17;box-shadow:0 -6px 28px rgba(0,0,0,.5)}',
-  'html.is-native-app[data-view="reader"] #app-tabbar,html.is-native-app.search-open #app-tabbar{display:none}',
+  'html.is-native-app[data-view="reader"] #app-tabbar{display:none}',
   '#app-tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:0;padding:6px 0 4px;color:#64748b;font:inherit;font-size:.68rem;font-weight:700;position:relative}',
   'html.dark #app-tabbar button{color:#94a3b8}',
   '#app-tabbar button i{font-size:1.15rem;width:3.1rem;height:1.9rem;display:flex;align-items:center;justify-content:center;border-radius:999px;transition:background .2s,color .2s,transform .15s}',
