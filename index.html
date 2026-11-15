@@ -12613,7 +12613,7 @@ document.addEventListener('click', function (e) {
       ttsSel('rd-learn', 'تعلّم الكلمات العامية الجديدة قبل التحويل (Gemini يشكّلها ويحفظها في القاموس)', [['1', 'شغّال'], ['0', 'مقفول']], r.learn === false ? '0' : '1') +
       ttsSel('rd-hum', 'التحسين البشري (دفء + وقفات الانفعال)', [['1', 'شغّال'], ['0', 'مقفول (صوت خام)']], r.humanize === false ? '0' : '1') +
       ttsSel('rd-dia', 'قوة تدريب اللهجة المصرية (لكل الشخصيات)', [['2', 'أقصى — نطق مصري قاهري مضبوط لكل شخصية (الأفضل)'], ['1', 'قوي'], ['0', 'عادي (من غير تدريب لهجة)']], String(r.dialect == null ? 2 : r.dialect)) +
-      ttsSel('rd-hum', 'قوة الواقعية البشرية (تنفّس · تردد · إيقاع طبيعي)', [['2', 'أقصى — كأنه إنسان حقيقي بيتكلم (الأفضل)'], ['1', 'خفيف'], ['0', 'مطفي']], String(r.human == null ? 2 : r.human)) +
+      ttsSel('rd-hlv', 'قوة الواقعية البشرية (تنفّس · إيقاع طبيعي)', [['1', 'متوازن — الأفضل (الافتراضي)'], ['2', 'أقصى — تمثيل بشري قوي'], ['0', 'مطفي']], String(r.human == null ? 1 : r.human)) +
       ttsInp('rd-pause', 'الوقفة بين المشاهد (ملي ثانية)', r.pauseMs == null ? 380 : r.pauseMs, '380', 1) +
       ttsInp('rd-batch', 'عدد المشاهد في الطلب الواحد (Mega-Batch)', r.batch || 7, '7', 1) +
       ttsInp('rd-pchars', 'حجم الجزء بالحروف (0 = تلقائي)', r.partChars || 0, '0', 1) +
@@ -13081,7 +13081,7 @@ document.addEventListener('click', function (e) {
       bl('rp-tt-rb'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
       if ($('rp-tt-dict')) bd.dict = $('rp-tt-dict').value;
 
-      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), analysis: g('rd-am'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', learn: g('rd-learn') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), dialect: g('rd-dia'), human: g('rd-hum'), narrator: g('rd-nar'), archMap: {}, pers: {} };
+      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), analysis: g('rd-am'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', learn: g('rd-learn') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), dialect: g('rd-dia'), human: g('rd-hlv'), narrator: g('rd-nar'), archMap: {}, pers: {} };
         RDA.forEach(function (a) { var v = g('rd-am-' + a[0]); if (v) rdo.archMap[a[0]] = v; });
         RDP.forEach(function (p) { var v = g('rd-pv-' + p[0]), q = g('rd-pp-' + p[0]); if (v || (q && +q)) rdo.pers[p[0]] = { v: v, p: q }; }); bd.rd = rdo; }
       if ($('rp-pc-cap')) { var pc = { dailyMin: g('rp-pc-cap'), freeMin: g('rp-pc-free'), concurrency: g('rp-pc-conc') }; if (TT.tab === 'gemini') { bd.dailyMin = pc.dailyMin; bd.freeMin = pc.freeMin; bd.concurrency = pc.concurrency; } else bd[(String(TT.tab).charAt(0) === 'r' ? 'r' + String(TT.tab).slice(2) : 'g' + String(TT.tab).slice(6))] = pc; }
