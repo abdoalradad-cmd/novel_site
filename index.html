@@ -15796,19 +15796,21 @@ html.is-native-app.lib-open #app-lib,html.is-native-app.search-open #app-search{
 #chapters-list-grid>div>div:first-child>div:first-child{background:var(--g-bg)!important;box-shadow:inset 3px 3px 7px var(--g-d),inset -3px -3px 7px var(--g-l)!important}
 #chapters-list-grid h4,#chapters-list-grid>div:hover h4{color:var(--g-t)!important}
 /* ===== الشريط السفلي: زجاج سائل شفاف — فقاعة بتنزلق بين التابات + تقعير متحرك + اسم تحت كل أيقونة ===== */
-html.is-native-app #app-tabbar{left:14px!important;right:14px!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;height:66px;padding:0 4px!important;border-radius:33px!important;background:transparent!important;border:0!important;align-items:center!important;box-shadow:0 12px 26px -12px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.07)!important;isolation:isolate;z-index:9340;transition:transform .3s,opacity .2s}
+@property --tb-x{syntax:'<length>';inherits:true;initial-value:50px}
+html.is-native-app #app-tabbar{left:14px!important;right:14px!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;height:66px;padding:0 4px!important;border-radius:33px!important;background:transparent!important;border:0!important;align-items:center!important;box-shadow:0 12px 26px -12px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.07)!important;isolation:isolate;z-index:9340;transition:--tb-x .42s cubic-bezier(.34,1.2,.5,1),transform .3s,opacity .2s}
 html.is-native-app.dark #app-tabbar{box-shadow:0 12px 26px -12px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.25)!important}
 html.is-native-app.kb-open #app-tabbar{transform:translateY(140%);opacity:0;pointer-events:none}
 html.is-native-app #app-tabbar::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:33px;pointer-events:none;
   background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.03) 55%,rgba(255,255,255,.12));
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  -webkit-mask-image:radial-gradient(circle 34px at var(--tb-x,50%) 8px,transparent 32px,#000 34px);mask-image:radial-gradient(circle 34px at var(--tb-x,50%) 8px,transparent 32px,#000 34px);
   box-shadow:inset 0 1.5px 0 rgba(255,255,255,.75),inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.4);}
 html.is-native-app.dark #app-tabbar::before{background:linear-gradient(135deg,rgba(60,80,72,.24),rgba(18,28,26,.08) 55%,rgba(40,58,52,.16));
   box-shadow:inset 0 1.5px 0 rgba(255,255,255,.24),inset 0 -1px 0 rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.12)}
 html.is-native-app #app-tabbar::after{display:none!important}
 /* الفقاعة المشتركة اللي بتنزلق */
 #app-tabbar .tb-bub{display:none}
-html.is-native-app #app-tabbar .tb-bub{display:block;position:absolute;z-index:0;top:-18px;left:0;width:52px;height:52px;transform:translateX(calc(var(--tb-x,50px) - 26px));transition:transform .42s cubic-bezier(.34,1.25,.5,1);will-change:transform;border-radius:50%;pointer-events:none;
+html.is-native-app #app-tabbar .tb-bub{display:block;position:absolute;z-index:0;top:-18px;left:0;width:52px;height:52px;transform:translateX(calc(var(--tb-x,50px) - 26px));border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.4),transparent 55%),linear-gradient(150deg,rgba(var(--brand-primary-rgb),.98),rgba(var(--brand-primary-rgb),.74));
   box-shadow:0 0 0 4px rgba(255,255,255,.3),0 10px 20px -4px rgba(var(--brand-primary-rgb),.5),inset 0 1.5px 1px rgba(255,255,255,.6)}
 html.is-native-app #app-tabbar .tb-bub.jelly{animation:tbJelly .45s ease}
