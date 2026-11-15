@@ -6578,6 +6578,8 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
             cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
+            cd.querySelectorAll('#app-sat,#app-lib,#app-search,#app-tabbar,#rp-quote-btn,#rp-busy,#rp-busy-st,#rp-upd,#app-mode-css').forEach(n => n.remove());
+            cd.classList.remove('is-native-app'); if (cd.style) cd.style.removeProperty('--sat');
             cd.querySelectorAll('script[src*="apis.google.com"], iframe[ng-non-bindable], #PING_IFRAME_FORM_DETECTION').forEach(n => n.remove());
         }
         window.cleanCloneForPublish = cleanCloneForPublish;
@@ -9740,38 +9742,17 @@ document.addEventListener('click', function (e) {
         function () {
           if (my !== TTS.gen) return;
           NXC.noteFail();
-          speakChunk(my, true);
+          TTS.state = 'idle'; TTS.gen++; try { updateUI(); } catch (e) {}
+          toast('الصوت لسه بيتجهّز أو حصلت مشكلة مؤقتة، جرّب كمان شوية');
         },
         function () { return my !== TTS.gen || TTS.state !== 'playing'; },
         function (i) { if (my !== TTS.gen || i === TTS.idx) return; TTS.idx = i; markCurrent(); updateUI(); });
       return;
     }
 
-    const SP = window.SpeechPrep;
-    const u = new SpeechSynthesisUtterance(SP ? SP.process(c.text) : c.text);
-    const v = currentVoice();
-    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'ar-EG'; }
-    const st = SP ? SP.styleFor(c.kind, c.text) : { rate: 1, pitch: 1 };
-    u.rate = Math.max(0.5, Math.min(2, TTS.rate * st.rate));
-    u.pitch = Math.max(0.5, Math.min(1.5, st.pitch));
-    u.onend = function () {
-      if (my !== TTS.gen) return;
-      const gap = SP ? SP.pauseFor(c, TTS.chunks[TTS.idx + 1]) : 0;
-      setTimeout(function () {
-        if (my !== TTS.gen) return;
-        TTS.idx++;
-        speakChunk(my);
-      }, gap);
-    };
-    u.onerror = function (e) {
-      if (my !== TTS.gen) return;
-      if (e && (e.error === 'canceled' || e.error === 'interrupted')) return;
-      TTS.idx++;
-      speakChunk(my);
-    };
-    markCurrent();
-    updateUI();
-    speechSynthesis.speak(u);
+    /* أداة صوت الجهاز القديمة اتشالت: لو الصوت الجاهز لسه مش موجود نوقف ونبلّغ بدل ما نقرا بصوت آلي */
+    TTS.state = 'idle'; TTS.gen++; try { updateUI(); } catch (e) {}
+    toast('الصوت المصري للفصل ده لسه بيتجهّز، هيبقى جاهز قريب');
   }
 
   function startFrom(i) {
@@ -9806,7 +9787,6 @@ document.addEventListener('click', function (e) {
   function begin(from) {
     if (window.NXCloudTTS && !window.NXCloudTTS.allowed()) { window.NXCloudTTS.upsell(); return; }
     if (window.NXCloudTTS && !from) window.NXCloudTTS.resetSession();
-    if (!supported) { toast('متصفحك لا يدعم القراءة الصوتية'); return; }
     buildChunks();
     if (!TTS.chunks.length) { toast('مفيش نص للقراءة في الفصل ده'); return; }
     const bar = document.getElementById('tts-bar');
@@ -12549,7 +12529,7 @@ document.addEventListener('click', function (e) {
     h += '<div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttsrun" data-p="' + prov + '">' + ic('play') + ' شغّل دفعة</button>' + (q.failed || (P.pausedUntil && P.pausedUntil > Date.now()) ? '<button type="button" class="rp-btn sm sec" data-act="ttsretry" data-p="' + prov + '">' + ic('rotate') + ' إعادة المحاولة</button>' : '') + '</div></div>';
     return h;
   }
-  var PV = [['gemini', 'جوجل 1', '🟩', '#bbf7d0'], ['gemini2', 'جوجل 2', '🟨', '#fde68a'], ['gemini3', 'جوجل 3', '🟧', '#fed7aa'], ['gemini4', 'جوجل 4', '🟥', '#fecaca'], ['gemini5', 'جوجل 5', '🟪', '#e9d5ff'], ['gemini6', 'جوجل 6', '🟫', '#e7d5c3'], ['rd1', 'الرداد 1', '🎙️', '#bbf7d0'], ['rd2', 'الرداد 2', '🎙️', '#fde68a'], ['rd3', 'الرداد 3', '🎙️', '#fed7aa'], ['rd4', 'الرداد 4', '🎙️', '#fecaca'], ['rd5', 'الرداد 5', '🎙️', '#e9d5ff'], ['rd6', 'الرداد 6', '🎙️', '#e7d5c3'], ['azure', 'Azure', '🟦', '#bfdbfe']];
+  var PV = [['gemini', 'جوجل 1', '🟩', '#bbf7d0'], ['gemini2', 'جوجل 2', '🟨', '#fde68a'], ['gemini3', 'جوجل 3', '🟧', '#fed7aa'], ['gemini4', 'جوجل 4', '🟥', '#fecaca'], ['gemini5', 'جوجل 5', '🟪', '#e9d5ff'], ['gemini6', 'جوجل 6', '🟫', '#e7d5c3'], ['rd1', 'الرداد 1', '🎙️', '#bbf7d0'], ['rd2', 'الرداد 2', '🎙️', '#fde68a'], ['rd3', 'الرداد 3', '🎙️', '#fed7aa'], ['rd4', 'الرداد 4', '🎙️', '#fecaca'], ['rd5', 'الرداد 5', '🎙️', '#e9d5ff'], ['rd6', 'الرداد 6', '🎙️', '#e7d5c3']];
   function pvInfo(id) { for (var i = 0; i < PV.length; i++) if (PV[i][0] === id) return PV[i]; return PV[0]; }
   function gcf(c, prov) { return prov === 'gemini' ? (c || {}) : ((c || {})[(String(prov).charAt(0) === 'r' ? 'r' + String(prov).slice(2) : 'g' + String(prov).slice(6))] || {}); }
   function ttsInp(id, lbl, val, ph, ltr) { return '<label class="rp-lbl">' + lbl + '</label><input id="' + id + '" class="rp-in"' + (ltr ? ' dir="ltr"' : '') + ' value="' + esc(val == null ? '' : val) + '" placeholder="' + (ph || '') + '">'; }
@@ -12582,6 +12562,7 @@ document.addEventListener('click', function (e) {
       '<div class="rp-row" style="margin-top:8px"><button type="button" class="rp-btn sm" data-act="lrnsend"' + (LR.busy ? ' disabled' : '') + '>' + (LR.busy ? 'بتسمع وتتعلّم…' : 'علّمها') + '</button></div>' +
       (LR.msg ? '<div class="rp-sub"><b>' + esc(LR.msg) + '</b></div>' : '') +
       '<label class="rp-lbl" style="margin-top:12px">أو تصحيح يدوي بالتشكيل</label><div class="rp-row" style="gap:8px"><input id="lrn-w2" class="rp-in" placeholder="الكلمة" style="flex:1"><input id="lrn-p2" class="rp-in" placeholder="مشكولة: لَجْنَة" style="flex:1"><button type="button" class="rp-btn sm" data-act="lrnman">حفظ</button></div>' +
+      '<div class="rp-row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="rp-btn sm sec" data-act="lrnexp">⬇ نسخة احتياطية للكلمات</button><label class="rp-btn sm sec" style="cursor:pointer">⬆ استرجاع نسخة<input id="lrn-imp" type="file" accept=".json,application/json" style="display:none"></label></div><div class="rp-sub">الكلمات المتعلّمة محفوظة دائمًا ومبتتمسحش مع أي تحديث (حد أقصى 20000 كلمة).</div>' +
       '<div class="rp-sub" style="margin-top:10px">كلمات محفوظة: <b>' + (d.total || 0) + '</b></div>' +
       (d.words.length ? d.words.slice(0, 15).map(function (w) { return '<div class="rp-item" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>' + esc(w[0]) + ' ← <b>' + esc(w[1]) + '</b></span><button type="button" class="rp-btn sm" data-act="lrndel" data-w="' + esc(w[0]) + '">حذف</button></div>'; }).join('') : '');
   }
@@ -12615,6 +12596,7 @@ document.addEventListener('click', function (e) {
       ttsSel('rd-skip', 'السرد', [['0', 'قراءة السرد بصوت الراوي'], ['1', 'تخطي السرد وقراءة الحوار بس']], r.skipNarration ? '1' : '0') +
       ttsSel('rd-learn', 'تعلّم الكلمات العامية الجديدة قبل التحويل (Gemini يشكّلها ويحفظها في القاموس)', [['1', 'شغّال'], ['0', 'مقفول']], r.learn === false ? '0' : '1') +
       ttsSel('rd-hum', 'التحسين البشري (دفء + وقفات الانفعال)', [['1', 'شغّال'], ['0', 'مقفول (صوت خام)']], r.humanize === false ? '0' : '1') +
+      ttsSel('rd-dia', 'قوة تدريب اللهجة المصرية (لكل الشخصيات)', [['2', 'أقصى — نطق مصري قاهري مضبوط لكل شخصية (الأفضل)'], ['1', 'قوي'], ['0', 'عادي (من غير تدريب لهجة)']], String(r.dialect == null ? 2 : r.dialect)) +
       ttsInp('rd-pause', 'الوقفة بين المشاهد (ملي ثانية)', r.pauseMs == null ? 380 : r.pauseMs, '380', 1) +
       ttsInp('rd-batch', 'عدد المشاهد في الطلب الواحد (Mega-Batch)', r.batch || 7, '7', 1) +
       ttsInp('rd-pchars', 'حجم الجزء بالحروف (0 = تلقائي)', r.partChars || 0, '0', 1) +
@@ -12626,7 +12608,8 @@ document.addEventListener('click', function (e) {
       '<div class="rp-sub" style="margin-top:8px"><b>تثبيت صوت لكل نوع شخصية (فاضي = تلقائي):</b></div>' +
       RDA.map(function (a) { return ttsSel('rd-am-' + a[0], a[1], [['', 'تلقائي']].concat(pl), am[a[0]] || ''); }).join('') +
       '<div class="rp-sub" style="margin-top:8px"><b>تعديل صوت/نغمة كل شخصية (اسم صوت جوجل فاضي = الافتراضي، النغمة 0.7–1.4، 0 = الافتراضي):</b></div>' +
-      RDP.map(function (p) { var o = pe[p[0]] || {}; return '<div class="rp-row">' + ttsInp('rd-pv-' + p[0], p[1] + ' — الصوت', o.v || '', p[2], 1) + ttsInp('rd-pp-' + p[0], 'النغمة', o.p || 0, '0', 1) + '</div>'; }).join('');
+      RDP.map(function (p) { var o = pe[p[0]] || {}; return '<div class="rp-row">' + ttsInp('rd-pv-' + p[0], p[1] + ' — الصوت', o.v || '', p[2], 1) + ttsInp('rd-pp-' + p[0], 'النغمة', o.p || 0, '0', 1) + '<button type="button" class="rp-btn sm sec" data-act="rdsample" data-pid="' + p[0] + '">▶ جرّب</button></div>'; }).join('') +
+      '<div class="rp-sub" id="rd-sample-msg" style="margin-top:6px">' + esc(TT.smMsg || 'دوس «جرّب» تسمع الشخصية بجملة مصرية. لو نطقها ضعيف غيّر اسم صوتها من الخانة وحفظ وجرّب تاني.') + '</div>';
     return h;
   }
   function nvCard(n, rank, act, prov) {
@@ -12635,7 +12618,7 @@ document.addEventListener('click', function (e) {
     return '<div class="rp-item" style="margin-top:6px' + (n.run ? ';border:1.5px solid #34d399' : '') + '"><div style="min-width:0"><b>' + (rank ? rank + '. ' : '') + esc(n.title || n.nid) + '</b>' + (n.run ? ' <span class="rp-pill live">⚙️ بتتحوّل دلوقتي</span>' : '') + '<div class="rp-sub" style="margin:2px 0">' + n.d + ' / ' + n.n + ' فصل جاهز (' + pc + '%)</div></div>' +
       '<div class="rp-row" style="flex-wrap:wrap;margin-top:4px">' +
       (act ? '<span class="rp-row" style="gap:4px;flex-wrap:nowrap"><input type="number" min="1" inputmode="numeric" class="rp-in" id="rp-pos-' + nid + '" value="' + rank + '" style="width:64px;padding:8px;text-align:center"><button type="button" class="rp-btn sm sec" data-act="ttspos" data-n="' + nid + '">ثبّت الترتيب</button></span>' : '') +
-      '<button type="button" class="rp-btn sm sec" data-act="ttsredo" data-n="' + nid + '" data-p="' + prov + '">' + ic('rotate') + ' إعادة تحويلها</button><button type="button" class="rp-btn sm sec" data-act="ttsinsp" data-n="' + nid + '">🔍 فحص الأصوات</button></div>' +
+      '<button type="button" class="rp-btn sm sec" data-act="ttsredo" data-n="' + nid + '" data-p="' + prov + '">' + ic('rotate') + ' إعادة تحويلها</button></div>' +
       '<div class="rp-row" style="flex-wrap:nowrap;gap:4px;margin-top:6px"><select id="rp-mv-' + nid + '" class="rp-in" style="padding:8px;flex:1;min-width:0">' + opts + '</select><button type="button" class="rp-btn sm sec" data-act="ttsmove" data-n="' + nid + '">انقلها</button><button type="button" class="rp-btn sm red" data-act="ttsdel" data-n="' + nid + '">حذف</button></div>' +
       (insp ? '<div class="rp-sub" style="margin-top:6px;line-height:1.7">' + insp + '</div>' : '') + '</div>';
   }
@@ -12665,23 +12648,17 @@ document.addEventListener('click', function (e) {
       ttsSel('rp-tt-rb', 'توزيع تلقائي على الحسابات الفاضية', [['1', 'شغّال: أي حساب طابوره خلص بياخد 1–2 رواية لسه ما اتبدأتش من طوابير الحسابات التانية'], ['0', 'مقفول: كل رواية تفضل في حسابها']], c.rebalance !== false ? '1' : '0') +
       ttsSel('rp-tt-open', 'مين يقدر يسمع الروايات الصوتية', [['0', 'مشتركو Premium بس'], ['1', 'كل اللي مسجّلين دخول']], c.listenAll ? '1' : '0') +
       ttsSel('rp-tt-hide', 'زرار «استمع للفصل» عند المستخدمين', [['0', 'ظاهر'], ['1', 'مخفي من التطبيق والموقع كله']], c.hideListen ? '1' : '0') +
-      ttsSel('rp-tt-multi', 'أصوات متعددة', [['1', 'شغّالة: راوي + راجل + ست + ولد + بنت'], ['0', 'مقفولة: صوت الراوي بس']], c.multi !== false ? '1' : '0') +
-      ttsSel('rp-tt-mm', 'السرعة (أصوات اتنين في طلب واحد)', [['1', 'سريع: الراوي والشخصية في طلب واحد — فصول أكتر في اليوم'], ['0', 'جودة أعلى: كل صوت في طلب لوحده — فصول أقل']], c.mm !== false ? '1' : '0') +
-      ttsSel('rp-tt-econ', 'وضع توفير الطلبات (للحساب المجاني)', [['1', 'شغّال: أجزاء أكبر وطلبات أقل'], ['0', 'مقفول: أجزاء صغيرة وأصوات أدق (محتاج حساب بفوترة)']], c.econ !== false ? '1' : '0') +
-      ttsSel('rp-tt-smart', 'التفكير الذكي في تحديد المتكلم', [['1', 'شغّال: نموذج جوجل بيقرا الفقرة ويحدد مين بيتكلم'], ['0', 'مقفول: تقدير بسيط بالكلمات']], c.smart !== false ? '1' : '0') +
-      ttsInp('rp-tt-ann', 'موديل التفكير (نصي)', c.annModel, 'gemini-2.5-flash', 1) +
       '<label class="rp-lbl">قاموس النطق (سطر لكل كلمة: الكلمة=الكلمة بالتشكيل)</label><textarea id="rp-tt-dict" class="rp-in" rows="5" placeholder="مثال:&#10;الرداد=الرَّدّاد">' + esc(c.dict || '') + '</textarea>' + rdCard(c) + engCard() + pubCard() + lrnCard();
     h += '<h3 style="margin-top:16px">🎙️ إعدادات مشتركة بين كل حسابات جوجل</h3><div class="rp-sub">الموديل والأسلوب والأصوات واحدة لكل حسابات جوجل الستة. الحد اليومي والمفتاح والطابور لكل حساب في تابته.</div>' +
       ttsInp('rp-tt-st', 'أسلوب القراءة (بالإنجليزي)', c.style, '', 1) + ttsInp('rp-tt-mod', 'الموديل', c.model, '', 1) +
-      ttsInp('rp-tt-pin', 'سعر النص لكل مليون توكن (فاضي = تلقائي)', c.priceIn || '', '0.5', 1) + ttsInp('rp-tt-pout', 'سعر الصوت لكل مليون توكن (فاضي = تلقائي)', c.priceOut || '', '9', 1) +
-      '<div class="rp-sub" style="margin-top:6px"><b>أصوات جوجل (اسم الصوت):</b></div>' + ROLE.map(function (r) { return ttsInp('rp-gv-' + r[0], r[1], gv[r[0]], '', 1); }).join('');
+      ttsInp('rp-tt-pin', 'سعر النص لكل مليون توكن (فاضي = تلقائي)', c.priceIn || '', '0.5', 1) + ttsInp('rp-tt-pout', 'سعر الصوت لكل مليون توكن (فاضي = تلقائي)', c.priceOut || '', '9', 1);
     h += '<div class="rp-err" id="rp-tt-out">' + esc(TT.msg) + '</div><div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttssave">' + ic('floppy-disk') + ' حفظ الإعدادات العامة</button><button type="button" class="rp-btn sm gold" data-act="ttsvoices" data-p="gemini">' + ic('list') + ' أصوات جوجل المتاحة</button></div>';
     return h;
   }
   function ttsProv(d, prov) {
     var c = d.conf || {}, az = prov === 'azure', I = pvInfo(prov), has = (d.has || {})[prov], keySrc = (d.keys || {})[prov], g = gcf(c, prov), a = c.az || {}, av = a.voices || {};
     var ROLE = [['narrator', '🎙️ الراوي'], ['man', '👨 راجل'], ['woman', '👩 ست'], ['boy', '👦 ولد'], ['girl', '👧 بنت']];
-    var h = '<div class="rp-item" style="border:1.5px solid ' + I[3] + '"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><b style="font-size:1.08rem">' + I[2] + ' ' + (az ? 'مايكروسوفت Azure' : 'حساب ' + I[1]) + '</b>' + (has ? '<span class="rp-ok">✅ جاهز</span>' : '<span class="rp-err">❌ مش جاهز</span>') + '</div>';
+    var h = '<div class="rp-item" style="border:1.5px solid ' + I[3] + '"><div class="rp-row" style="justify-content:space-between;flex-wrap:nowrap"><b style="font-size:1.08rem">' + I[2] + ' ' + 'حساب ' + I[1] + '</b>' + (has ? '<span class="rp-ok">✅ جاهز</span>' : '<span class="rp-err">❌ مش جاهز</span>') + '</div>';
     if (!az) {
       h += '<h4 style="margin:12px 0 4px">🔑 مفتاح الحساب (API Key)</h4><div class="rp-sub" style="margin:0 0 6px">' + (keySrc === 'app' ? '✅ المفتاح متسجّل من التطبيق' : (has ? '✅ المفتاح موجود (متحط في إعدادات Cloudflare)' : '❌ لسه مفيش مفتاح للحساب ده')) + '. المفتاح بيتخزّن على السيرفر بس ومبيرجعش ظاهر تاني. اعمله من <b dir="ltr">aistudio.google.com/apikey</b> من حساب جوجل مختلف.</div>' +
         '<textarea id="rp-key-' + prov + '" class="rp-in" rows="3" dir="ltr" autocomplete="off" style="font-family:monospace;font-size:.78rem" placeholder="الصق المفاتيح هنا — كل مفتاح في سطر (AIza…)"></textarea><div class="rp-row" style="margin-top:6px"><button type="button" class="rp-btn sm" data-act="ttskey" data-p="' + prov + '">' + ic('floppy-disk') + ' حفظ المفتاح</button>' + (keySrc === 'app' ? '<button type="button" class="rp-btn sm red" data-act="ttskeydel" data-p="' + prov + '">مسح المفتاح</button>' : '') + '</div>';
@@ -12689,9 +12666,7 @@ document.addEventListener('click', function (e) {
     h += provStatus(d, prov);
     h += '<h4 style="margin:14px 0 4px">⚙️ إعدادات الحساب ده</h4>';
     if (!az) h += ttsInp('rp-pc-cap', 'الحد اليومي (دقيقة صوت في اليوم، 0 = إيقاف)', g.dailyMin, '20') + ttsInp('rp-pc-free', 'دقايق مجانية في اليوم (حسب حصة الحساب)', g.freeMin || '', 'مثال: 30') + ttsInp('rp-pc-conc', 'طلبات متوازية (1–4)', g.concurrency, '2');
-    else h += ttsInp('rp-az-region', 'المنطقة Region (مثال: uaenorth)', a.region || (d.has || {}).azureRegion || '', 'uaenorth', 1) + ttsInp('rp-az-cap', 'الحد اليومي (دقيقة صوت في اليوم، 0 = إيقاف)', a.dailyMin, '30') + ttsInp('rp-az-free', 'الحروف المجانية في الشهر (500000)', a.freeChars, '500000', 1) + ttsInp('rp-az-price', 'سعر المليون حرف بعد المجاني ($)', a.price, '15', 1) + ttsInp('rp-az-conc', 'طلبات متوازية (1–8)', a.concurrency, '3') +
-      '<div class="rp-sub" style="margin-top:6px"><b>أصوات Azure (الصوت · الحدّة · السرعة):</b></div>' + ROLE.map(function (r) { var o = av[r[0]] || {}; return '<div class="rp-sub" style="margin:6px 0 0">' + r[1] + '</div><div class="rp-row" style="flex-wrap:nowrap;gap:6px"><input id="rp-azv-' + r[0] + '" class="rp-in" dir="ltr" style="flex:2" value="' + esc(o.v || '') + '"><input id="rp-azp-' + r[0] + '" class="rp-in" dir="ltr" style="flex:1" value="' + esc(o.pitch || '') + '" placeholder="+0%"><input id="rp-azr-' + r[0] + '" class="rp-in" dir="ltr" style="flex:1" value="' + esc(o.rate || '') + '" placeholder="0%"></div>'; }).join('');
-    h += '<div class="rp-err" id="rp-tt-out">' + esc(TT.msg) + '</div><div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttssave">' + ic('floppy-disk') + ' حفظ إعدادات الحساب</button><button type="button" class="rp-btn sm" data-act="ttstest" data-p="' + prov + '">' + ic('play') + ' جرّب الصوت</button>' + (az ? '<button type="button" class="rp-btn sm gold" data-act="ttsvoices" data-p="azure">' + ic('list') + ' أصوات Azure العربي</button>' : '') + '</div>';
+    h += '<div class="rp-err" id="rp-tt-out">' + esc(TT.msg) + '</div><div class="rp-row" style="margin-top:8px;flex-wrap:wrap"><button type="button" class="rp-btn sm" data-act="ttssave">' + ic('floppy-disk') + ' حفظ إعدادات الحساب</button><button type="button" class="rp-btn sm" data-act="ttstest" data-p="' + prov + '">' + ic('play') + ' جرّب الصوت</button>' + '</div>';
     if (TT.voices && TT.vprov === (az ? 'azure' : 'gemini')) h += '<div class="rp-item" style="margin-top:8px;max-height:200px;overflow:auto" dir="ltr">' + (TT.voices.length ? TT.voices.map(function (v) { return esc(v.name) + ' <span class="rp-sub">' + esc([].concat(v.lang || '').join(',')) + ' ' + esc(v.gender || '') + '</span>'; }).join('<br>') : esc(TT.raw || 'مفيش قايمة.')) + '</div>';
     // روايات الحساب ده
     var NV = (d.novels || []), mine = NV.filter(function (n) { return n.prov === prov; }), actL = mine.filter(function (n) { return (n.d || 0) < n.n; }), doneL = mine.filter(function (n) { return (n.d || 0) >= n.n; });
@@ -12719,7 +12694,7 @@ document.addEventListener('click', function (e) {
     if (!d) return '<div class="rp-card">' + T + '<p class="rp-sub">جاري التحميل…</p></div>';
     if (d.error) return '<div class="rp-card">' + T + '<div class="rp-err">' + esc(d.error) + '</div><button type="button" class="rp-btn sm" data-act="ttsload">' + ic('rotate') + ' إعادة المحاولة</button></div>';
     if (!TT.tab) TT.tab = 'general';
-    var h = '<div class="rp-card">' + T + '<p class="rp-sub">الفصول بتتحوّل لصوت مسبقًا بالترتيب وبحد يومي. كل حساب (6 جوجل + Azure) في تابة لوحده بمفتاحه وإعداداته وطابوره وروايته، وبيشتغلوا مع بعض من غير ما يتلخبطوا.</p>' + ttsTabs(d);
+    var h = '<div class="rp-card">' + T + '<p class="rp-sub">الفصول بتتحوّل لصوت مسبقًا بالترتيب وبحد يومي. كل حساب (6 جوجل) في تابة لوحده بمفتاحه وإعداداته وطابوره وروايته، وبيشتغلوا مع بعض من غير ما يتلخبطوا.</p>' + ttsTabs(d);
     h += TT.tab === 'general' ? ttsGeneral(d) : ttsProv(d, TT.tab);
     return h + '</div>';
   }
@@ -13080,31 +13055,19 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttsfront') api('/api/admin/tts/front', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); });
     else if (a === 'ttsdel') { if (confirm('تشيل الرواية دي من طابور الصوت وتمسح الصوت المتخزّن لها؟')) api('/api/admin/tts/remove', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsprov') { var pp = b.getAttribute('data-p'); if (confirm('تحوّل الرواية دي لـ ' + pvInfo(pp)[1] + '؟ الصوت الجاهز لها هيتمسح وتتحوّل من الأول.')) api('/api/admin/tts/provider', { method: 'POST', body: { nid: b.getAttribute('data-n'), prov: pp } }).then(function (d) { TT.st = d; render(); flash('تمام ✅'); }).catch(function (x) { flash(x.message); }); }
-    else if (a === 'ttsinsp') { var inn = b.getAttribute('data-n'); TT.insp = TT.insp || {}; TT.insp[inn] = 'جاري الفحص…'; render(); api('/api/admin/tts/inspect?nid=' + encodeURIComponent(inn)).then(function (d) {
-      var RN = { narrator: 'الراوي', man: 'راجل', woman: 'ست', boy: 'ولد', girl: 'بنت' }, tot = 0, k, parts = []; for (k in d.roles) tot += d.roles[k];
-      for (k in d.roles) parts.push(RN[k] + ' ' + Math.round(d.roles[k] / (tot || 1) * 100) + '%');
-      var m = '<b>فصل ' + (d.idx + 1) + '</b> (' + esc(d.status === 'done' ? 'جاهز' : 'لسه') + ' · ' + esc(d.prov) + '): ';
-      if (!d.multiOn) m += '⚠️ «أصوات متعددة» مقفولة في الإعدادات.';
-      else if (!d.dashLines && !d.quotes) m += '❌ النص المتخزّن مفيهوش علامات حوار (« » أو شرطة أول السطر) — اتبعت بنسخة قديمة. ارفع index.html الجديد، دوس «ابعت الروايات والفصول الجديدة للطابور» وبعدها «إعادة تحويلها».';
-      else if (Object.keys(d.roles).length < 2) m += '⚠️ فيه حوار (' + (d.dashLines + d.quotes) + ') بس السيرفر ما قدرش يميّز متكلمين.';
-      else m += '✅ السيرفر شايف: ' + parts.join(' · ') + ' — ' + d.multiParts + ' جزء من ' + d.parts + ' فيه أكتر من صوت. لو لسه سامع صوت واحد في الفصل ده، يبقى اتحوّل قبل كده بنص قديم: دوس «إعادة تحويلها».';
-      TT.insp[inn] = m; render();
-    }).catch(function (x) { TT.insp[inn] = esc(x.message); render(); }); }
     else if (a === 'ttsredo') { if (confirm('تمسح الصوت الجاهز للرواية دي وتحوّلها من الأول؟')) api('/api/admin/tts/provider', { method: 'POST', body: { nid: b.getAttribute('data-n'), prov: b.getAttribute('data-p'), redo: true } }).then(function (d) { TT.st = d; render(); flash('اتحطت في الطابور من الأول ✅'); ttsSync(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttssave') {
       var g = function (i) { var e = $(i); return e ? e.value.trim() : null; }, bd = {}, put = function (k, v) { if (v !== null) bd[k] = v; }, RL = ['narrator', 'man', 'woman', 'boy', 'girl'];
-      put('defProv', g('rp-tt-dp')); put('annModel', g('rp-tt-ann')); put('style', g('rp-tt-st')); put('model', g('rp-tt-mod')); put('priceIn', g('rp-tt-pin')); put('priceOut', g('rp-tt-pout'));
-      var bl = function (i, v1) { var x = g(i); if (x !== null) bd[{ 'rp-tt-multi': 'multi', 'rp-tt-smart': 'smart', 'rp-tt-econ': 'econ', 'rp-tt-mm': 'mm', 'rp-tt-hide': 'hideListen', 'rp-tt-rb': 'rebalance', 'rp-tt-open': 'listenAll' }[i]] = v1 ? x === '1' : x !== '0'; };
+      put('defProv', g('rp-tt-dp')); put('style', g('rp-tt-st')); put('model', g('rp-tt-mod')); put('priceIn', g('rp-tt-pin')); put('priceOut', g('rp-tt-pout'));
+      var bl = function (i, v1) { var x = g(i); if (x !== null) bd[{ 'rp-tt-hide': 'hideListen', 'rp-tt-rb': 'rebalance', 'rp-tt-open': 'listenAll' }[i]] = v1 ? x === '1' : x !== '0'; };
       var eg = g('rp-tt-eng'); if (eg !== null) { bd.radad = eg !== 'old'; bd.engine = eg === 'single' ? 'single' : 'mega'; }
-      bl('rp-tt-multi'); bl('rp-tt-smart'); bl('rp-tt-econ'); bl('rp-tt-mm'); bl('rp-tt-rb'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
+      bl('rp-tt-rb'); bl('rp-tt-hide', 1); bl('rp-tt-open', 1);
       if ($('rp-tt-dict')) bd.dict = $('rp-tt-dict').value;
 
-      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), analysis: g('rd-am'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', learn: g('rd-learn') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), narrator: g('rd-nar'), archMap: {}, pers: {} };
+      if ($('rd-mode')) { var rdo = { mode: g('rd-mode'), analysis: g('rd-am'), skipNarration: g('rd-skip') === '1', humanize: g('rd-hum') !== '0', learn: g('rd-learn') !== '0', pauseMs: g('rd-pause'), batch: g('rd-batch'), partChars: g('rd-pchars'), autoWait: g('rd-aw') !== '0', waitSec: g('rd-ws'), anaModel: g('rd-ana'), dialect: g('rd-dia'), narrator: g('rd-nar'), archMap: {}, pers: {} };
         RDA.forEach(function (a) { var v = g('rd-am-' + a[0]); if (v) rdo.archMap[a[0]] = v; });
         RDP.forEach(function (p) { var v = g('rd-pv-' + p[0]), q = g('rd-pp-' + p[0]); if (v || (q && +q)) rdo.pers[p[0]] = { v: v, p: q }; }); bd.rd = rdo; }
-      var gvv = {}; RL.forEach(function (r) { var x = g('rp-gv-' + r); if (x !== null) gvv[r] = x; }); if (Object.keys(gvv).length) bd.gv = gvv;
       if ($('rp-pc-cap')) { var pc = { dailyMin: g('rp-pc-cap'), freeMin: g('rp-pc-free'), concurrency: g('rp-pc-conc') }; if (TT.tab === 'gemini') { bd.dailyMin = pc.dailyMin; bd.freeMin = pc.freeMin; bd.concurrency = pc.concurrency; } else bd[(String(TT.tab).charAt(0) === 'r' ? 'r' + String(TT.tab).slice(2) : 'g' + String(TT.tab).slice(6))] = pc; }
-      if ($('rp-az-cap')) { var azv = {}; RL.forEach(function (r) { azv[r] = { v: g('rp-azv-' + r), pitch: g('rp-azp-' + r), rate: g('rp-azr-' + r) }; }); bd.az = { region: g('rp-az-region'), dailyMin: g('rp-az-cap'), freeChars: g('rp-az-free'), price: g('rp-az-price'), concurrency: g('rp-az-conc'), voices: azv }; }
 
       if ($('pf-notify')) { api('/api/admin/pubflow', { method: 'PUT', body: { notify: g('pf-notify') !== '0', autoq: g('pf-autoq') !== '0', followers: g('pf-fol') !== '0' } }).then(function (d) { TT.pf = d; }).catch(function () {}); if (g('pf-nv')) api('/api/admin/novels/' + g('pf-nv') + '/narrator', { method: 'PUT', body: { g: g('pf-ng') } }).catch(function () {}); }
       if ($('en-tip')) { var tp = ($('en-tips').value || '').split('\n').map(function (l) { var k = l.indexOf('|'); return k > 0 ? { t: l.slice(0, k).trim(), x: l.slice(k + 1).trim() } : null; }).filter(Boolean);
@@ -13207,6 +13170,10 @@ document.addEventListener('click', function (e) {
     }
     else if (a === 'lrnsend') { var fl = ($('lrn-file') || {}).files && $('lrn-file').files[0]; if (LR.blob) lrnSend(LR.blob, LR.blob.type); else if (fl) lrnSend(fl, fl.type); else { LR.msg = 'اختار ملف صوت أو سجّل الأول'; render(); } }
     else if (a === 'lrnman') { api('/api/admin/rd/learn-word', { method: 'POST', body: { word: ($('lrn-w2') || {}).value, pron: ($('lrn-p2') || {}).value } }).then(function () { LR.msg = 'اتحفظت ✅'; lrnLoad(); }).catch(function (x) { LR.msg = x.message; render(); }); }
+    else if (a === 'rdsample') { var spid = b.getAttribute('data-pid'); TT.smMsg = '⏳ بنولّد عيّنة الصوت… (طلب واحد من جوجل)'; var sm = $('rd-sample-msg'); if (sm) sm.textContent = TT.smMsg;
+      var spv = $('rd-pv-' + spid), sph = { 'Content-Type': 'application/json', 'X-Device': devId() }; if (token()) sph.Authorization = 'Bearer ' + token();
+      fetch(base() + '/api/admin/rd/sample', { method: 'POST', headers: sph, body: JSON.stringify({ pid: spid }) }).then(function (r) { if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.error || 'فشل التوليد'); }); return r.blob(); }).then(function (bl) { var au = new Audio(URL.createObjectURL(bl)); au.play(); TT.smMsg = '▶ شغّال: ' + spid + (spv && spv.value ? ' (صوت ' + spv.value + ')' : ''); var s2 = $('rd-sample-msg'); if (s2) s2.textContent = TT.smMsg; }).catch(function (x) { TT.smMsg = '❌ ' + x.message; var s3 = $('rd-sample-msg'); if (s3) s3.textContent = TT.smMsg; }); }
+    else if (a === 'lrnexp') { api('/api/admin/rd/learned-export').then(function (d) { var u = URL.createObjectURL(new Blob([JSON.stringify(d)], { type: 'application/json' })), an = document.createElement('a'); an.href = u; an.download = 'radpad-learned-words.json'; document.body.appendChild(an); an.click(); an.remove(); flash('نزّلنا ' + d.total + ' كلمة ✅'); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'lrndel') { api('/api/admin/rd/learned', { method: 'DELETE', body: { word: b.getAttribute('data-w') } }).then(lrnLoad).catch(function () {}); }
     else if (a === 'goldsave') { api('/api/admin/gold', { method: 'PUT', body: { rate: +(($('rp-gd-rate') || {}).value), min: +(($('rp-gd-min') || {}).value) } }).then(function (d) { WL.cfg = d; flash('اتحفظ سعر النقطة وحد السحب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'wdok' || a === 'wdno') {
@@ -13263,6 +13230,7 @@ document.addEventListener('click', function (e) {
       pg.__rp = 1; pg.addEventListener('click', onClick); pg.addEventListener('input', onInput);
       pg.addEventListener('change', function (e) {
         var t = e.target; if (!t) return;
+        if (t.id === 'lrn-imp' && t.files[0]) { var rf = new FileReader(); rf.onload = function () { try { var jj = JSON.parse(rf.result); api('/api/admin/rd/learned-import', { method: 'POST', body: { words: jj.words || jj } }).then(function (d) { flash('اتسترجع ' + d.n + ' كلمة ✅'); lrnLoad(); }).catch(function (x) { flash(x.message); }); } catch (er) { flash('الملف مش سليم'); } }; rf.readAsText(t.files[0]); t.value = ''; return; }
         if (t.id === 'rp-ca-week') { CA.week = t.value; CA.d = null; render(); loadCA(CA.week); return; }
         if (t.getAttribute && t.getAttribute('data-f') === 'genre') { S.ed.genre = t.value; markDirty(); return; }
         if (t.id === 'rp-cv-file' && t.files[0]) { uploadCover(t.files[0]); t.value = ''; return; }
