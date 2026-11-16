@@ -14466,6 +14466,23 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   }
   try { var at = null; new MutationObserver(function () { clearTimeout(at); at = setTimeout(paintAud, 150); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
   setTimeout(loadReady, 1500); setInterval(loadReady, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) loadReady(); });
+  /* ---- لو الفصل لسه ما اتحولش لصوت: ما نفتحش المشغّل ونطلّع رسالة بس ---- */
+  var gateRe = false;
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('#tts-start-btn') : null; if (!b) return;
+    if (gateRe) { gateRe = false; return; }
+    if (!/استمع للفصل/.test(b.textContent || '')) return; // تشغيل/إيقاف/متابعة عادي
+    if (!(available() && allowed() && opt.cloud && !sessionOff)) return; // الاشتراك/الإعدادات بتتعامل معاها الأداة زي الأول
+    e.stopImmediatePropagation(); e.preventDefault();
+    var key = curKey();
+    getMan(key).then(function (m) {
+      if (m && m.status === 'ready') { stat[key] = { st: 'ready', t: Date.now() }; gateRe = true; try { b.click(); } catch (x) { gateRe = false; } gateRe = false; }
+      else { stat[key] = { st: (m && m.status) || 'none', t: Date.now() }; toast('الفصل ده لسه مش متاح للسماع صوتيا، هيكون متوفر قريبًا 🎧'); }
+    }).catch(function (er) {
+      if (er && er.status === 403) { gateRe = true; try { b.click(); } catch (x) {} gateRe = false; return; } // مش مشترك: الأداة هتعرض الاشتراك
+      gateRe = true; try { b.click(); } catch (x) {} gateRe = false; // مفيش نت/خطأ مؤقت: نكمّل زي الأول
+    });
+  }, true);
   window.NXCloudTTS = { pos: pos, seekAbs: seekAbs, setRate: setRate, available: available, enabled: enabled, usable: usable, allowed: allowed, upsell: upsell, speak: speak, stop: stop, noteFail: noteFail, resetSession: function () { sessionOff = false; lastUnavail = false; forced = null; }, _opt: opt };
 })();
 </script>
