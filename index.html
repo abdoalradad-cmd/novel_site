@@ -12524,7 +12524,7 @@ document.addEventListener('click', function (e) {
   }
 
   /* ---------- الصوت المصري (Gemini): لوحة الأدمن ---------- */
-  var TT = { st: null, voices: null, raw: '', msg: '', sync: '' };
+  var TT = { st: null, voices: null, raw: '', msg: '', sync: '', chOpen: {}, chs: {} };
   function loadTts() { api('/api/admin/pubflow').then(function (x) { TT.pf = x; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function () {}); if (!TT.nv) api('/api/novels').then(function (x) { TT.nv = (Array.isArray(x) ? x : (x.novels || [])).filter(function (n) { return n && /^\d+$/.test(String(n.id)); }); }).catch(function () {}); api('/api/admin/engage').then(function (x) { TT.eng = x.conf; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function () {}); api('/api/admin/tts').then(function (d) { TT.st = d; if (S.view === 'home' && (S.tab === 'premium' || /^rd[1-6]$/.test(S.tab))) render(); }).catch(function (x) { TT.st = { error: x.message }; if (S.view === 'home' && S.tab === 'premium') render(); }); }
   function usd(n) { n = +n || 0; return '$' + (n < 1 ? n.toFixed(3) : n.toFixed(2)); }
   function mins(sec) { return (Math.round((+sec || 0) / 6) / 10).toLocaleString('en') + ' د'; }
@@ -12639,8 +12639,29 @@ document.addEventListener('click', function (e) {
       (act ? '<span class="rp-row" style="gap:4px;flex-wrap:nowrap"><input type="number" min="1" inputmode="numeric" class="rp-in" id="rp-pos-' + nid + '" value="' + rank + '" style="width:64px;padding:8px;text-align:center"><button type="button" class="rp-btn sm sec" data-act="ttspos" data-n="' + nid + '">ثبّت الترتيب</button></span>' : '') +
       '<button type="button" class="rp-btn sm sec" data-act="ttsredo" data-n="' + nid + '" data-p="' + prov + '">' + ic('rotate') + ' إعادة تحويلها</button></div>' +
       '<div class="rp-row" style="flex-wrap:nowrap;gap:4px;margin-top:6px"><select id="rp-mv-' + nid + '" class="rp-in" style="padding:8px;flex:1;min-width:0">' + opts + '</select><button type="button" class="rp-btn sm sec" data-act="ttsmove" data-n="' + nid + '">انقلها</button><button type="button" class="rp-btn sm red" data-act="ttsdel" data-n="' + nid + '">حذف</button></div>' +
+      '<div class="rp-row" style="margin-top:6px"><button type="button" class="rp-btn sm" data-act="ttschs" data-n="' + nid + '">📖 ' + (TT.chOpen[n.nid] ? 'اقفل الفصول' : 'تحكّم في الفصول (واحد واحد)') + '</button></div>' + (TT.chOpen[n.nid] ? chPanel(n.nid) : '') +
       (insp ? '<div class="rp-sub" style="margin-top:6px;line-height:1.7">' + insp + '</div>' : '') + '</div>';
   }
+  /* ---------- تحكم في كل فصل لوحده جوه الرواية ---------- */
+  function ttsNovelObj(nid) { try { for (var i = 0; i < novels.length; i++) if (String(novels[i].id) === String(nid)) return novels[i]; } catch (e) {} return null; }
+  function chPanel(nid) {
+    var d = TT.chs[nid]; if (!d) return '<div class="rp-sub" style="margin-top:8px">جاري تحميل الفصول…</div>';
+    var by = {}; (d.rows || []).forEach(function (r) { by[r.idx] = r; });
+    var nv = ttsNovelObj(nid), list = [], mx = (d.rows || []).reduce(function (a, r) { return Math.max(a, r.idx + 1); }, 0);
+    var total = nv && nv.chapters ? Math.max(nv.chapters.length, mx) : mx;
+    for (var i = 0; i < total; i++) list.push(i);
+    var ST = { done: ['✅ جاهز', 'ok'], running: ['⚙️ بيتحوّل', 'live'], queued: ['⏳ مستني دوره', ''], failed: ['❌ فشل', 'err'], off: ['⏸ متشال', ''] };
+    var h = '<div style="margin-top:8px;border-top:1px dashed #cbd5d0;padding-top:6px"><div class="rp-sub">كل فصل ليه دوره في الطابور. الفصل الجديد بيتحط في آخر الطابور لوحده. تقدر تقدّم أي فصل أو تأخّره أو تشيله أو تعيد تحويله.</div>';
+    list.forEach(function (i) {
+      var r = by[i], ttl = (nv && nv.chapters && nv.chapters[i] && nv.chapters[i].title) || (r && r.ctitle) || ('فصل ' + (i + 1)), s = r ? (ST[r.status] || [r.status, '']) : ['➕ لسه ما اتبعتش', ''];
+      var bt = function (op, lab, cls, cf) { return '<button type="button" class="rp-btn sm ' + (cls || 'sec') + '" data-act="ttsch" data-n="' + esc(nid) + '" data-i="' + i + '" data-o="' + op + '"' + (cf ? ' data-cf="' + cf + '"' : '') + '>' + lab + '</button>'; };
+      var prog = r && r.nparts && r.status !== 'done' && r.status !== 'off' ? ' <span class="rp-sub" style="margin:0">(' + (r.done || 0) + '/' + r.nparts + ')</span>' : '';
+      h += '<div class="rp-item" style="margin-top:5px;padding:8px"><div style="min-width:0"><b>' + (i + 1) + '. ' + esc(ttl) + '</b> <span class="rp-pill ' + s[1] + '">' + s[0] + '</span>' + prog + (r && r.status === 'failed' && r.err ? '<div class="rp-sub" style="margin:2px 0 0;color:#b91c1c">' + esc(r.err) + '</div>' : '') + '</div><div class="rp-row" style="flex-wrap:wrap;gap:4px;margin-top:5px">' +
+        (r ? (r.status === 'off' ? bt('on', '▶ رجّعه للطابور') : (r.status !== 'done' ? bt('front', '⏫ قدّمه') + bt('end', '⏬ آخر الطابور') : '') + bt('redo', '♻ إعادة تحويله', 'sec', 'تمسح صوت الفصل ده وتحوّله من الأول؟') + (r.status !== 'done' ? bt('off', '⏸ شيله من الطابور') : '')) + bt('del', '🗑 مسحه', 'red', 'تمسح الفصل ده وصوته خالص؟ (السينك ممكن يضيفه تاني)') : '<button type="button" class="rp-btn sm" data-act="ttschsend" data-n="' + esc(nid) + '" data-i="' + i + '">⬆ ابعته للطابور</button>') + '</div></div>';
+    });
+    return h + '</div>';
+  }
+  function chLoad(nid) { return api('/api/admin/tts/chapters?nid=' + encodeURIComponent(nid)).then(function (d) { TT.chs[nid] = { rows: d.chapters || [] }; render(); }).catch(function (x) { flash(x.message); }); }
   function ttsTabs(d) {
     var has = d.has || {}, h = '<div class="rp-ttabs"><button type="button" class="' + (TT.tab === 'general' ? 'on' : '') + '" data-act="tttab" data-t="general">⚙️ عام</button>';
     PV.forEach(function (p) {
@@ -13069,6 +13090,14 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttssync') ttsSync();
     else if (a === 'ttsrun') { var pv = b.getAttribute('data-p') || 'gemini', so2 = $('rp-tt-sync'); if (so2) so2.textContent = 'جاري التحويل… (ممكن ياخد نص دقيقة)'; api('/api/admin/tts/run', { method: 'POST', body: { prov: pv } }).then(function (d) { TT.st = d; TT.sync = d.step && d.step.idle ? ({ daily_limit: 'وصلت للحد اليومي ✋ هيكمّل بكرة.', paused: 'واقف مؤقتًا بسبب رفض المزوّد.', empty: 'مفيش حاجة في الطابور ده.', not_configured: 'المفتاح أو R2 ناقص.' }[d.step.idle] || '') : 'اتحوّل ' + ((d.step || {}).made || 0) + ' جزء.'; render(); }).catch(function (x) { if (so2) so2.textContent = x.message; }); }
     else if (a === 'ttsrebal') api('/api/admin/tts/rebalance', { method: 'POST', body: {} }).then(function (d) { TT.st = d; TT.sync = (d.moved && d.moved.length) ? 'اتنقل ' + d.moved.length + ' رواية للحسابات الفاضية' : 'مفيش حساب فاضي أو مفيش روايات تتنقل دلوقتي'; flash('تمام'); render(); }).catch(function (e) { flash(e.message || 'حصل خطأ'); });
+    else if (a === 'ttschs') { var cn = b.getAttribute('data-n'); TT.chOpen[cn] = !TT.chOpen[cn]; if (TT.chOpen[cn]) { delete TT.chs[cn]; chLoad(cn); } render(); }
+    else if (a === 'ttsch') { var cn2 = b.getAttribute('data-n'), cf = b.getAttribute('data-cf'); if (cf && !confirm(cf)) return; api('/api/admin/tts/ch', { method: 'POST', body: { nid: cn2, idx: +b.getAttribute('data-i'), op: b.getAttribute('data-o') } }).then(function (d) { TT.st = d; flash('تمام ✅'); chLoad(cn2); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'ttschsend') {
+      var sn = b.getAttribute('data-n'), si = +b.getAttribute('data-i'), nvo = ttsNovelObj(sn), sc = nvo && nvo.chapters && nvo.chapters[si];
+      if (!sc || !sc.content) { flash('نص الفصل مش محمّل هنا — افتح الرواية مرة وارجع، أو دوس «ابعت الروايات والفصول الجديدة للطابور»'); return; }
+      var ct1 = ttsChapText(sc); if (!ct1.text) { flash('الفصل فاضي'); return; }
+      api('/api/admin/tts/enqueue', { method: 'POST', body: { items: [{ nid: String(sn), idx: si, ntitle: String(nvo.title || ''), ctitle: String(sc.title || ''), ord: 0, sig: ct1.sig, text: ct1.text, redo: true }] } }).then(function () { return api('/api/admin/tts/ch', { method: 'POST', body: { nid: sn, idx: si, op: 'end' } }); }).then(function (d) { TT.st = d; flash('اتبعت وهياخد دوره في آخر الطابور ✅'); chLoad(sn); }).catch(function (x) { flash(x.message); });
+    }
     else if (a === 'ttsretry') api('/api/admin/tts/retry', { method: 'POST', body: { prov: b.getAttribute('data-p') } }).then(function (d) { TT.st = d; flash('تمام'); render(); }).catch(function (x) { flash(x.message); });
     else if (a === 'ttspos') { var pe = document.getElementById('rp-pos-' + b.getAttribute('data-n')); api('/api/admin/tts/pos', { method: 'POST', body: { nid: b.getAttribute('data-n'), pos: pe ? pe.value : 1 } }).then(function (d) { TT.st = d; flash('اتثبّت الترتيب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsfront') api('/api/admin/tts/front', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); });
