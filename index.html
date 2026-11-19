@@ -15872,6 +15872,14 @@ html.is-native-app #app-tabbar button.on i{transform:translateY(-21px)!important
 html.is-native-app #app-tabbar button.on span{color:rgb(var(--brand-primary-rgb))!important;transform:translateY(1px)}
 html.dark.is-native-app #app-tabbar button.on span{color:var(--brand-accent)!important}
 html.is-native-app #app-tabbar button.on:active i{transform:translateY(-21px) scale(.9)!important}
+/* لون تلقائي حسب الخلفية */
+html.is-native-app #app-tabbar button[data-tone="dark"],html.dark.is-native-app #app-tabbar button[data-tone="dark"]{color:#fff!important}
+html.is-native-app #app-tabbar button[data-tone="dark"] span{text-shadow:0 1px 3px rgba(0,0,0,.55)!important}
+html.is-native-app #app-tabbar button[data-tone="light"],html.dark.is-native-app #app-tabbar button[data-tone="light"]{color:#0b1220!important}
+html.is-native-app #app-tabbar button[data-tone="light"] span{text-shadow:0 0 5px rgba(255,255,255,.6)!important}
+html.is-native-app #app-tabbar button.on[data-tone="dark"] span,html.dark.is-native-app #app-tabbar button.on[data-tone="dark"] span{color:#fff!important}
+html.is-native-app #app-tabbar button.on[data-tone="light"] span,html.dark.is-native-app #app-tabbar button.on[data-tone="light"] span{color:#0b1220!important}
+html.is-native-app #app-tabbar button i{transition:transform .38s cubic-bezier(.3,1.3,.5,1),color .3s!important}
 /* مساحة تحت المحتوى والصفحات الكاملة علشان الشريط العايم ما يغطيش آخر الصفحة */
 html.is-native-app body{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important}
 html.is-native-app #rp-all-page,html.is-native-app #rp-acct-page,html.is-native-app #rp-notif-page,html.is-native-app #rp-prof-page,html.is-native-app #app-search,html.is-native-app #app-lib{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;box-sizing:border-box}
@@ -15893,6 +15901,53 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
   function closeOverlays() {
     ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll', 'rpCloseAccount'].forEach(function (f) { try { if (window[f]) window[f](); } catch (e) {} });
   }
+
+  /* لون الأيقونة والاسم يتغيّر حسب الخلفية اللي وراهم: أبيض على الغامق، وأسود على الفاتح */
+  var lumCache = {}, lastTone = {}, tq = 0, cv = null;
+  function parseRGB(c) { var m = /rgba?\(([^)]+)\)/.exec(c || ''); if (!m) return null; var p = m[1].split(',').map(parseFloat); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; }
+  function lumOf(r, g, b) { return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
+  function imgLum(img, x, y) {
+    try {
+      var rc = img.getBoundingClientRect(), nw = img.naturalWidth, nh = img.naturalHeight; if (!nw || !nh || !rc.width) return null;
+      var fit = getComputedStyle(img).objectFit, sc = fit === 'contain' ? Math.min(rc.width / nw, rc.height / nh) : fit === 'fill' ? 0 : Math.max(rc.width / nw, rc.height / nh);
+      var sx, sy, sw = 16, sh = 16;
+      if (!sc) { sx = (x - rc.left) / rc.width * nw - 8; sy = (y - rc.top) / rc.height * nh - 8; }
+      else { var ox = (rc.width - nw * sc) / 2, oy = (rc.height - nh * sc) / 2; sx = (x - rc.left - ox) / sc - 8; sy = (y - rc.top - oy) / sc - 8; }
+      sx = Math.max(0, Math.min(nw - 1, sx)); sy = Math.max(0, Math.min(nh - 1, sy)); sw = Math.min(sw, nw - sx); sh = Math.min(sh, nh - sy); if (sw < 1 || sh < 1) return null;
+      cv = cv || document.createElement('canvas'); cv.width = 6; cv.height = 6;
+      var cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(img, sx, sy, sw, sh, 0, 0, 6, 6);
+      var d = cx.getImageData(0, 0, 6, 6).data, t = 0, n = 0; for (var i = 0; i < d.length; i += 4) { if (d[i + 3] < 30) continue; t += lumOf(d[i], d[i + 1], d[i + 2]); n++; }
+      return n ? t / n : null;
+    } catch (e) { return null; } // صورة من دومين تاني من غير CORS
+  }
+  function lumAt(x, y) {
+    var els = document.elementsFromPoint(x, y), el = null;
+    for (var i = 0; i < els.length; i++) { if (els[i].closest && els[i].closest('#app-tabbar')) continue; el = els[i]; break; }
+    var e = el, guard = 0;
+    while (e && guard++ < 14) {
+      if (e.tagName === 'IMG' || e.tagName === 'VIDEO') { var l = e.tagName === 'IMG' ? imgLum(e, x, y) : null; return l == null ? 0.25 : l; }
+      var cs = getComputedStyle(e), c = parseRGB(cs.backgroundColor);
+      if (c && c.a >= 0.6) return lumOf(c.r, c.g, c.b);
+      if (cs.backgroundImage && cs.backgroundImage !== 'none' && /url\(/.test(cs.backgroundImage)) return 0.25; // خلفية صورة: غالبًا غامقة
+      if (cs.backgroundImage && /gradient/.test(cs.backgroundImage)) { var cols = cs.backgroundImage.match(/rgba?\([^)]+\)/g); if (cols && cols.length) { var t = 0; cols.forEach(function (q) { var p = parseRGB(q); t += lumOf(p.r, p.g, p.b); }); return t / cols.length; } }
+      e = e.parentElement;
+    }
+    return document.documentElement.classList.contains('dark') ? 0.1 : 0.95;
+  }
+  function tone() {
+    tq = 0; if (!bar || bar.offsetParent === null && getComputedStyle(bar).position !== 'fixed') return;
+    var br = bar.getBoundingClientRect(); if (br.height < 10) return;
+    var y = br.top + br.height / 2, b = bar.querySelectorAll('button');
+    for (var i = 0; i < b.length; i++) {
+      var r = b[i].getBoundingClientRect(), x = r.left + r.width / 2, l = lumAt(x, y), prev = lastTone[i];
+      var t = prev === 'dark' ? (l > 0.58 ? 'light' : 'dark') : prev === 'light' ? (l < 0.42 ? 'dark' : 'light') : (l < 0.5 ? 'dark' : 'light'); // هيستريسيس علشان ما يرعّش
+      if (t !== prev) { lastTone[i] = t; b[i].setAttribute('data-tone', t); }
+    }
+  }
+  function schedTone() { if (!tq) tq = setTimeout(function () { requestAnimationFrame(tone); }, 90); }
+  window.addEventListener('scroll', schedTone, { passive: true, capture: true });
+  window.addEventListener('resize', schedTone);
+  setInterval(schedTone, 900);
   function attach(b) {
     bar = b;
     bub = document.createElement('span'); bub.className = 'tb-bub'; bar.insertBefore(bub, bar.firstChild);
@@ -15918,7 +15973,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     // إخفاء الشريط وقت الكتابة (الكيبورد)
     document.addEventListener('focusin', function (e) { var t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) && !/^(checkbox|radio|button|range|file)$/.test(t.type || '') && !(t.closest && t.closest('#app-search'))) root.classList.add('kb-open'); });
     document.addEventListener('focusout', function () { setTimeout(function () { var a = document.activeElement; if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) root.classList.remove('kb-open'); }, 120); });
-    setTimeout(sched, 400); setTimeout(sched, 1500);
+    setTimeout(sched, 400); setTimeout(sched, 1500); setTimeout(schedTone, 300); setTimeout(schedTone, 1500);
   }
   var t = 0, iv = setInterval(function () {
     var b = document.getElementById('app-tabbar'); t++;
