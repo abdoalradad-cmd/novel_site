@@ -15939,8 +15939,10 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     var br = bar.getBoundingClientRect(); if (br.height < 10) return;
     var y = br.top + br.height / 2, b = bar.querySelectorAll('button');
     for (var i = 0; i < b.length; i++) {
-      var r = b[i].getBoundingClientRect(), x = r.left + r.width / 2, l = lumAt(x, y), prev = lastTone[i];
-      var t = prev === 'dark' ? (l > 0.58 ? 'light' : 'dark') : prev === 'light' ? (l < 0.42 ? 'dark' : 'light') : (l < 0.5 ? 'dark' : 'light'); // هيستريسيس علشان ما يرعّش
+      var r = b[i].getBoundingClientRect(), x = r.left + r.width / 2, prev = lastTone[i], sum = 0, cnt = 0;
+      [-20, 0, 20].forEach(function (dx) { [-12, 12].forEach(function (dy) { sum += lumAt(x + dx, y + dy); cnt++; }); });
+      var l = sum / cnt;
+      var t = prev === 'dark' ? (l > 0.7 ? 'light' : 'dark') : prev === 'light' ? (l < 0.56 ? 'dark' : 'light') : (l < 0.62 ? 'dark' : 'light'); // هيستريسيس علشان ما يرعّش
       if (t !== prev) { lastTone[i] = t; b[i].setAttribute('data-tone', t); }
     }
   }
