@@ -12648,10 +12648,11 @@ document.addEventListener('click', function (e) {
   /* ---------- تحكم في كل فصل لوحده جوه الرواية ---------- */
   function ttsNovelObj(nid) { try { for (var i = 0; i < novels.length; i++) if (String(novels[i].id) === String(nid)) return novels[i]; } catch (e) {} return null; }
   /* ---- تابة «تحويل نص لصوت»: مستقلة تمامًا عن الفصول. الصوت بيتعمل ويتعرض هنا بس ومش بيتخزّن على السيرفر، ويتمسح أول ما تخرج من التابة ---- */
-  var VC = { text: '', pid: 'kareem', md: 'egy', busy: false, url: '', secs: 0, msg: '', list: null, _req: 0 };
+  var VC = { text: '', pid: 'kareem', md: 'egy', busy: false, url: '', secs: 0, msg: '', list: null, _req: 0, keys: null, kmsg: '' };
   function vcClear() { if (VC.url) { try { URL.revokeObjectURL(VC.url); } catch (e) {} } VC.url = ''; VC.secs = 0; VC.msg = ''; VC.text = ''; VC.busy = false; }
   function vcRead() { var t = $('vc-text'), p = $('vc-pid'), m = $('vc-md'); if (t) VC.text = t.value; if (p) VC.pid = p.value; if (m) VC.md = m.value; }
-  function vcLoad() { if (VC.list || VC._req) return; VC._req = 1; api('/api/admin/vc/voices').then(function (d) { VC.list = d.voices || []; render(); }).catch(function () { VC._req = 0; VC.list = []; render(); }); }
+  function vcKeys() { api('/api/admin/vc/keys').then(function (d) { VC.keys = d.keys || []; render(); }).catch(function () { VC.keys = []; }); }
+  function vcLoad() { if (VC.keys === null) { VC.keys = []; vcKeys(); } if (VC.list || VC._req) return; VC._req = 1; api('/api/admin/vc/voices').then(function (d) { VC.list = d.voices || []; render(); }).catch(function () { VC._req = 0; VC.list = []; render(); }); }
   function vcTab() {
     vcLoad();
     var opts = (VC.list || []).map(function (v) { return '<option value="' + esc(v.id) + '"' + (v.id === VC.pid ? ' selected' : '') + '>' + esc(v.n) + (v.g === 'f' ? ' (صوت نسائي)' : v.g === 'm' ? ' (صوت رجالي)' : '') + '</option>'; }).join('') || '<option value="kareem">جاري تحميل الأصوات…</option>';
@@ -12663,6 +12664,11 @@ document.addEventListener('click', function (e) {
       '<div class="rp-row" style="margin-top:10px"><button type="button" class="rp-btn pri" data-act="vcgo"' + (VC.busy ? ' disabled' : '') + '>' + (VC.busy ? '⏳ بيتحوّل…' : '🎙 تحويل') + '</button></div>' +
       (VC.msg ? '<div class="rp-sub" style="margin-top:8px">' + esc(VC.msg) + '</div>' : '') +
       (VC.url ? '<div style="margin-top:12px;border-top:1px dashed #cbd5d0;padding-top:10px"><audio controls src="' + VC.url + '" style="width:100%"></audio><div class="rp-sub" style="margin:6px 0">المدة: <b>' + dur + '</b> دقيقة</div><div class="rp-row" style="gap:8px"><a class="rp-btn sec" download="radpad-voice.wav" href="' + VC.url + '">⬇ تحميل على الموبايل</a><button type="button" class="rp-btn red" data-act="vcclr">🗑 مسح</button></div></div>' : '') +
+      '<details style="margin-top:14px;border-top:1px dashed #cbd5d0;padding-top:10px"' + (VC.keys && !VC.keys.length ? ' open' : '') + '><summary style="cursor:pointer;font-weight:700">🔑 مفاتيح التابة دي (' + ((VC.keys || []).length) + ')</summary>' +
+      '<div class="rp-sub" style="margin:6px 0">مفاتيح Gemini مخصوصة للتابة دي بس، ومالهاش علاقة بمفاتيح الفصول. التحويل بيبدّل بينها لوحده لو واحد اتزحم أو اتحظر. لو مفيش مفاتيح هنا بيستخدم مفاتيح الأدوات.</div>' +
+      (VC.keys || []).map(function (k, i) { return '<div class="rp-row" style="justify-content:space-between;gap:8px;margin:4px 0"><code dir="ltr">' + esc(k) + '</code><button type="button" class="rp-btn red" data-act="vckdel" data-i="' + i + '">حذف</button></div>'; }).join('') +
+      '<textarea id="vc-keys" rows="3" dir="ltr" placeholder="الصق مفتاح أو أكتر (واحد في كل سطر)" style="width:100%;margin-top:6px;padding:8px;border-radius:10px;border:1px solid #cbd5d0;font:inherit"></textarea>' +
+      '<div class="rp-row" style="margin-top:6px"><button type="button" class="rp-btn sec" data-act="vckadd">➕ إضافة المفاتيح</button></div>' + (VC.kmsg ? '<div class="rp-sub">' + esc(VC.kmsg) + '</div>' : '') + '</details>' +
       '</div>';
   }
   try { window.addEventListener('pagehide', function () { vcClear(); }); } catch (e) {}
@@ -13113,6 +13119,8 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttsrun') { var pv = b.getAttribute('data-p') || 'gemini', so2 = $('rp-tt-sync'); if (so2) so2.textContent = 'جاري التحويل… (ممكن ياخد نص دقيقة)'; api('/api/admin/tts/run', { method: 'POST', body: { prov: pv } }).then(function (d) { TT.st = d; TT.sync = d.step && d.step.idle ? ({ daily_limit: 'وصلت للحد اليومي ✋ هيكمّل بكرة.', paused: 'واقف مؤقتًا بسبب رفض المزوّد.', empty: 'مفيش حاجة في الطابور ده.', not_configured: 'المفتاح أو R2 ناقص.' }[d.step.idle] || '') : 'اتحوّل ' + ((d.step || {}).made || 0) + ' جزء.'; render(); }).catch(function (x) { if (so2) so2.textContent = x.message; }); }
     else if (a === 'ttsrebal') api('/api/admin/tts/rebalance', { method: 'POST', body: {} }).then(function (d) { TT.st = d; TT.sync = (d.moved && d.moved.length) ? 'اتنقل ' + d.moved.length + ' رواية للحسابات الفاضية' : 'مفيش حساب فاضي أو مفيش روايات تتنقل دلوقتي'; flash('تمام'); render(); }).catch(function (e) { flash(e.message || 'حصل خطأ'); });
     else if (a === 'ttschs') { var cn = b.getAttribute('data-n'); TT.chOpen[cn] = !TT.chOpen[cn]; if (TT.chOpen[cn]) { delete TT.chs[cn]; chLoad(cn); } render(); }
+    else if (a === 'vckadd') { vcRead(); var kt = ($('vc-keys') || {}).value || ''; if (!kt.trim()) { VC.kmsg = 'الصق مفتاح الأول'; render(); return; } api('/api/admin/vc/keys', { method: 'POST', body: { keys: kt } }).then(function (d) { VC.keys = d.keys || []; VC.kmsg = 'اتضاف ' + (d.added || 0) + ' مفتاح ✅'; render(); }).catch(function (x) { VC.kmsg = x.message; render(); }); }
+    else if (a === 'vckdel') { vcRead(); if (!confirm('تمسح المفتاح ده؟')) return; api('/api/admin/vc/keys', { method: 'DELETE', body: { i: +b.getAttribute('data-i') } }).then(function (d) { VC.keys = d.keys || []; VC.kmsg = 'اتمسح'; render(); }).catch(function (x) { VC.kmsg = x.message; render(); }); }
     else if (a === 'vcclr') { vcClear(); render(); }
     else if (a === 'vcgo') {
       vcRead(); if (VC.text.replace(/\s/g, '').length < 2) { VC.msg = 'اكتب النص الأول'; render(); return; }
