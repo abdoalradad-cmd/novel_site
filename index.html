@@ -12657,7 +12657,7 @@ document.addEventListener('click', function (e) {
       var bt = function (op, lab, cls, cf) { return '<button type="button" class="rp-btn sm ' + (cls || 'sec') + '" data-act="ttsch" data-n="' + esc(nid) + '" data-i="' + i + '" data-o="' + op + '"' + (cf ? ' data-cf="' + cf + '"' : '') + '>' + lab + '</button>'; };
       var prog = r && r.nparts && r.status !== 'done' && r.status !== 'off' ? ' <span class="rp-sub" style="margin:0">(' + (r.done || 0) + '/' + r.nparts + ')</span>' : '';
       h += '<div class="rp-item" style="margin-top:5px;padding:8px"><div style="min-width:0"><b>' + (i + 1) + '. ' + esc(ttl) + '</b> <span class="rp-pill ' + s[1] + '">' + s[0] + '</span>' + prog + (r && r.status === 'failed' && r.err ? '<div class="rp-sub" style="margin:2px 0 0;color:#b91c1c">' + esc(r.err) + '</div>' : '') + '</div><div class="rp-row" style="flex-wrap:wrap;gap:4px;margin-top:5px">' +
-        (r ? (r.status === 'off' ? bt('on', '▶ رجّعه للطابور') : (r.status !== 'done' ? bt('front', '⏫ قدّمه') + bt('end', '⏬ آخر الطابور') : '') + bt('redo', '♻ إعادة تحويله', 'sec', 'تمسح صوت الفصل ده وتحوّله من الأول؟') + (r.status !== 'done' ? bt('off', '⏸ شيله من الطابور') : '')) + bt('del', '🗑 مسحه', 'red', 'تمسح الفصل ده وصوته خالص؟ (السينك ممكن يضيفه تاني)') : '<button type="button" class="rp-btn sm" data-act="ttschsend" data-n="' + esc(nid) + '" data-i="' + i + '">⬆ ابعته للطابور</button>') + '</div></div>';
+        (r ? (r.status === 'off' ? bt('on', '▶ رجّعه للطابور') : (r.status === 'done' ? bt('dl', '⬇ تحميل الصوت', 'pri') : '') + (r.status !== 'done' ? bt('front', '⏫ قدّمه') + bt('end', '⏬ آخر الطابور') : '') + bt('redo', '♻ إعادة تحويله', 'sec', 'تمسح صوت الفصل ده وتحوّله من الأول؟') + (r.status !== 'done' ? bt('off', '⏸ شيله من الطابور') : '')) + bt('del', '🗑 مسحه', 'red', 'تمسح الفصل ده وصوته خالص؟ (السينك ممكن يضيفه تاني)') : '<button type="button" class="rp-btn sm" data-act="ttschsend" data-n="' + esc(nid) + '" data-i="' + i + '">⬆ ابعته للطابور</button>') + '</div></div>';
     });
     return h + '</div>';
   }
@@ -13091,6 +13091,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttsrun') { var pv = b.getAttribute('data-p') || 'gemini', so2 = $('rp-tt-sync'); if (so2) so2.textContent = 'جاري التحويل… (ممكن ياخد نص دقيقة)'; api('/api/admin/tts/run', { method: 'POST', body: { prov: pv } }).then(function (d) { TT.st = d; TT.sync = d.step && d.step.idle ? ({ daily_limit: 'وصلت للحد اليومي ✋ هيكمّل بكرة.', paused: 'واقف مؤقتًا بسبب رفض المزوّد.', empty: 'مفيش حاجة في الطابور ده.', not_configured: 'المفتاح أو R2 ناقص.' }[d.step.idle] || '') : 'اتحوّل ' + ((d.step || {}).made || 0) + ' جزء.'; render(); }).catch(function (x) { if (so2) so2.textContent = x.message; }); }
     else if (a === 'ttsrebal') api('/api/admin/tts/rebalance', { method: 'POST', body: {} }).then(function (d) { TT.st = d; TT.sync = (d.moved && d.moved.length) ? 'اتنقل ' + d.moved.length + ' رواية للحسابات الفاضية' : 'مفيش حساب فاضي أو مفيش روايات تتنقل دلوقتي'; flash('تمام'); render(); }).catch(function (e) { flash(e.message || 'حصل خطأ'); });
     else if (a === 'ttschs') { var cn = b.getAttribute('data-n'); TT.chOpen[cn] = !TT.chOpen[cn]; if (TT.chOpen[cn]) { delete TT.chs[cn]; chLoad(cn); } render(); }
+    else if (a === 'ttsch' && b.getAttribute('data-o') === 'dl') { flash('بجهّز رابط التحميل…'); api('/api/admin/tts/dllink', { method: 'POST', body: { nid: b.getAttribute('data-n'), idx: +b.getAttribute('data-i') } }).then(function (d) { var nat = false; try { nat = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) {} if (nat) window.open(d.url, '_blank'); else location.href = d.url; flash('التحميل بدأ ⬇'); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsch') { var cn2 = b.getAttribute('data-n'), cf = b.getAttribute('data-cf'); if (cf && !confirm(cf)) return; api('/api/admin/tts/ch', { method: 'POST', body: { nid: cn2, idx: +b.getAttribute('data-i'), op: b.getAttribute('data-o') } }).then(function (d) { TT.st = d; flash('تمام ✅'); chLoad(cn2); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttschsend') {
       var sn = b.getAttribute('data-n'), si = +b.getAttribute('data-i'), nvo = ttsNovelObj(sn), sc = nvo && nvo.chapters && nvo.chapters[si];
@@ -15981,6 +15982,30 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     var b = document.getElementById('app-tabbar'); t++;
     if (b) { clearInterval(iv); attach(b); } else if (t > 80) clearInterval(iv);
   }, 150);
+})();
+</script>
+<style id="rp-noshot-css">@media print{html:not(.rp-adm) body{display:none!important}}html.rp-shield body>*{visibility:hidden!important}html.rp-shield::after{content:"المحتوى محمي 🔒";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0b1210;color:#fff;font:700 20px Cairo,sans-serif;z-index:2147483647}html:not(.rp-adm) #chapter-content,html:not(.rp-adm) .chapter-content{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}</style>
+<script id="rp-noshot">
+/* حماية من اللقطات في المتصفح لغير الأدمن. تنبيه: المتصفح مش بيقدر يمنع لقطة الشاشة من النظام نفسه؛ ده بيصعّبها (طباعة/PrintScreen/تبديل نافذة). المنع الحقيقي في التطبيق (FLAG_SECURE). */
+(function () {
+  var de = document.documentElement, t = 0;
+  function isAdm() { try { var u = JSON.parse(localStorage.getItem('rp_user') || 'null'); return !!(u && u.role === 'admin'); } catch (e) { return false; } }
+  function native() { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || /; wv\)/.test(navigator.userAgent); } catch (e) { return false; } }
+  function sync() { de.classList.toggle('rp-adm', isAdm()); }
+  function off() { return native() || isAdm(); }
+  function shield(ms) { if (off()) return; de.classList.add('rp-shield'); clearTimeout(t); t = setTimeout(function () { if (document.hasFocus() && !document.hidden) de.classList.remove('rp-shield'); }, ms || 1500); }
+  sync(); setInterval(sync, 3000);
+  document.addEventListener('keydown', function (e) {
+    if (off()) return;
+    var k = e.key, c = e.ctrlKey || e.metaKey;
+    if (k === 'PrintScreen' || (c && /^[psPS]$/.test(k)) || (e.metaKey && e.shiftKey && /^[3-5]$/.test(k)) || (e.shiftKey && e.metaKey) || (e.shiftKey && e.key === 'S' && c)) { e.preventDefault(); try { navigator.clipboard && navigator.clipboard.writeText(''); } catch (x) {} shield(2000); }
+  }, true);
+  document.addEventListener('keyup', function (e) { if (!off() && e.key === 'PrintScreen') { try { navigator.clipboard && navigator.clipboard.writeText(''); } catch (x) {} shield(2000); } }, true);
+  window.addEventListener('blur', function () { if (!off() && window.matchMedia && matchMedia('(pointer:fine)').matches) de.classList.add('rp-shield'); });
+  window.addEventListener('focus', function () { de.classList.remove('rp-shield'); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { if (!off() && matchMedia('(pointer:fine)').matches) de.classList.add('rp-shield'); } else de.classList.remove('rp-shield'); });
+  document.addEventListener('contextmenu', function (e) { if (!off() && e.target && e.target.closest && e.target.closest('#reader-paper,#chapter-content,.chapter-content,img')) e.preventDefault(); });
+  document.addEventListener('copy', function (e) { if (!off() && e.target && e.target.closest && e.target.closest('#reader-paper,#chapter-content,.chapter-content')) e.preventDefault(); });
 })();
 </script>
 <script src="android-bridge.js"></script></body></html>
