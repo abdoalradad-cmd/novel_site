@@ -11916,6 +11916,8 @@ document.addEventListener('click', function (e) {
   function render0() {
     var el = body(); if (!el) return;
     try { if (window.RadPadSecure) window.RadPadSecure.set(!isAdmin()); } catch (e) {}
+    try { if (S.tab === 'vc' && !S.menu) vcRead(); } catch (e) {}
+    try { if (VC.url && (S.menu || S.tab !== 'vc' || !token())) vcClear(); } catch (e) {}
     var pg = $('rp-acct-page'); if (pg) pg.classList.toggle('editing', S.view === 'editor' && !!token());
     if (pg) { var ak = (S.menu ? 'menu' : S.view + ':' + S.tab); pg.classList.toggle('rp-still', pg.__key === ak); pg.__key = ak; }
     if (!base()) { setTitle('حسابي'); el.innerHTML = '<div class="rp-card"><div class="rp-empty">' + ic('plug-circle-xmark') + 'الحسابات مش متاحة دلوقتي.<br>' + (function () { try { return isReaderOnlyMode ? 'جرّب بعد شوية.' : 'حط رابط سيرفر الحسابات في لوحة التحكم (تبويب «التطبيق والإشعارات»).'; } catch (e) { return ''; } })() + '</div></div>' + themeCard(); return; }
@@ -12079,7 +12081,7 @@ document.addEventListener('click', function (e) {
     hero += streakCard() + achCard() + premCard() + libraryCard() + earnCard() + ptsMini();
     var html = '';
     var tabs = [['about', 'user', 'عني'], ['wallet', 'wallet', 'محفظتي'], ['novels', 'book-open', 'رواياتي'], ['settings', 'gear', 'الإعدادات'], ['contest', 'trophy', 'مسابقات بفلوس'], ['points', 'star', 'نقاط الفوز'], ['news', 'newspaper', 'الأخبار الأدبية', isAdmin() ? unseenN('news') : 0], ['quotes', 'quote-right', 'اقتباساتي'], ['contact', 'envelope', 'تواصل معنا']];
-    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['wd', 'money-bill-transfer', 'طلبات السحب', WL.list ? WL.list.filter(function (x) { return x.status === 'pending'; }).length : 0], ['actest', 'gavel', 'إدارة المسابقات'], ['rd1', 'microphone', 'أداة الرداد 1'], ['rd2', 'microphone', 'أداة الرداد 2'], ['rd3', 'microphone', 'أداة الرداد 3'], ['rd4', 'microphone', 'أداة الرداد 4'], ['rd5', 'microphone', 'أداة الرداد 5'], ['rd6', 'microphone', 'أداة الرداد 6'], ['backup', 'database', 'النسخ الاحتياطي']);
+    if (admin) tabs.push(['pending', 'inbox', 'الطلبات', unseenN('pending')], ['live', 'earth-africa', 'المنشورة'], ['users', 'users', 'المستخدمين'], ['sales', 'cart-shopping', 'المبيعات', unseenN('sales')], ['premium', 'crown', 'Premium', unseenN('premium')], ['bc', 'bullhorn', 'إشعارات'], ['msgs', 'inbox', 'رسائل التواصل', unseenN('msgs')], ['wd', 'money-bill-transfer', 'طلبات السحب', WL.list ? WL.list.filter(function (x) { return x.status === 'pending'; }).length : 0], ['actest', 'gavel', 'إدارة المسابقات'], ['rd1', 'microphone', 'أداة الرداد 1'], ['rd2', 'microphone', 'أداة الرداد 2'], ['rd3', 'microphone', 'أداة الرداد 3'], ['rd4', 'microphone', 'أداة الرداد 4'], ['rd5', 'microphone', 'أداة الرداد 5'], ['rd6', 'microphone', 'أداة الرداد 6'], ['vc', 'microphone', 'تحويل نص لصوت'], ['backup', 'database', 'النسخ الاحتياطي']);
     var MI = { rd1: ['#16a34a', 'مفاتيح وطابور وروايات حساب جوجل 1'], rd2: ['#ca8a04', 'مفاتيح وطابور وروايات حساب جوجل 2'], rd3: ['#ea580c', 'مفاتيح وطابور وروايات حساب جوجل 3'], rd4: ['#dc2626', 'مفاتيح وطابور وروايات حساب جوجل 4'], rd5: ['#9333ea', 'مفاتيح وطابور وروايات حساب جوجل 5'], rd6: ['#92400e', 'مفاتيح وطابور وروايات حساب جوجل 6'], wallet: ['#f59e0b', 'نقاطك الذهبية ورصيدك بالجنيه وسحب الأموال'], wd: ['#16a34a', 'اقبل أو ارفض طلبات سحب الأموال'], about: ['#0f766e', 'اللي يخصك: بياناتك ومحفظتك ومكتبتك'], novels: ['#7c3aed', 'اكتب وانشر رواياتك'], settings: ['#475569', 'الصوت، الأجهزة، الحساب'], contest: ['#d97706', 'اشترك واكسب جوايز'], points: ['#ca8a04', 'نقاطك وقرعة الأسبوع'], pending: ['#dc2626', 'روايات مستنية موافقتك'], live: ['#059669', 'اللي نزل من الناس'], users: ['#2563eb', 'الحسابات والزوار والـ IP'], sales: ['#db2777', 'الطلبات والأرباح'], premium: ['#9333ea', 'الاشتراكات والصوت'], bc: ['#ea580c', 'ابعت إشعار لكل الناس'], news: ['#0d9488', 'آخر أخبار عالم الأدب'], quotes: ['#e11d48', 'جمل حفظتها من الروايات'], contact: ['#4f46e5', 'استفسار أو شكوى أو اقتراح'], msgs: ['#7c3aed', 'رسائل المستخدمين'], actest: ['#0891b2', 'أسئلة وجوايز المسابقات'], backup: ['#64748b', 'نسخة احتياطية'] };
     if (S.menu) {
       var av = u.avatar ? '<img loading="lazy" decoding="async" src="' + esc(u.avatar) + '" alt="" referrerpolicy="no-referrer" onerror="this.remove()">' : '<span>' + esc((u.name || '؟').trim().charAt(0)) + '</span>';
@@ -12111,6 +12113,7 @@ document.addEventListener('click', function (e) {
   function tabBody() {
     var t = S.tab;
     if (t === 'settings') return settingsTab();
+    if (t === 'vc' && isAdmin()) return vcTab();
     if (t === 'contest') return contestTab();
     if (t === 'points') return pointsTab();
     if (t === 'wallet') return walletTab();
@@ -12644,6 +12647,25 @@ document.addEventListener('click', function (e) {
   }
   /* ---------- تحكم في كل فصل لوحده جوه الرواية ---------- */
   function ttsNovelObj(nid) { try { for (var i = 0; i < novels.length; i++) if (String(novels[i].id) === String(nid)) return novels[i]; } catch (e) {} return null; }
+  /* ---- تابة «تحويل نص لصوت»: مستقلة تمامًا عن الفصول. الصوت بيتعمل ويتعرض هنا بس ومش بيتخزّن على السيرفر، ويتمسح أول ما تخرج من التابة ---- */
+  var VC = { text: '', pid: 'kareem', md: 'egy', busy: false, url: '', secs: 0, msg: '', list: null, _req: 0 };
+  function vcClear() { if (VC.url) { try { URL.revokeObjectURL(VC.url); } catch (e) {} } VC.url = ''; VC.secs = 0; VC.msg = ''; VC.text = ''; VC.busy = false; }
+  function vcRead() { var t = $('vc-text'), p = $('vc-pid'), m = $('vc-md'); if (t) VC.text = t.value; if (p) VC.pid = p.value; if (m) VC.md = m.value; }
+  function vcLoad() { if (VC.list || VC._req) return; VC._req = 1; api('/api/admin/vc/voices').then(function (d) { VC.list = d.voices || []; render(); }).catch(function () { VC._req = 0; VC.list = []; render(); }); }
+  function vcTab() {
+    vcLoad();
+    var opts = (VC.list || []).map(function (v) { return '<option value="' + esc(v.id) + '"' + (v.id === VC.pid ? ' selected' : '') + '>' + esc(v.n) + (v.g === 'f' ? ' (صوت نسائي)' : v.g === 'm' ? ' (صوت رجالي)' : '') + '</option>'; }).join('') || '<option value="kareem">جاري تحميل الأصوات…</option>';
+    var mm = Math.floor(VC.secs / 60), ss = VC.secs % 60, dur = mm + ':' + (ss < 10 ? '0' : '') + ss;
+    return '<div class="rp-card"><h3>' + ic('microphone') + ' تحويل نص لصوت</h3><div class="rp-sub">اكتب أي نص، اختار الصوت، وادوس تحويل. الصوت بيظهر هنا بس وبيتمسح أول ما تخرج من التابة، ومش بيتخزّن على السيرفر ومالوش علاقة بتحويل الفصول.</div>' +
+      '<textarea id="vc-text" rows="8" maxlength="3000" placeholder="اكتب أو الصق النص هنا (لحد 3000 حرف)" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;border:1px solid #cbd5d0;font:inherit">' + esc(VC.text) + '</textarea>' +
+      '<div class="rp-row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><label style="flex:1;min-width:150px">الصوت<select id="vc-pid" style="width:100%;padding:9px;border-radius:10px">' + opts + '</select></label>' +
+      '<label style="flex:1;min-width:150px">اللهجة<select id="vc-md" style="width:100%;padding:9px;border-radius:10px"><option value="egy"' + (VC.md === 'egy' ? ' selected' : '') + '>عامية مصرية</option><option value="msa"' + (VC.md === 'msa' ? ' selected' : '') + '>فصحى</option></select></label></div>' +
+      '<div class="rp-row" style="margin-top:10px"><button type="button" class="rp-btn pri" data-act="vcgo"' + (VC.busy ? ' disabled' : '') + '>' + (VC.busy ? '⏳ بيتحوّل…' : '🎙 تحويل') + '</button></div>' +
+      (VC.msg ? '<div class="rp-sub" style="margin-top:8px">' + esc(VC.msg) + '</div>' : '') +
+      (VC.url ? '<div style="margin-top:12px;border-top:1px dashed #cbd5d0;padding-top:10px"><audio controls src="' + VC.url + '" style="width:100%"></audio><div class="rp-sub" style="margin:6px 0">المدة: <b>' + dur + '</b> دقيقة</div><div class="rp-row" style="gap:8px"><a class="rp-btn sec" download="radpad-voice.wav" href="' + VC.url + '">⬇ تحميل على الموبايل</a><button type="button" class="rp-btn red" data-act="vcclr">🗑 مسح</button></div></div>' : '') +
+      '</div>';
+  }
+  try { window.addEventListener('pagehide', function () { vcClear(); }); } catch (e) {}
   function chPanel(nid) {
     var d = TT.chs[nid]; if (!d) return '<div class="rp-sub" style="margin-top:8px">جاري تحميل الفصول…</div>';
     var by = {}; (d.rows || []).forEach(function (r) { by[r.idx] = r; });
@@ -13091,6 +13113,16 @@ document.addEventListener('click', function (e) {
     else if (a === 'ttsrun') { var pv = b.getAttribute('data-p') || 'gemini', so2 = $('rp-tt-sync'); if (so2) so2.textContent = 'جاري التحويل… (ممكن ياخد نص دقيقة)'; api('/api/admin/tts/run', { method: 'POST', body: { prov: pv } }).then(function (d) { TT.st = d; TT.sync = d.step && d.step.idle ? ({ daily_limit: 'وصلت للحد اليومي ✋ هيكمّل بكرة.', paused: 'واقف مؤقتًا بسبب رفض المزوّد.', empty: 'مفيش حاجة في الطابور ده.', not_configured: 'المفتاح أو R2 ناقص.' }[d.step.idle] || '') : 'اتحوّل ' + ((d.step || {}).made || 0) + ' جزء.'; render(); }).catch(function (x) { if (so2) so2.textContent = x.message; }); }
     else if (a === 'ttsrebal') api('/api/admin/tts/rebalance', { method: 'POST', body: {} }).then(function (d) { TT.st = d; TT.sync = (d.moved && d.moved.length) ? 'اتنقل ' + d.moved.length + ' رواية للحسابات الفاضية' : 'مفيش حساب فاضي أو مفيش روايات تتنقل دلوقتي'; flash('تمام'); render(); }).catch(function (e) { flash(e.message || 'حصل خطأ'); });
     else if (a === 'ttschs') { var cn = b.getAttribute('data-n'); TT.chOpen[cn] = !TT.chOpen[cn]; if (TT.chOpen[cn]) { delete TT.chs[cn]; chLoad(cn); } render(); }
+    else if (a === 'vcclr') { vcClear(); render(); }
+    else if (a === 'vcgo') {
+      vcRead(); if (VC.text.replace(/\s/g, '').length < 2) { VC.msg = 'اكتب النص الأول'; render(); return; }
+      if (VC.url) { try { URL.revokeObjectURL(VC.url); } catch (x) {} VC.url = ''; } VC.busy = true; VC.msg = ''; render();
+      var vch = { 'Content-Type': 'application/json', 'X-Device': devId() }; if (token()) vch.Authorization = 'Bearer ' + token();
+      fetch(base() + '/api/admin/vc/convert', { method: 'POST', headers: vch, body: JSON.stringify({ text: VC.text, pid: VC.pid, mode: VC.md }) })
+        .then(function (r) { if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.error || 'فشل التحويل'); }); return r.blob(); })
+        .then(function (bl) { VC.url = URL.createObjectURL(bl); VC.secs = Math.round(Math.max(0, bl.size - 44) / 48000); VC.busy = false; VC.msg = 'اتحوّل ✅'; render(); })
+        .catch(function (x) { VC.busy = false; VC.msg = '❌ ' + (x.message || 'فشل التحويل'); render(); });
+    }
     else if (a === 'ttsch' && b.getAttribute('data-o') === 'dl') { flash('بجهّز رابط التحميل…'); api('/api/admin/tts/dllink', { method: 'POST', body: { nid: b.getAttribute('data-n'), idx: +b.getAttribute('data-i') } }).then(function (d) { var nat = false; try { nat = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) {} if (nat) window.open(d.url, '_blank'); else location.href = d.url; flash('التحميل بدأ ⬇'); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsch') { var cn2 = b.getAttribute('data-n'), cf = b.getAttribute('data-cf'); if (cf && !confirm(cf)) return; api('/api/admin/tts/ch', { method: 'POST', body: { nid: cn2, idx: +b.getAttribute('data-i'), op: b.getAttribute('data-o') } }).then(function (d) { TT.st = d; flash('تمام ✅'); chLoad(cn2); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttschsend') {
