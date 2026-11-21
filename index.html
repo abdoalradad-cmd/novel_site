@@ -16035,7 +16035,9 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
   document.addEventListener('keyup', function (e) { if (!off() && e.key === 'PrintScreen') { try { navigator.clipboard && navigator.clipboard.writeText(''); } catch (x) {} shield(2000); } }, true);
   window.addEventListener('blur', function () { if (!off() && window.matchMedia && matchMedia('(pointer:fine)').matches) de.classList.add('rp-shield'); });
   window.addEventListener('focus', function () { de.classList.remove('rp-shield'); });
-  document.addEventListener('visibilitychange', function () { if (document.hidden) { if (!off() && matchMedia('(pointer:fine)').matches) de.classList.add('rp-shield'); } else de.classList.remove('rp-shield'); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { if (!off()) de.classList.add('rp-shield'); } else de.classList.remove('rp-shield'); });
+  window.addEventListener('pagehide', function () { if (!off()) de.classList.add('rp-shield'); });
+  window.addEventListener('pageshow', function () { de.classList.remove('rp-shield'); });
   document.addEventListener('contextmenu', function (e) { if (!off() && e.target && e.target.closest && e.target.closest('#reader-paper,#chapter-content,.chapter-content,img')) e.preventDefault(); });
   document.addEventListener('copy', function (e) { if (!off() && e.target && e.target.closest && e.target.closest('#reader-paper,#chapter-content,.chapter-content')) e.preventDefault(); });
 })();
