@@ -871,6 +871,48 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 
+
+  /* تشغيل الصوت في الخلفية: إشعار تحكم + خدمة أمامية (الجزء الأصلي في PlaybackService.java). بيشتغل في التطبيق بس. */
+  (function () {
+    if (!(NATIVE || nativeNow())) return;
+    var last = '', shown = false, wired = false, bar = null;
+    function $(id) { return document.getElementById(id); }
+    function txt(id) { var e = $(id); return e ? (e.textContent || '').trim() : ''; }
+    function playing() { return !!(bar && bar.classList.contains('playing')); }
+    function visible() { return !!(bar && bar.isConnected && getComputedStyle(bar).display !== 'none'); }
+    function sync() {
+      var P = plugin('AppNative'); if (!P || !P.mediaShow) return;
+      bar = $('tts-bar'); var v = visible();
+      var sig = v + '|' + playing() + '|' + txt('tts-ttl') + '|' + txt('tts-sub');
+      if (sig === last) return; last = sig;
+      try {
+        if (v) { shown = true; P.mediaShow({ title: txt('tts-ttl') || 'RadPad', sub: txt('tts-sub'), playing: playing() }); }
+        else if (shown) { shown = false; P.mediaHide(); }
+      } catch (e) {}
+    }
+    function wire() {
+      var P = plugin('AppNative'); if (wired || !P || !P.addListener) return; wired = true;
+      try {
+        P.addListener('mediaAction', function (e) {
+          var a = e && e.a, b = $('tts-bar'); if (!b) return; bar = b;
+          function click(id) { var el = $(id); if (el) el.click(); }
+          if (a === 'play') { if (!playing()) click('tts-play'); }
+          else if (a === 'pause') { if (playing()) click('tts-play'); }
+          else if (a === 'next') click('tts-f10');
+          else if (a === 'prev') click('tts-b10');
+          else if (a === 'stop') { shown = false; last = ''; click('tts-stop'); }
+          setTimeout(sync, 300);
+        });
+      } catch (err) {}
+    }
+    function start() {
+      wire(); sync();
+      new MutationObserver(sync).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'style'], characterData: true });
+      setInterval(sync, 1500);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+  })();
+
   /* الضغط على أي مكان في كارت الرواية يفتح صفحتها */
   document.addEventListener('click', function (e) {
     var card = e.target.closest && e.target.closest('#novels-grid>div');
