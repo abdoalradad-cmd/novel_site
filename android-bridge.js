@@ -874,7 +874,7 @@
 
   /* تشغيل الصوت في الخلفية: إشعار تحكم + خدمة أمامية (الجزء الأصلي في PlaybackService.java). بيشتغل في التطبيق بس. */
   (function () {
-    if (!(NATIVE || nativeNow())) return;
+    if (window.__rpMedia || !(NATIVE || nativeNow())) return;
     var last = '', shown = false, wired = false, bar = null;
     function $(id) { return document.getElementById(id); }
     function txt(id) { var e = $(id); return e ? (e.textContent || '').trim() : ''; }

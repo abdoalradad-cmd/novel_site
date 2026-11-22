@@ -16064,6 +16064,52 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
   }, 150);
 })();
 </script>
+<script id="rp-media">
+/* إشعار التحكم في الخلفية (التطبيق بس): اسم الرواية + الفصل + موضع الاستماع، وأزرار الإشعار بتتحكم في المشغّل. الجزء الأصلي: PlaybackService.java */
+(function () {
+  window.__rpMedia = 1;
+  function plug() { try { var C = window.Capacitor; if (!(C && C.isNativePlatform && C.isNativePlatform())) return null; return (C.Plugins && C.Plugins.AppNative) || (C.registerPlugin ? C.registerPlugin('AppNative') : null); } catch (e) { return null; } }
+  var P = null, last = '', shown = false, wired = false, lp = 0, lt = 0;
+  function $(id) { return document.getElementById(id); }
+  function txt(id) { var e = $(id); return e ? (e.textContent || '').trim() : ''; }
+  function info() {
+    var bar = $('tts-bar'), vis = !!(bar && getComputedStyle(bar).display !== 'none'), sk = $('tts-seek'), rb = document.querySelector('#tts-rates button.on');
+    return { vis: vis, play: !!(bar && bar.classList.contains('playing')), ttl: txt('tts-ttl'), sub: txt('tts-sub'), cur: sk ? +sk.value || 0 : 0, dur: sk ? +sk.max || 0 : 0, rate: rb ? parseFloat(rb.dataset.r) || 1 : 1 };
+  }
+  function sync() {
+    if (!P) { P = plug(); if (!P) return; }
+    var i = info(), now = Date.now(), exp = lp + (i.play ? (now - lt) / 1000 * i.rate : 0);
+    var jump = Math.abs(i.cur - exp) > 3, sig = [i.vis, i.play, i.ttl, i.sub, i.rate, Math.round(i.dur / 10)].join('|');
+    if (sig === last && !jump) return;
+    last = sig; lp = i.cur; lt = now;
+    try {
+      if (i.vis) { shown = true; var pr = P.mediaShow({ title: i.ttl || 'RadPad', sub: i.sub, playing: i.play, pos: Math.round(i.cur * 1000), dur: Math.round(i.dur * 1000), rate: i.rate }); if (pr && pr.catch && !window.__bgWarned) pr.catch(function (er) { window.__bgWarned = 1; try { console.warn('media', er); } catch (x) {} }); }
+      else if (shown) { shown = false; P.mediaHide(); }
+    } catch (e) {}
+  }
+  function wire() {
+    if (wired || !P || !P.addListener) return; wired = true;
+    try {
+      P.addListener('mediaAction', function (e) {
+        var a = e && e.a, i = info(); function click(id) { var el = $(id); if (el) el.click(); }
+        if (a === 'play') { if (!i.play) click('tts-play'); }
+        else if (a === 'pause') { if (i.play) click('tts-play'); }
+        else if (a === 'next') click('tts-f10');
+        else if (a === 'prev') click('tts-b10');
+        else if (a === 'stop') { shown = false; last = ''; click('tts-stop'); }
+        else if (a === 'seek') { var sk = $('tts-seek'); if (sk) { sk.value = Math.max(0, Math.round((+e.pos || 0) / 1000)); sk.dispatchEvent(new Event('change')); } }
+        setTimeout(function () { last = ''; sync(); }, 400);
+      });
+    } catch (err) {}
+  }
+  function start() {
+    P = plug(); if (!P) return; wire(); sync();
+    try { new MutationObserver(sync).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'style'], characterData: true }); } catch (e) {}
+    setInterval(sync, 1500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
 <style id="rp-noshot-css">@media print{html:not(.rp-adm) body{display:none!important}}html.rp-shield body>*{visibility:hidden!important}html.rp-shield::after{content:"المحتوى محمي 🔒";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0b1210;color:#fff;font:700 20px Cairo,sans-serif;z-index:2147483647}html:not(.rp-adm) #chapter-content,html:not(.rp-adm) .chapter-content{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}</style>
 <script id="rp-noshot">
 /* حماية من اللقطات في المتصفح لغير الأدمن. تنبيه: المتصفح مش بيقدر يمنع لقطة الشاشة من النظام نفسه؛ ده بيصعّبها (طباعة/PrintScreen/تبديل نافذة). المنع الحقيقي في التطبيق (FLAG_SECURE). */
