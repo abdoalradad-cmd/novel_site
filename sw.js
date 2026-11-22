@@ -2,7 +2,7 @@
    - عند وجود إنترنت: يجلب أحدث نسخة من الموقع ويحفظها (فتظهر الروايات الجديدة فورًا).
    - بدون إنترنت أو مع شبكة بطيئة: يعرض آخر نسخة محفوظة.
    ضع هذا الملف بجانب index.html في مستودع الموقع (بنفس الاسم sw.js). */
-const CACHE = 'radpad-v1';
+const CACHE = 'radpad-v2'; // رفع الرقم بيمسح الكاش القديم كله (كان فيه أجزاء صوت متراكمة بمئات الميجا)
 const CFG_KEY = '__rp_cfg';
 const NET_TIMEOUT = 7000;
 
@@ -28,7 +28,7 @@ self.addEventListener('activate', (e) => {
 });
 
 // طلبات لا نخزّنها أبدًا (بيانات حيّة)
-const SKIP = /(\/api\/(me|my|admin|login|register|password)|firebaseio\.com|identitytoolkit|securetoken|firebaseinstallations|google-analytics|googletagmanager|youtube\.com|ytimg\.com|googlevideo\.com)/i;
+const SKIP = /(\/api\/(me|my|admin|login|register|password|tts)|firebaseio\.com|identitytoolkit|securetoken|firebaseinstallations|google-analytics|googletagmanager|youtube\.com|ytimg\.com|googlevideo\.com)/i;
 
 function withTimeout(promise, ms) {
   return new Promise((resolve, reject) => {
@@ -74,7 +74,9 @@ async function handle(e, req) {
   // الصفحة الرئيسية: نتجاوز كاش المتصفح (10 دقايق في GitHub Pages) علشان التعديلات الجديدة تظهر فورًا
   const isPage = req.mode === 'navigate' || /\/(index\.html)?$/.test(new URL(req.url).pathname);
   const net = (isPage ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req)).then((res) => {
-    if (res && (res.ok || res.type === 'opaque') && !/no-store/i.test(res.headers.get('cache-control') || '')) cache.put(req, res.clone()).catch(() => {});
+    // مبنخزّنش الصوت ولا أي ملف كبير (كان بيملّى مساحة الموبايل)
+    const ct = (res && res.headers && res.headers.get('content-type')) || '', cl = +((res && res.headers && res.headers.get('content-length')) || 0);
+    if (res && (res.ok || res.type === 'opaque') && !/no-store/i.test(res.headers.get('cache-control') || '') && !/^(audio|video)\//i.test(ct) && cl < 3000000) cache.put(req, res.clone()).catch(() => {});
     if (isPage && res && res.ok) e.waitUntil(rememberCfg(res.clone()));
     return res;
   });
