@@ -886,7 +886,7 @@
       var sig = v + '|' + playing() + '|' + txt('tts-ttl') + '|' + txt('tts-sub');
       if (sig === last) return; last = sig;
       try {
-        if (v) { shown = true; P.mediaShow({ title: txt('tts-ttl') || 'RadPad', sub: txt('tts-sub'), playing: playing() }); }
+        if (v) { shown = true; var pr = P.mediaShow({ title: txt('tts-ttl') || 'RadPad', sub: txt('tts-sub'), playing: playing() }); if (pr && pr.catch && !window.__bgWarned) pr.catch(function (er) { window.__bgWarned = 1; toast('إشعار الخلفية مش شغال: ' + ((er && er.message) || er)); }); }
         else if (shown) { shown = false; P.mediaHide(); }
       } catch (e) {}
     }
