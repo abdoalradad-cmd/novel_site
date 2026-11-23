@@ -12727,6 +12727,56 @@ document.addEventListener('click', function (e) {
     });
     return h + '</div>';
   }
+  function ttsPublishConfirm(message) {
+    return new Promise(function (resolve) {
+      var previous = document.activeElement, finished = false;
+      var overlay = document.createElement('div');
+      overlay.className = 'rp-tts-publish-confirm';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.55);direction:rtl';
+      var dialog = document.createElement('div');
+      dialog.setAttribute('role', 'alertdialog');
+      dialog.setAttribute('aria-modal', 'true');
+      dialog.setAttribute('aria-labelledby', 'rp-tts-publish-title');
+      dialog.setAttribute('aria-describedby', 'rp-tts-publish-warning');
+      dialog.style.cssText = 'box-sizing:border-box;width:100%;max-width:560px;max-height:90vh;overflow:auto;padding:24px;border-radius:18px;background:#fff;color:#172c25;box-shadow:0 18px 70px rgba(0,0,0,.3);font-family:inherit';
+      var title = document.createElement('h3');
+      title.id = 'rp-tts-publish-title'; title.textContent = 'تأكيد نشر الجيل الصوتي';
+      title.style.cssText = 'font-size:20px;margin:0 0 14px;font-weight:800';
+      var warning = document.createElement('p');
+      warning.id = 'rp-tts-publish-warning'; warning.textContent = message;
+      warning.style.cssText = 'font-size:16px;line-height:1.9;margin:0 0 22px;overflow-wrap:anywhere';
+      var actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;flex-wrap:wrap;gap:12px';
+      var cancel = document.createElement('button');
+      cancel.type = 'button'; cancel.textContent = 'إلغاء';
+      cancel.style.cssText = 'font:inherit;cursor:pointer;border:1px solid #64746d;border-radius:10px;padding:12px 22px;background:#fff;color:#172c25';
+      var approve = document.createElement('button');
+      approve.type = 'button'; approve.textContent = 'تأكيد النشر وإشعار المتابعين';
+      approve.style.cssText = 'font:inherit;font-weight:800;cursor:pointer;border:1px solid #065f46;border-radius:10px;padding:12px 22px;background:#065f46;color:#fff';
+      function finish(accepted) {
+        if (finished) return; finished = true;
+        approve.disabled = cancel.disabled = true;
+        document.removeEventListener('keydown', onKey, true);
+        overlay.remove();
+        if (previous && previous.isConnected) previous.focus();
+        resolve(accepted);
+      }
+      function onKey(event) {
+        if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); finish(false); }
+        else if (event.key === 'Tab') {
+          event.preventDefault(); event.stopPropagation();
+          (document.activeElement === cancel ? approve : cancel).focus();
+        }
+      }
+      cancel.addEventListener('click', function () { finish(false); });
+      approve.addEventListener('click', function () { finish(true); });
+      actions.appendChild(cancel); actions.appendChild(approve);
+      dialog.appendChild(title); dialog.appendChild(warning); dialog.appendChild(actions);
+      overlay.appendChild(dialog); document.body.appendChild(overlay);
+      document.addEventListener('keydown', onKey, true);
+      cancel.focus();
+    });
+  }
   function chLoad(nid) { return api('/api/admin/tts/chapters?nid=' + encodeURIComponent(nid)).then(function (d) { TT.chs[nid] = { rows: d.chapters || [], staged: d.staged || [], notify: d.notify || {} }; render(); }).catch(function (x) { flash(x.message); }); }
   function ttsTabs(d) {
     var has = d.has || {}, h = '<div class="rp-ttabs"><button type="button" class="' + (TT.tab === 'general' ? 'on' : '') + '" data-act="tttab" data-t="general">⚙️ عام</button>';
@@ -13182,7 +13232,7 @@ document.addEventListener('click', function (e) {
       var ct1 = ttsChapText(sc); if (!ct1.text) { flash('الفصل فاضي'); return; }
       api('/api/admin/tts/enqueue', { method: 'POST', body: { items: [{ nid: String(sn), idx: si, ntitle: String(nvo.title || ''), ctitle: String(sc.title || ''), ord: 0, sig: ct1.sig, text: ct1.text, redo: true }] } }).then(function () { return api('/api/admin/tts/ch', { method: 'POST', body: { nid: sn, idx: si, op: 'end' } }); }).then(function (d) { TT.st = d; flash('اتبعت وهياخد دوره في آخر الطابور ✅'); chLoad(sn); }).catch(function (x) { flash(x.message); });
     }
-    else if (a === 'ttspub') { var pn2 = b.getAttribute('data-n'), pi2 = +b.getAttribute('data-i'), pg2 = +b.getAttribute('data-g'), pv2 = b.getAttribute('data-v') || ''; if (!confirm('اعتماد نشر الجيل الصوتي الجديد (رقم ' + pg2 + (pv2 ? '، الصوت: ' + pv2 : '') + ') للفصل ده؟ الصوت الحالي هيتبدل فورًا، وهيتبعت إشعار «الفصل اتحوّل لصوت» للكاتب والمتابعين مرة واحدة بس. تأكد إنك سمعت الجيل ده نفسه الأول.')) return; flash('بيتم النشر…'); api('/api/admin/tts/publish', { method: 'POST', body: { nid: pn2, idx: pi2, accept: pg2 } }).then(function (d) { var nm = { sent: 'اتنشر واتبعت الإشعار للمتابعين ✅', dup: 'اتنشر ✅ (الإشعار كان اتبعت قبل كده)', off: 'اتنشر ✅ — الإشعارات مقفولة للرواية دي', admins: 'اتنشر ✅ — الإشعار للأدمن بس (مفيش متابعين)', bound: 'الجيل ده منشور أصلًا ✅', none: 'اتنشر ✅', pending: 'اتنشر ✅ — الإشعار قيد الإتمام', unknown: 'اتنشر ✅ — حالة الإشعار غير مؤكدة، راجع سجل الأدمن' }[d.notify]; if (!nm && /^err:/.test(String(d.notify))) nm = 'اتنشر ✅ — فشل الإشعار: ' + String(d.notify).slice(4); flash(nm || ('اتنشر ✅ — الإشعار: ' + d.notify)); chLoad(pn2); }).catch(function (x) { flash(x.message); }); }
+    else if (a === 'ttspub') { var pn2 = b.getAttribute('data-n'), pi2 = +b.getAttribute('data-i'), pg2 = +b.getAttribute('data-g'), pv2 = b.getAttribute('data-v') || ''; ttsPublishConfirm('اعتماد نشر الجيل الصوتي الجديد (رقم ' + pg2 + (pv2 ? '، الصوت: ' + pv2 : '') + ') للفصل ده؟ الصوت الحالي هيتبدل فورًا، وهيتبعت إشعار «الفصل اتحوّل لصوت» للكاتب والمتابعين مرة واحدة بس. تأكد إنك سمعت الجيل ده نفسه الأول.').then(function (confirmed) { if (!confirmed) return; flash('بيتم النشر…'); api('/api/admin/tts/publish', { method: 'POST', body: { nid: pn2, idx: pi2, accept: pg2 } }).then(function (d) { var nm = { sent: 'اتنشر واتبعت الإشعار للمتابعين ✅', dup: 'اتنشر ✅ (الإشعار كان اتبعت قبل كده)', off: 'اتنشر ✅ — الإشعارات مقفولة للرواية دي', admins: 'اتنشر ✅ — الإشعار للأدمن بس (مفيش متابعين)', bound: 'الجيل ده منشور أصلًا ✅', none: 'اتنشر ✅', pending: 'اتنشر ✅ — الإشعار قيد الإتمام', unknown: 'اتنشر ✅ — حالة الإشعار غير مؤكدة، راجع سجل الأدمن' }[d.notify]; if (!nm && /^err:/.test(String(d.notify))) nm = 'اتنشر ✅ — فشل الإشعار: ' + String(d.notify).slice(4); flash(nm || ('اتنشر ✅ — الإشعار: ' + d.notify)); chLoad(pn2); }).catch(function (x) { flash(x.message); });}); }
     else if (a === 'ttsretry') api('/api/admin/tts/retry', { method: 'POST', body: { prov: b.getAttribute('data-p') } }).then(function (d) { TT.st = d; flash('تمام'); render(); }).catch(function (x) { flash(x.message); });
     else if (a === 'ttspos') { var pe = document.getElementById('rp-pos-' + b.getAttribute('data-n')); api('/api/admin/tts/pos', { method: 'POST', body: { nid: b.getAttribute('data-n'), pos: pe ? pe.value : 1 } }).then(function (d) { TT.st = d; flash('اتثبّت الترتيب ✅'); render(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'ttsfront') api('/api/admin/tts/front', { method: 'POST', body: { nid: b.getAttribute('data-n') } }).then(function (d) { TT.st = d; render(); }).catch(function (x) { flash(x.message); });
