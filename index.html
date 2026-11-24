@@ -9865,7 +9865,14 @@ document.addEventListener('click', function (e) {
     for (let k = 0; k < TTS.chunks.length; k++) { if (n >= goal) break; n += TTS.chunks[k].text.length + 1; i = k; }
     if (TTS.state === 'playing') startFrom(i); else { TTS.idx = i; updateUI(); }
   }
-  function skip(d) { const info = timeInfo(); seekTime(info.cur + d); }
+  let skAcc = 0, skT = 0, skBase = 0;
+  function skip(d) {
+    const info = timeInfo(); if (!skT) skBase = info.cur; skAcc += d;
+    const tg = Math.max(0, Math.min(info.tot, skBase + skAcc)), sk = document.getElementById('tts-seek'), ps = document.getElementById('tts-pos');
+    seeking = true; if (sk) sk.value = Math.round(tg); if (ps) ps.textContent = fmt(tg);
+    clearTimeout(skT);
+    skT = setTimeout(() => { skT = 0; const a = skAcc; skAcc = 0; seeking = false; seekTime(skBase + a); }, 350);
+  }
   function setRateTo(r) {
     TTS.rate = r; lsSet('tts_rate', String(r));
     const NXC = window.NXCloudTTS, info = timeInfo();
@@ -14445,7 +14452,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   var opt = { cloud: lsGet('tts_cloud', '1') !== '0' };
-  var stat = {}, sessionOff = false, audio = new Audio(), man = {}, blobs = {}, forced = null, lastUnavail = false;
+  var stat = {}, sessionOff = false, audio = new Audio(), man = {}, blobs = {}, forced = null, lastUnavail = false, pendT = null;
   audio.preload = 'auto';
   function R() { return window.__rp || null; }
   function base() { var r = R(); return r ? r.base() : ''; }
@@ -14541,8 +14548,8 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
       stat[key] = { st: 'ready', t: Date.now() }; hint('');
       var P = m.parts, T = m.total || 1, p, sf = 0;
       if (forced !== null && forced.idx === idx && forced.key === key) { p = forced.p; sf = 0; }
-      else { var g = (C[idx] / CT) * T; p = 0; for (var i = 0; i < P.length; i++) { if (g >= P[i][0]) p = i; } var span = Math.max(1, P[p][1] - P[p][0]); sf = Math.max(0, Math.min(0.98, (g - P[p][0]) / span)); }
-      forced = null;
+      else { var g = (pendT && pendT.key === key) ? pendT.g : (C[idx] / CT) * T; p = 0; for (var i = 0; i < P.length; i++) { if (g >= P[i][0]) p = i; } var span = Math.max(1, P[p][1] - P[p][0]); sf = Math.max(0, Math.min(0.98, (g - P[p][0]) / span)); }
+      forced = null; pendT = null;
       partBlob(m.id, p).then(function (src) {
         if (cancelled()) return;
         var lastI = idx; cur = { key: key, m: m, P: P, T: T, p: p };
@@ -14590,7 +14597,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     var secs = cur.m.secs, P = cur.P, T = cur.T; t = Math.max(0, Math.min(secs - 0.3, t));
     var g = (t / secs) * T, p = 0; for (var i = 0; i < P.length; i++) { if (g >= P[i][0]) p = i; }
     if (p === cur.p) { var d = audio.duration; if (d && isFinite(d)) { try { audio.currentTime = Math.max(0, Math.min(d - 0.05, t - partStart(cur))); return -2; } catch (e) {} } }
-    var C = cum(chunks), CT = C[C.length - 1] || 1; return chunkAt(C, (g / T) * CT);
+    var C = cum(chunks), CT = C[C.length - 1] || 1; pendT = { key: curKey(), g: g }; return chunkAt(C, (g / T) * CT);
   }
   function setRate(r) { r = Math.max(0.5, Math.min(2, r || 1)); try { audio.playbackRate = r; audio.defaultPlaybackRate = r; } catch (e) {} }
   function noteFail() { if (lastUnavail) { lastUnavail = false; return; } }
