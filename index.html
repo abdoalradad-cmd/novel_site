@@ -178,6 +178,12 @@ html.dark .rp-bk-t{color:#f1f5f9}
 .rp-bk-a{font:700 .62rem Cairo,sans-serif;color:#64748b;margin:2px 0 8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rp-bk-a:hover{color:var(--brand-primary,#065f46);text-decoration:underline}
 .rp-bk-m{font:800 .6rem Cairo,sans-serif;color:#94a3b8;margin:-4px 0 6px}
+.rp-eye{width:1.2em;height:1.2em;flex:none;display:inline-block;vertical-align:-.2em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rp-bk>.rp-bk-m{display:flex;align-items:center;flex-wrap:wrap;gap:3px 6px;font:700 .86rem Cairo,sans-serif;color:#6b7280;margin:6px 0 8px;white-space:normal;overflow:visible}
+html.dark .rp-bk>.rp-bk-m{color:#9ca3af}
+.rp-bk-m .rp-aud{margin:0;padding:1px 8px;font-size:.64rem;box-shadow:none;animation:none}
+.rp-li .rp-bk-m .rp-aud{margin-right:6px}
+html.is-native-app .rp-bbs,html.is-native-app .rp-li .btns{display:none!important}
 .rp-bb{border:0;border-radius:11px;padding:8px 4px;font:900 .76rem Cairo,sans-serif;color:#fff;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:5px}
 .rp-bb+.rp-bb{margin-top:6px}
 .rp-bb.g{background:linear-gradient(135deg,#16a34a,#15803d)}
@@ -13536,7 +13542,7 @@ document.addEventListener('click', function (e) {
   function btns(n) { return '<button type="button" class="rp-bb g" data-rp-read="' + esc(n.id) + '"><i class="fa-solid fa-book-open"></i> قراءة</button><button type="button" class="rp-bb r" data-rp-pdf="' + esc(n.id) + '"><i class="fa-solid fa-file-pdf"></i> تحميل PDF</button>'; }
   function card(n, o) {
     o = o || {};
-    return '<div class="rp-bk">' + coverHtml(n, o.rank, true) + '<div class="rp-bk-t" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) + '<div class="rp-bk-m">👁 ' + fnum(readsOf(n)) + ' قراءة' + (n.isPaper ? ' <span class="rp-ppr">📖 ورقية</span>' : '') + '</div><div class="rp-bbs">' + btns(n).replace('تحميل PDF', 'PDF') + '</div></div>';
+    return '<div class="rp-bk">' + coverHtml(n, o.rank, true) + '<div class="rp-bk-t" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) + '<div class="rp-bk-m">' + '<svg class="rp-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3.2"/></svg>' + '<span>' + fnum(readsOf(n)) + '</span>' + (n.isPaper ? ' <span class="rp-ppr">📖 ورقية</span>' : '') + '</div><div class="rp-bbs">' + btns(n).replace('تحميل PDF', 'PDF') + '</div></div>';
   }
   function section(icon, title, list, o) {
     o = o || {};
@@ -13642,7 +13648,7 @@ document.addEventListener('click', function (e) {
   var ALL = { cat: 'all', q: '' };
   function listItem(n) {
     return '<div class="rp-li">' + coverHtml(n, 0, true) + '<div class="in"><div class="rp-bk-t" style="min-height:0;-webkit-line-clamp:2" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) +
-      '<div style="margin-bottom:8px"><span class="rp-gen">' + esc(plain(n.genre || 'عام')) + '</span><span class="rp-bk-m">' + (n.chapters || []).length + ' فصل · ' + esc(plain(n.status || '')) + (readsOf(n) ? ' · 👁 ' + fnum(readsOf(n)) : '') + '</span></div><div class="btns">' + btns(n) + '</div></div></div>';
+      '<div style="margin-bottom:8px"><span class="rp-gen">' + esc(plain(n.genre || 'عام')) + '</span><span class="rp-bk-m">' + (n.chapters || []).length + ' فصل · ' + esc(plain(n.status || '')) + (readsOf(n) ? ' · ' + '<svg class="rp-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3.2"/></svg>' + ' ' + fnum(readsOf(n)) : '') + '</span></div><div class="btns">' + btns(n) + '</div></div></div>';
   }
   function renderAuthorsAll(body) {
     var q = ALL.q.trim().toLowerCase(), keep = $('rp-all-q') && document.activeElement === $('rp-all-q');
@@ -14637,7 +14643,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     for (var i = 0; i < hs.length; i++) {
       var h = hs[i], id = h.getAttribute('data-rp-read'); if (!id) { var m = /requestNovelAccess\('([^']+)'/.exec(h.getAttribute('onclick') || ''); id = m && m[1]; } if (!id) continue;
       var v = READY.novels[id], txt = v ? '🎧 ' + v.d : '', cv = h.classList.contains('rp-bk-t') ? (h.closest('.rp-bk,.rp-li') || document).querySelector('.rp-bk-cv') : null;
-      if (cv) { var ex = cv.querySelector('.rp-aud'); if (!v) { if (ex) ex.remove(); continue; } if (ex) { if (ex.textContent !== txt) ex.textContent = txt; continue; } var o = document.createElement('div'); o.className = 'rp-aud ov'; o.title = 'صوتية — ' + v.d + ' فصل جاهز'; o.textContent = txt; cv.appendChild(o); continue; }
+      if (cv) { var cx0 = cv.querySelector('.rp-aud'); if (cx0) cx0.remove(); var mm = (h.closest('.rp-bk,.rp-li') || document).querySelector('.rp-bk-m'); if (!mm) continue; var ex = mm.querySelector('.rp-aud'), tx2 = v ? '🎧 ' + v.d : ''; if (!v) { if (ex) ex.remove(); continue; } if (ex) { if (ex.textContent !== tx2) ex.textContent = tx2; continue; } var o = document.createElement('span'); o.className = 'rp-aud'; o.title = 'صوتية — ' + v.d + ' فصل جاهز'; o.textContent = tx2; mm.appendChild(o); continue; }
       var nx = h.nextElementSibling;
       if (nx && nx.classList && nx.classList.contains('rp-aud')) { if (!v) nx.remove(); else if (nx.textContent !== txt) nx.textContent = txt; continue; }
       if (!v) continue;
