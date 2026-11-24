@@ -12683,19 +12683,22 @@ document.addEventListener('click', function (e) {
   try { window.addEventListener('pagehide', function () { vcClear(); }); } catch (e) {}
   /* ---- تابة «تسجيلات الروايات»: الروايات اللي فيها صوت جاهز، ومسح تسجيلات رواية كاملة أو فصول معيّنة (الفصول الممسوحة بتتوقف ومبتتحوّلش تاني غير لو شغّلتها) ---- */
   var VL = { novels: null, open: {}, chs: {}, msg: '', busy: false, _req: 0 };
-  function vlLoad(force) { if (VL._req && !force) return; VL._req = 1; api('/api/admin/tts/library').then(function (d) { VL.novels = d.novels || []; render(); }).catch(function (x) { VL.novels = VL.novels || []; VL.msg = x.message; render(); }); }
+  function vlLoad(force) { if (VL._req && !force) return; VL._req = 1; api('/api/admin/tts/library').then(function (d) { VL.novels = d.novels || []; VL.miss = d.keepMissing || []; render(); }).catch(function (x) { VL.novels = VL.novels || []; VL.msg = x.message; render(); }); }
   function vlMin(s) { return Math.round((s || 0) / 60); }
   function vlTab() {
     vlLoad(false);
     if (!VL.novels) return '<div class="rp-card"><div class="rp-sub">جاري التحميل…</div></div>';
-    var tot = VL.novels.reduce(function (a, n) { return a + n.n; }, 0);
+    var tot = VL.novels.reduce(function (a, n) { return a + (n.keep ? 0 : n.n); }, 0), kept = VL.novels.filter(function (n) { return n.keep; });
     var h = '<div class="rp-card"><h3>🗂 تسجيلات الروايات</h3><div class="rp-sub">كل الروايات اللي فيها فصول اتحوّلت لصوت. تقدر تمسح تسجيلات رواية كاملة أو فصل فصل. الفصل الممسوح بيتوقف ومش بيتحوّل تاني غير لو شغّلته من تابة الأداة.</div>' +
       (VL.msg ? '<div class="rp-sub" style="margin:6px 0"><b>' + esc(VL.msg) + '</b></div>' : '') +
-      (tot ? '<div class="rp-row" style="margin:8px 0"><button type="button" class="rp-btn red sm" data-act="vlall"' + (VL.busy ? ' disabled' : '') + '>🗑 مسح كل التسجيلات (' + tot + ' فصل)</button></div>' : '<div class="rp-sub">مفيش تسجيلات دلوقتي.</div>');
+      (tot ? '<div class="rp-row" style="margin:8px 0"><button type="button" class="rp-btn red sm" data-act="vlall"' + (VL.busy ? ' disabled' : '') + '>🗑 مسح باقي التسجيلات (' + tot + ' فصل) — من غير المحميّة 🔒</button></div>' : '<div class="rp-sub">مفيش تسجيلات غير محميّة.</div>') +
+      '<div class="rp-sub">🔒 محميّة (' + kept.length + '): ' + (kept.length ? kept.map(function (n) { return esc(n.ntitle || n.nid); }).join(' · ') : 'لا يوجد') + '</div>' +
+      (VL.miss && VL.miss.length ? '<div class="rp-sub" style="color:#b45309">⚠ مش لاقي صوت جاهز لـ: ' + VL.miss.map(esc).join('، ') + '</div>' : '');
     VL.novels.forEach(function (n) {
-      h += '<div style="border:1.5px solid #e2e8f0;border-radius:14px;padding:10px 12px;margin-top:8px"><b>' + esc(n.ntitle || n.nid) + '</b><div class="rp-sub" style="margin:2px 0 6px">' + n.n + ' فصل · ' + vlMin(n.secs) + ' دقيقة</div><div class="rp-row" style="gap:6px;flex-wrap:wrap">' +
+      h += '<div style="border:1.5px solid #e2e8f0;border-radius:14px;padding:10px 12px;margin-top:8px"><b>' + (n.keep ? '🔒 ' : '') + esc(n.ntitle || n.nid) + '</b><div class="rp-sub" style="margin:2px 0 6px">' + n.n + ' فصل · ' + vlMin(n.secs) + ' دقيقة</div><div class="rp-row" style="gap:6px;flex-wrap:wrap">' +
         '<button type="button" class="rp-btn sm" data-act="vlchs" data-n="' + esc(n.nid) + '">📂 الفصول</button>' +
-        '<button type="button" class="rp-btn red sm" data-act="vlnov" data-n="' + esc(n.nid) + '"' + (VL.busy ? ' disabled' : '') + '>🗑 مسح كل تسجيلات الرواية</button></div>';
+        '<button type="button" class="rp-btn sm" data-act="vlkeep" data-n="' + esc(n.nid) + '" data-on="' + (n.keep ? 0 : 1) + '">' + (n.keep ? '🔓 فكّ الحماية' : '🔒 حماية من المسح') + '</button>' +
+        (n.keep ? '' : '<button type="button" class="rp-btn red sm" data-act="vlnov" data-n="' + esc(n.nid) + '"' + (VL.busy ? ' disabled' : '') + '>🗑 مسح كل تسجيلات الرواية</button>') + '</div>';
       if (VL.open[n.nid]) {
         var cs = (VL.chs[n.nid] || []).filter(function (c) { return c.status === 'done'; });
         h += '<div style="margin-top:8px">' + (VL.chs[n.nid] ? (cs.length ? cs.map(function (c) { return '<div class="rp-row" style="justify-content:space-between;gap:8px;padding:5px 0;border-top:1px dashed #e2e8f0"><span>' + esc(c.ctitle || ('فصل ' + (c.idx + 1))) + ' <span class="rp-sub">(' + vlMin(c.secs) + ' د)</span></span><button type="button" class="rp-btn red sm" data-act="vlch" data-n="' + esc(n.nid) + '" data-i="' + c.idx + '"' + (VL.busy ? ' disabled' : '') + '>🗑</button></div>'; }).join('') : '<div class="rp-sub">مفيش فصول جاهزة.</div>') : '<div class="rp-sub">جاري التحميل…</div>') + '</div>';
@@ -13220,7 +13223,8 @@ document.addEventListener('click', function (e) {
     else if (a === 'vlchs') { var vn = b.getAttribute('data-n'); VL.open[vn] = !VL.open[vn]; if (VL.open[vn] && !VL.chs[vn]) api('/api/admin/tts/chapters?nid=' + encodeURIComponent(vn)).then(function (d) { VL.chs[vn] = d.chapters || []; render(); }).catch(function (x) { VL.chs[vn] = []; VL.msg = x.message; render(); }); render(); }
     else if (a === 'vlnov') { if (!confirm('تمسح كل تسجيلات الرواية دي؟ مش هينفع ترجّعها غير بإعادة التحويل.')) return; vlWipe({ nid: b.getAttribute('data-n') }, 'تسجيلات الرواية'); }
     else if (a === 'vlch') { if (!confirm('تمسح تسجيل الفصل ده؟')) return; vlWipe({ nid: b.getAttribute('data-n'), idx: [+b.getAttribute('data-i')] }, 'الفصل'); }
-    else if (a === 'vlall') { if (!confirm('تمسح كل التسجيلات لكل الروايات؟ ده مش بيترجّع.')) return; if (!confirm('متأكد؟ هتتمسح كل الأصوات الجاهزة.')) return; vlWipe({ all: true }, 'كل التسجيلات'); }
+    else if (a === 'vlkeep') { api('/api/admin/tts/keep', { method: 'POST', body: { nid: b.getAttribute('data-n'), on: b.getAttribute('data-on') === '1' } }).then(function () { VL._req = 0; vlLoad(true); }).catch(function (x) { VL.msg = '❌ ' + x.message; render(); }); }
+    else if (a === 'vlall') { var del = (VL.novels || []).filter(function (n) { return !n.keep; }); if (!del.length) return; if (!confirm('هتتمسح أصوات الروايات دي نهائياً:\n\n' + del.map(function (n) { return '• ' + (n.ntitle || n.nid) + ' (' + n.n + ' فصل)'; }).join('\n') + '\n\nالمحميّة 🔒 مش هتتلمس. ده مش بيترجّع.')) return; if (!confirm('متأكد؟')) return; vlWipe({ all: true }, 'باقي التسجيلات'); }
     else if (a === 'vcclr') { vcClear(); render(); }
     else if (a === 'vcgo') {
       vcRead(); if (VC.text.replace(/\s/g, '').length < 2) { VC.msg = 'اكتب النص الأول'; render(); return; }
