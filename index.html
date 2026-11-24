@@ -14494,7 +14494,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
     tokP.catch(function () { tokP = null; });
     return tokP;
   }
-  function partBlob(id, p) { return getTok().then(function (k) { return base() + '/api/tts/part/' + id + '/' + p + '?k=' + encodeURIComponent(k); }); }
+  function partBlob(id, p, fmt) { return getTok().then(function (k) { return base() + '/api/tts/part/' + id + '/' + p + '?k=' + encodeURIComponent(k) + (fmt === 'mp3' ? '&f=mp3' : ''); }); }
   var SNAP = false; // مزامنة التظليل على وقفات الصوت الحقيقية: بتحتاج تنزيل وتحليل الجزء كله (لاج ونت) فمقفولة، والتظليل بيعتمد على التقدير بالوقت
   var tkr = 0, cur = null;
   function stop() { audio.onended = null; audio.onerror = null; audio.ontimeupdate = null; if (tkr) { clearInterval(tkr); tkr = 0; } try { audio.pause(); } catch (e) {} }
@@ -14554,7 +14554,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
       if (forced !== null && forced.idx === idx && forced.key === key) { p = forced.p; sf = 0; }
       else { var g = (pendT && pendT.key === key) ? pendT.g : (C[idx] / CT) * T; p = 0; for (var i = 0; i < P.length; i++) { if (g >= P[i][0]) p = i; } var span = Math.max(1, P[p][1] - P[p][0]); sf = Math.max(0, Math.min(0.98, (g - P[p][0]) / span)); }
       forced = null; pendT = null;
-      partBlob(m.id, p).then(function (src) {
+      partBlob(m.id, p, m.fmt).then(function (src) {
         if (cancelled()) return;
         var lastI = idx; cur = { key: key, m: m, P: P, T: T, p: p };
         audio.onended = function () {
