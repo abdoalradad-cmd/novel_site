@@ -14653,7 +14653,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   }
   function loadReady() {
     if (!base()) return;
-    fetch(base() + '/api/tts/ready').then(function (r) { return r.json(); }).then(function (d) { READY = { hide: !!d.hide, open: !!d.open, novels: d.novels || {} }; applyHide(); paintAud(); }).catch(function () {});
+    fetch(base() + '/api/tts/ready').then(function (r) { return r.json(); }).then(function (d) { READY = { hide: !!d.hide, open: !!d.open, novels: d.novels || {} }; window.RP_READY = READY; applyHide(); paintAud(); }).catch(function () {});
   }
   try { var at = null; new MutationObserver(function () { clearTimeout(at); at = setTimeout(paintAud, 150); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
   setTimeout(loadReady, 1500); setInterval(loadReady, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) loadReady(); });
@@ -15759,12 +15759,14 @@ window.addEventListener('load', () => {
     '#rp-fav-btn.rpnd-fav i{font-size:1.2rem}',
     '#rp-fav-btn.rpnd-fav.nx-fav-on{color:#fff;background:linear-gradient(135deg,#f43f5e,#be123c);border-color:transparent;box-shadow:0 8px 20px rgba(190,18,60,.33)}',
     'html.dark #rp-fav-btn.rpnd-fav:not(.nx-fav-on){color:#fda4af;background:rgba(244,63,94,.1)}',
-    '.rpnd-stats{display:grid;grid-template-columns:repeat(3,1fr);border-radius:20px;background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.16);overflow:hidden}',
+    '.rpnd-stats{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-radius:20px;background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.16);overflow:hidden}',
     '.rpnd-st{padding:13px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}',
     '.rpnd-st+.rpnd-st{border-right:1px solid rgba(100,116,139,.18)}',
     '.rpnd-st .v{font-size:1.15rem;font-weight:900;color:#0f172a;display:flex;align-items:center;gap:6px;line-height:1.2}html.dark .rpnd-st .v{color:#fff}',
     '.rpnd-st .v i{font-size:.95rem;color:var(--brand-primary)}html.dark .rpnd-st .v i{color:var(--brand-accent,#fbbf24)}',
     '.rpnd-st .v i.fa-star{color:#f59e0b}',
+    '#rpnd-aud .l{white-space:nowrap;font-size:.62rem}@media(max-width:340px){#rpnd-aud .l{font-size:.52rem}.rpnd-st .v{font-size:1rem}}',
+    '.rpnd-st .v i.fa-headphones{color:#7c3aed}html.dark .rpnd-st .v i.fa-headphones{color:#c4b5fd}',
     '.rpnd-st .l{font-size:.68rem;font-weight:800;color:#64748b}html.dark .rpnd-st .l{color:#94a3b8}',
     '.rpnd-syn h3{display:flex;align-items:center;gap:8px;font-size:1.05rem;font-weight:900;margin:0 0 8px;color:#0f172a}html.dark .rpnd-syn h3{color:#fff}',
     '.rpnd-syn h3::before{content:"";width:5px;height:20px;border-radius:3px;background:linear-gradient(var(--brand-primary),var(--brand-accent,#fbbf24))}',
@@ -15774,6 +15776,8 @@ window.addEventListener('load', () => {
     '@media(min-width:768px){.rpnd{max-width:640px;margin:0 auto}.rpnd .book-cover{width:11rem!important;height:16rem!important}.rpnd-title{font-size:1.9rem}}'
   ].join('\n');
 
+  function audVal(novel) { var R = window.RP_READY; if (!R) return '…'; var v = R.novels && R.novels[novel.id]; return String(v ? v.d : 0); }
+  function audCell(novel) { var R = window.RP_READY; if (R && R.hide) return ''; return '<div class="rpnd-st" id="rpnd-aud"><div class="v"><i class="fa-solid fa-headphones"></i><span id="rpnd-v-au">' + audVal(novel) + '</span></div><div class="l">فصول صوتية</div></div>'; }
   var building = false, lastKey = '';
   function build() {
     var host = $('novel-details-content'); if (!host || building) return;
@@ -15802,6 +15806,7 @@ window.addEventListener('load', () => {
             '<div class="rpnd-st"><div class="v"><i class="fa-solid fa-book-open"></i><span id="rpnd-v-ch">' + n + '</span></div><div class="l">الفصول</div></div>' +
             '<div class="rpnd-st"><div class="v"><i class="fa-solid fa-star"></i><span id="rpnd-v-rt">' + esc(novel.rating || '5.0') + '</span></div><div class="l" id="rpnd-l-rt">التقييم</div></div>' +
             '<div class="rpnd-st"><div class="v"><i class="fa-solid fa-eye"></i><span id="rpnd-v-vw">' + fnum(viewsOf(novel)) + '</span></div><div class="l">المشاهدات</div></div>' +
+            audCell(novel) +
           '</div>' +
           (syn ? '<div class="rpnd-syn"><h3>نبذة عن الرواية</h3><p id="rpnd-syn-p" class="clamp">' + syn + '</p><button type="button" class="rpnd-more" id="rpnd-more" style="display:none">عرض المزيد</button></div>' : '') +
         '</div>';
@@ -15817,6 +15822,9 @@ window.addEventListener('load', () => {
     var r = String(novel.rating || '5.0'); if ($('rpnd-v-rt').textContent !== r) $('rpnd-v-rt').textContent = r;
     var l = $('rpnd-l-rt'), lt = novel.ratingsCount > 0 ? 'التقييم (' + novel.ratingsCount + ')' : 'التقييم'; if (l && l.textContent !== lt) l.textContent = lt;
     var c = String((novel.chapters || []).length); if ($('rpnd-v-ch').textContent !== c) $('rpnd-v-ch').textContent = c;
+    var hid = !!(window.RP_READY && window.RP_READY.hide), ac = $('rpnd-aud');
+    if (hid && ac) ac.remove(); else if (!hid && !ac && window.RP_READY) { var sts = document.querySelector('.rpnd-stats'); if (sts) sts.insertAdjacentHTML('beforeend', audCell(novel)); }
+    var au = $('rpnd-v-au'), av = audVal(novel); if (au && au.textContent !== av) au.textContent = av;
   }
   function start() {
     var host = $('novel-details-content'); if (!host) return setTimeout(start, 500);
