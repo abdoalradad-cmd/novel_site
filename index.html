@@ -14474,13 +14474,17 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   }
   // true لو الفصل الحالي صوته مجهّز (أو لسه مش معروف)
   function usable() { if (!enabled()) return false; var k = curKey(), x = stat[k]; if (x && x.st !== 'ready') { if (Date.now() - x.t > 45000) { delete stat[k]; delete man[k]; return true; } return false; } return true; }
-  function partBlob(id, p) {
-    var k = id + '/' + p; if (blobs[k]) return blobs[k];
-    var pr = fetch(base() + '/api/tts/part/' + id + '/' + p, { headers: auth() }).then(function (r) { if (!r.ok) throw new Error('part'); return r.blob(); }).then(function (b) { return URL.createObjectURL(b); });
-    blobs[k] = pr; pr.catch(function () { delete blobs[k]; });
-    var ks = Object.keys(blobs); if (ks.length > 4) { var old = ks[0]; blobs[old].then(function (u) { try { URL.revokeObjectURL(u); } catch (e) {} }).catch(function () {}); delete blobs[old]; }
-    return pr;
+  /* بث الصوت: <audio> بيقرا الجزء بالـRange من رابط مؤقت، فيبدأ فورًا ومبينزّلش غير اللي بيسمعه (بدل تنزيل الجزء كله كـblob) */
+  var tokP = null, tokT = 0;
+  function getTok() {
+    if (tokP && Date.now() - tokT < 2.5 * 3600000) return tokP;
+    tokT = Date.now();
+    tokP = fetch(base() + '/api/tts/ptoken', { headers: auth() }).then(function (r) { if (r.status === 403) { var e = new Error('prem'); e.status = 403; throw e; } if (!r.ok) throw new Error('tok'); return r.json(); }).then(function (d) { return d.k; });
+    tokP.catch(function () { tokP = null; });
+    return tokP;
   }
+  function partBlob(id, p) { return getTok().then(function (k) { return base() + '/api/tts/part/' + id + '/' + p + '?k=' + encodeURIComponent(k); }); }
+  var SNAP = false; // مزامنة التظليل على وقفات الصوت الحقيقية: بتحتاج تنزيل وتحليل الجزء كله (لاج ونت) فمقفولة، والتظليل بيعتمد على التقدير بالوقت
   var tkr = 0, cur = null;
   function stop() { audio.onended = null; audio.onerror = null; audio.ontimeupdate = null; if (tkr) { clearInterval(tkr); tkr = 0; } try { audio.pause(); } catch (e) {} }
   // موضع الحرف في الفقرة → رقم الجملة (chunk) والعكس
@@ -14559,14 +14563,13 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
           return ca + (tb ? findIn(tb, audio.currentTime) : findIn(Wc, (audio.currentTime / d) * Wt));
         };
         var tick = function () { if (cancelled()) { if (tkr) { clearInterval(tkr); tkr = 0; } return; } var i = pick(); if (i >= 0 && i !== lastI && i >= idx) { lastI = i; if (onTick) onTick(i); } };
-        silences(src).then(function (r) { if (!r || cancelled() || !isFinite(audio.duration) || Math.abs(r.dur - audio.duration) > 1.5) return; var d = audio.duration, arr = []; for (var z = 0; z < Wc.length; z++) arr.push(d * Wc[z] / Wt); tb = snapBounds(arr, Wc, ends, r.sil, d); }).catch(function () {});
+        if (SNAP) silences(src).then(function (r) { if (!r || cancelled() || !isFinite(audio.duration) || Math.abs(r.dur - audio.duration) > 1.5) return; var d = audio.duration, arr = []; for (var z = 0; z < Wc.length; z++) arr.push(d * Wc[z] / Wt); tb = snapBounds(arr, Wc, ends, r.sil, d); }).catch(function () {});
         if (tkr) clearInterval(tkr); tkr = setInterval(tick, 90);
         audio.src = src;
         var rate = Math.max(0.5, Math.min(2, baseRate || 1)); audio.playbackRate = rate; audio.defaultPlaybackRate = rate;
         if (sf > 0.01) audio.onloadedmetadata = function () { audio.onloadedmetadata = null; try { audio.currentTime = sf * audio.duration; } catch (e) {} };
         var pr = audio.play();
         if (pr && pr.catch) pr.catch(function () { if (!cancelled()) { audio.onended = null; audio.onerror = null; onFail(); } });
-        if (p + 1 < P.length) partBlob(m.id, p + 1).catch(function () {});
       }).catch(function () { if (!cancelled()) onFail(); });
     }).catch(function (e) {
       if (cancelled()) return;
