@@ -12012,10 +12012,11 @@ document.addEventListener('click', function (e) {
     }).catch(function () { SOC.busy = false; });
   }
   function socBtns() {
-    if (!SOC.g && !SOC.f) return '';
+    var fbOn = SOC.f && !socIsApp(); /* فيسبوك مخفي في التطبيق لحد ما فيسبوك يوافق على النشر */
+    if (!SOC.g && !fbOn) return '';
     return '<div class="nmor"><span>أو</span></div><div class="nmsoc">' +
       (SOC.g ? '<button type="button" class="nmsb g" data-act="soc" data-p="google"><i class="fa-brands fa-google"></i> جوجل</button>' : '') +
-      (SOC.f ? '<button type="button" class="nmsb f" data-act="soc" data-p="facebook"><i class="fa-brands fa-facebook-f"></i> فيسبوك</button>' : '') + '</div>';
+      (fbOn ? '<button type="button" class="nmsb f" data-act="soc" data-p="facebook"><i class="fa-brands fa-facebook-f"></i> فيسبوك</button>' : '') + '</div>';
   }
   function socRand(n) { var a = new Uint8Array(n || 12); (window.crypto || window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a, function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
   function socIsApp() { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) { return false; } }
