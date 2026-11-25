@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>جاري تسجيل الدخول…</title>
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#022c22;color:#ecfdf5;font:700 1rem Cairo,Tahoma,sans-serif;text-align:center;padding:24px}a{color:#fbbf24}</style>
+</head>
+<body>
+<div id="m">جاري إكمال تسجيل الدخول…</div>
+<script>
+/* صفحة وسيطة: جوجل/فيسبوك بيرجّعوا النتيجة هنا، وهي بتسلّمها لموقع RadPad (أو للتطبيق عن طريق رابط radpad://). */
+(function () {
+  var q = new URLSearchParams((location.hash || '').replace(/^#/, '') + '&' + (location.search || '').replace(/^\?/, ''));
+  var idt = q.get('id_token') || '', at = q.get('access_token') || '';
+  var pl = { provider: idt ? 'google' : (at ? 'facebook' : ''), token: idt || at, state: q.get('state') || '', error: q.get('error') || '' };
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  var m = document.getElementById('m');
+  if (/^app\./.test(pl.state)) { // جاي من التطبيق: نرجّعه للتطبيق
+    var r = btoa(unescape(encodeURIComponent(JSON.stringify(pl)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    location.replace('radpad://auth?r=' + r);
+    setTimeout(function () { m.innerHTML = 'ارجع لتطبيق RadPad لإكمال الدخول.'; }, 2500);
+    return;
+  }
+  try { localStorage.setItem('rp_oauth_res', JSON.stringify({ t: Date.now(), p: pl })); } catch (e) {}
+  try { if (window.opener) window.opener.postMessage({ rpOauth: pl }, location.origin); } catch (e) {}
+  setTimeout(function () { try { window.close(); } catch (e) {} setTimeout(function () { location.replace('./'); }, 700); }, 300);
+})();
+</script>
+</body>
+</html>
