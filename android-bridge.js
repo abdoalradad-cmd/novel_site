@@ -178,7 +178,7 @@
   window.addEventListener('load', function () {
     // كل أزرار التحميل تمر على الطباعة الأصلية (جودة أفضل من html2canvas)
     installFastPdf();
-    if (nativeOK('AppNative') && typeof window.triggerPrintPdf === 'function') {
+    if (!window.rpPdfEngine && nativeOK('AppNative') && typeof window.triggerPrintPdf === 'function') {
       window.generateDirectPdfFromChapters = function () { return window.triggerPrintPdf(); };
     }
   });
@@ -303,7 +303,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden && !updShown) setTimeout(function () { checkUpdate(5); }, 600); });
 
   /* ---------- تشخيص: اضغط مطولًا على عنوان الموقع (ثانيتين) ---------- */
-  var BRIDGE_VERSION = '2026-10-28.1';
+  var BRIDGE_VERSION = '2026-11-26.1';
   (function () {
     var t = null;
     function start(e) {

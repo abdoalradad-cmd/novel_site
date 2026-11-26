@@ -16415,4 +16415,246 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
   document.addEventListener('contextmenu', function (e) { var g = grid(); if (isAdm() && g && g.contains(e.target)) e.preventDefault(); });
 })();
 </script>
+<script id="rp-pdf-engine">
+/* محرك PDF جديد: بيبني ملف الـ PDF صفحة صفحة جوه الصفحة نفسها وبعدين يتحفظ لوحده (من غير نافذة الطباعة) */
+(function () {
+  'use strict';
+  var W = 794, H = 1123, PX = 52, PT = 60, PB = 64, CW = W - PX * 2, CHH = H - PT - PB, SCALE = 1.5, QUAL = 0.6;
+  var FONT = "'Amiri','Cairo','Noto Naskh Arabic',serif";
+  var PST = 'margin:0;line-height:1.95;font-size:18px;color:#111827;text-align:justify;font-family:' + FONT + ';direction:rtl;overflow-wrap:break-word;';
+  function cfgv(k, d) { try { return (siteConfig && siteConfig[k]) || d; } catch (e) { return d; } }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function escH(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function say(m) { try { if (typeof showToast === 'function') showToast(m); } catch (e) {} }
+
+  /* ---------- شاشة التقدّم ---------- */
+  function overlay(title) {
+    var o = document.createElement('div'); o.id = 'rp-pdf-ov';
+    o.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(2,6,23,.82);display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl;font-family:Cairo,sans-serif';
+    o.innerHTML = '<div style="width:100%;max-width:340px;background:#0f172a;border:1px solid #1e293b;border-radius:22px;padding:22px 20px;color:#fff;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.5)">' +
+      '<div id="rp-pdf-ic" style="width:46px;height:46px;border:4px solid #334155;border-top-color:#fbbf24;border-radius:50%;margin:0 auto 14px;animation:rppdfsp 1s linear infinite"></div>' +
+      '<div id="rp-pdf-t" style="font-weight:800;font-size:16px;margin-bottom:6px">' + title + '</div>' +
+      '<div id="rp-pdf-s" style="font-size:13px;opacity:.85;min-height:20px">جاري التحضير…</div>' +
+      '<div style="height:8px;background:#1e293b;border-radius:99px;margin:14px 0;overflow:hidden"><div id="rp-pdf-b" style="height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#fbbf24);transition:width .25s"></div></div>' +
+      '<div id="rp-pdf-btns"><button id="rp-pdf-x" type="button" style="background:#334155;color:#fff;border:0;border-radius:12px;padding:9px 20px;font-weight:700;font-family:inherit;font-size:14px">إلغاء</button></div></div>' +
+      '<style>@keyframes rppdfsp{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(o);
+    var ui = { cancelled: false, el: o,
+      status: function (t, p) { var s = document.getElementById('rp-pdf-s'), b = document.getElementById('rp-pdf-b'); if (s) s.textContent = t; if (b && p != null) b.style.width = Math.max(0, Math.min(100, p)) + '%'; },
+      done: function (msg, uri) {
+        var ic = document.getElementById('rp-pdf-ic'), t = document.getElementById('rp-pdf-t'), btns = document.getElementById('rp-pdf-btns');
+        if (ic) { ic.style.cssText = 'font-size:40px;margin:0 auto 8px;animation:none'; ic.textContent = '✅'; }
+        if (t) t.textContent = 'تم تجهيز الملف'; this.status(msg, 100);
+        if (btns) { btns.innerHTML = (uri ? '<button id="rp-pdf-o" type="button" style="background:#f59e0b;color:#111;border:0;border-radius:12px;padding:9px 20px;font-weight:800;font-family:inherit;font-size:14px;margin-left:8px">فتح الملف</button>' : '') + '<button id="rp-pdf-c" type="button" style="background:#334155;color:#fff;border:0;border-radius:12px;padding:9px 20px;font-weight:700;font-family:inherit;font-size:14px">تمام</button>';
+          var c = document.getElementById('rp-pdf-c'); if (c) c.onclick = function () { ui.close(); };
+          var op = document.getElementById('rp-pdf-o'); if (op) op.onclick = function () { try { window.Capacitor.Plugins.AppNative.fileView({ uri: uri, mime: 'application/pdf' }); } catch (e) {} }; }
+      },
+      close: function () { if (o.parentNode) o.parentNode.removeChild(o); } };
+    var x = document.getElementById('rp-pdf-x'); if (x) x.onclick = function () { ui.cancelled = true; ui.status('جاري الإلغاء…'); };
+    return ui;
+  }
+
+  /* ---------- نص الفصول (روايات السيرفر بتتحمّل بالطلب) ---------- */
+  async function ensureContent(n, ui) {
+    var lazy = (n.chapters || []).some(function (c) { return !c.content && c.lazy; });
+    if (!(n.isUser && n.apiId && lazy)) return;
+    ui.status('بجيب نص الفصول من السيرفر…', 3);
+    var rp = window.__rp || {}, h = {}; if (n.unlockTok) h['X-Unlock'] = n.unlockTok; try { if (rp.token && rp.token()) h.Authorization = 'Bearer ' + rp.token(); } catch (e) {}
+    var r = await fetch(rp.base() + '/api/novels/' + n.apiId + '/full', { headers: h }); if (!r.ok) throw new Error('full');
+    var d = await r.json();
+    (d.chapters || []).forEach(function (c, i) { if (n.chapters[i] && !c.locked && c.content != null) { n.chapters[i].content = escH(c.content).replace(/"/g, '&quot;').replace(/'/g, '&#39;'); n.chapters[i].lazy = false; } });
+  }
+
+  /* ---------- ترتيب الصفحات ---------- */
+  async function paginate(n, ui) {
+    var color = cfgv('primaryColor', '#065f46');
+    var host = document.createElement('div'); host.style.cssText = 'position:fixed;left:-99999px;top:0;width:' + CW + 'px;visibility:hidden;direction:rtl;font-family:' + FONT;
+    document.body.appendChild(host);
+    try { if (document.fonts && document.fonts.load) { await Promise.race([Promise.all([document.fonts.load('18px Amiri'), document.fonts.load('bold 26px Cairo')]), sleep(2500)]); } } catch (e) {}
+    var probe = document.createElement('div'); host.appendChild(probe);
+    function measure(html) { probe.innerHTML = html; return probe.firstElementChild.offsetHeight; }
+    function pHtml(t, fin, cont) { return '<div style="' + PST + 'padding:0 0 ' + (fin ? 14 : 0) + 'px 0;text-indent:' + (cont ? 0 : 15) + 'px;' + (fin ? '' : 'text-align-last:justify;') + '">' + t + '</div>'; }
+    function titleHtml(t) { return '<h2 style="margin:0 0 24px 0;padding:6px 0 12px 0;font-size:26px;font-weight:bold;line-height:1.7;color:' + color + ';text-align:center;border-bottom:2px solid #e5e7eb;font-family:Cairo,Amiri,sans-serif;direction:rtl">' + t + '</h2>'; }
+    var pages = [], cur = { items: [], used: 0 };
+    function newPage() { if (cur.items.length) { pages.push(cur); cur = { items: [], used: 0 }; } }
+    function put(html, h) { cur.items.push(html); cur.used += h; }
+    function place(text) {
+      var words = text.split(' '), cont = false, guard = 0;
+      while (guard++ < 4000) {
+        var rem = CHH - cur.used, full = words.join(' '), hF = measure(pHtml(full, true, cont));
+        if (hF <= rem) { put(pHtml(full, true, cont), hF); return; }
+        if (rem < 80 && cur.items.length) { newPage(); continue; }
+        var lo = 0, hi = words.length - 1;
+        while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (measure(pHtml(words.slice(0, mid).join(' '), false, cont)) <= rem) lo = mid; else hi = mid - 1; }
+        if (lo < 1) { if (cur.items.length) { newPage(); continue; } lo = 1; }
+        var part = words.slice(0, lo).join(' ');
+        put(pHtml(part, false, cont), measure(pHtml(part, false, cont)));
+        words = words.slice(lo); cont = true; newPage();
+        if (!words.length) return;
+      }
+    }
+    var chs = n.chapters || [];
+    for (var i = 0; i < chs.length; i++) {
+      if (ui.cancelled) throw new Error('cancel');
+      var ch = chs[i]; newPage();
+      var th = titleHtml(ch.title || ('الفصل ' + (i + 1))); put(th, measure(th) + 24);
+      var content = String(ch.content || '');
+      if (!content.trim()) { var em = pHtml('هذا الفصل غير متاح في الملف (مقفول أو غير محمّل).', true, false); put(em, measure(em)); }
+      else content.split('\n').map(function (p) { return p.trim(); }).filter(Boolean).forEach(place);
+      ui.status('ترتيب الفصول… ' + (i + 1) + ' من ' + chs.length, 8 + (i + 1) / chs.length * 12);
+      if (i % 2 === 1) await sleep(0);
+    }
+    newPage();
+    host.remove();
+    return pages;
+  }
+
+  function wrapPage(inner, num) {
+    return '<div style="position:relative;width:' + W + 'px;height:' + H + 'px;background:#fff;box-sizing:border-box;padding:' + PT + 'px ' + PX + 'px ' + PB + 'px;direction:rtl;overflow:hidden;font-family:' + FONT + '">' + inner +
+      (num ? '<div style="position:absolute;left:0;right:0;bottom:26px;text-align:center;font-size:13px;color:#9ca3af;font-family:Cairo,sans-serif">' + num + '</div>' : '') + '</div>';
+  }
+  function coverHtml(n) {
+    var color = cfgv('primaryColor', '#065f46'), site = cfgv('siteTitle', 'روائع عبدالرحمن الرداد');
+    return '<div style="height:100%;display:flex;align-items:center;justify-content:center;direction:rtl"><div style="width:100%;text-align:center;padding:70px 34px;border:4px double ' + color + ';border-radius:22px;background:#fcf8f2;box-sizing:border-box">' +
+      '<p style="font-size:15px;color:#6b7280;margin:0 0 12px 0;font-family:Cairo,sans-serif">' + site + '</p>' +
+      '<h1 style="font-size:38px;font-weight:900;line-height:1.5;color:' + color + ';margin:0 0 16px 0;font-family:' + FONT + '">رواية ' + n.title + '</h1>' +
+      '<h3 style="font-size:22px;color:#b45309;margin:0 0 26px 0;font-family:Cairo,sans-serif">تأليف الكاتب: ' + n.author + '</h3>' +
+      '<div style="width:80px;height:3px;background:' + color + ';margin:0 auto 26px auto"></div>' +
+      '<p style="font-size:16px;line-height:2;color:#374151;margin:0 auto;max-width:560px;text-align:center;font-family:' + FONT + '">' + (n.synopsis || '') + '</p>' +
+      '<p style="font-size:13px;color:#6b7280;margin:36px 0 0 0;font-family:Cairo,sans-serif">عدد الفصول: ' + (n.chapters || []).length + ' فصلاً</p></div></div>';
+  }
+
+  /* ---------- رسم الصفحة كصورة ---------- */
+  async function rasterHtml2pdf(el) {
+    var cv = await html2pdf().set({ margin: 0, html2canvas: { scale: SCALE, useCORS: true, letterRendering: false, backgroundColor: '#ffffff', scrollY: 0 }, jsPDF: { unit: 'px', format: [W, H] } }).from(el).toCanvas().get('canvas');
+    return cv;
+  }
+  async function rasterSvg(el) {
+    var xml = new XMLSerializer().serializeToString(el);
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '"><foreignObject width="100%" height="100%">' + xml + '</foreignObject></svg>';
+    var img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    await new Promise(function (ok, no) { img.onload = ok; img.onerror = function () { no(new Error('svg')); }; });
+    var cv = document.createElement('canvas'); cv.width = Math.round(W * SCALE); cv.height = Math.round(H * SCALE);
+    var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+    return cv;
+  }
+  var rasterMode = null;
+  async function raster(el) {
+    if (window.__rpRaster) return window.__rpRaster(el);
+    if (rasterMode !== 'svg' && typeof html2pdf !== 'undefined') {
+      try { var d = await rasterHtml2pdf(el); rasterMode = 'h2p'; return d; } catch (e) { if (rasterMode === 'h2p') throw e; rasterMode = 'svg'; }
+    }
+    rasterMode = 'svg'; return rasterSvg(el);
+  }
+  function b64bytes(dataUrl) { var s = atob(dataUrl.split(',')[1]), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+  /* الصفحة بتتحوّل لرمادي 4 بت ومضغوطة (أصغر بكتير من JPEG وأوضح للنص)، ولو المتصفح مش بيدعم الضغط نستخدم JPEG */
+  async function encode(cv) {
+    var w = cv.width, h = cv.height;
+    if (typeof CompressionStream === 'function' && typeof Response === 'function') {
+      try {
+        var d = cv.getContext('2d').getImageData(0, 0, w, h).data, rb = (w + 1) >> 1, g4 = new Uint8Array(rb * h);
+        for (var y = 0; y < h; y++) {
+          var o = y * w * 4, r = y * rb;
+          for (var x = 0; x < w; x += 2) {
+            var i = o + x * 4, a = ((d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8) >> 4, c = 15;
+            if (x + 1 < w) { var j = i + 4; c = ((d[j] * 77 + d[j + 1] * 150 + d[j + 2] * 29) >> 8) >> 4; }
+            g4[r + (x >> 1)] = (a << 4) | c;
+          }
+        }
+        var buf = await new Response(new Blob([g4]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer();
+        cv.width = cv.height = 0; return { w: w, h: h, bytes: new Uint8Array(buf), kind: 'g4' };
+      } catch (e) {}
+    }
+    var u = b64bytes(cv.toDataURL('image/jpeg', QUAL)); cv.width = cv.height = 0; return { w: w, h: h, bytes: u, kind: 'jpg' };
+  }
+
+  /* ---------- كاتب PDF بسيط (كل صفحة صورة JPEG) ---------- */
+  function makePdf(imgs, title) {
+    var parts = [], off = 0, xr = [];
+    function add(x) { parts.push(x); off += x.length; }
+    function ob(n, body) { xr[n] = off; add(n + ' 0 obj\n' + body + '\nendobj\n'); }
+    function hex16(s) { var h = 'FEFF'; for (var i = 0; i < s.length; i++) h += ('0000' + s.charCodeAt(i).toString(16)).slice(-4).toUpperCase(); return '<' + h + '>'; }
+    var PW = 595.28, PH = 841.89, np = imgs.length, kids = [];
+    add('%PDF-1.4\n');
+    ob(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    for (var i = 0; i < np; i++) kids.push((4 + i * 3) + ' 0 R');
+    ob(2, '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + np + ' >>');
+    ob(3, '<< /Title ' + hex16(title) + ' /Producer (RadPad) >>');
+    for (var k = 0; k < np; k++) {
+      var p = 4 + k * 3, im = imgs[k], cs = 'q ' + PW + ' 0 0 ' + PH + ' 0 0 cm /Im0 Do Q';
+      ob(p, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + PW + ' ' + PH + '] /Resources << /XObject << /Im0 ' + (p + 2) + ' 0 R >> >> /Contents ' + (p + 1) + ' 0 R >>');
+      ob(p + 1, '<< /Length ' + cs.length + ' >>\nstream\n' + cs + '\nendstream');
+      xr[p + 2] = off; add((p + 2) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + im.w + ' /Height ' + im.h + ' ' + (im.kind === 'g4' ? '/ColorSpace /DeviceGray /BitsPerComponent 4 /Filter /FlateDecode' : '/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode') + ' /Length ' + im.bytes.length + ' >>\nstream\n');
+      add(im.bytes); add('\nendstream\nendobj\n');
+    }
+    var total = 4 + np * 3, xo = off, x = 'xref\n0 ' + total + '\n0000000000 65535 f \n';
+    for (var j = 1; j < total; j++) x += ('0000000000' + xr[j]).slice(-10) + ' 00000 n \n';
+    add(x + 'trailer\n<< /Size ' + total + ' /Root 1 0 R /Info 3 0 R >>\nstartxref\n' + xo + '\n%%EOF\n');
+    return new Blob(parts, { type: 'application/pdf' });
+  }
+
+  /* ---------- الحفظ ---------- */
+  function blobB64(b) { return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1] || ''); }; r.onerror = no; r.readAsDataURL(b); }); }
+  function nativeP() { try { var C = window.Capacitor; if (!(C && C.isPluginAvailable && C.isPluginAvailable('AppNative'))) return null; return (C.Plugins && C.Plugins.AppNative) || (C.registerPlugin && C.registerPlugin('AppNative')); } catch (e) { return null; } }
+  async function saveFile(blob, name, ui) {
+    var P = nativeP();
+    if (P && P.fileOpen) {
+      var id = null;
+      try {
+        var o = await P.fileOpen({ name: name, mime: 'application/pdf' }); id = o.id;
+        var CH = 786432;
+        for (var off = 0; off < blob.size; off += CH) {
+          await P.fileWrite({ id: id, data: await blobB64(blob.slice(off, off + CH)) });
+          ui.status('جاري حفظ الملف على الموبايل…', 92 + 8 * Math.min(1, off / blob.size));
+        }
+        var r = await P.fileClose({ id: id }); return { where: 'downloads', uri: r && r.uri };
+      } catch (e) { try { if (id) await P.fileAbort({ id: id }); } catch (e2) {} }
+    }
+    var url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; a.style.display = 'none'; document.body.appendChild(a); a.click();
+    setTimeout(function () { try { document.body.removeChild(a); URL.revokeObjectURL(url); } catch (e) {} }, 60000);
+    return { where: P ? 'share' : 'browser' };
+  }
+
+  var running = false;
+  async function build(n, ui) {
+    await ensureContent(n, ui);
+    var pages = await paginate(n, ui);
+    var total = pages.length + 1, imgs = [], host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:-1;opacity:0.01;pointer-events:none;background:#fff';
+    document.body.appendChild(host);
+    try {
+      for (var i = 0; i < total; i++) {
+        if (ui.cancelled) throw new Error('cancel');
+        host.innerHTML = wrapPage(i === 0 ? coverHtml(n) : pages[i - 1].items.join(''), i === 0 ? 0 : i);
+        imgs.push(await encode(await raster(host.firstElementChild)));
+        ui.status('رسم الصفحة ' + (i + 1) + ' من ' + total, 20 + (i + 1) / total * 70);
+        await sleep(0);
+      }
+    } finally { host.remove(); }
+    return makePdf(imgs, 'رواية ' + String(n.title).replace(/&amp;/g, '&'));
+  }
+
+  window.rpPdfEngine = { build: build, makePdf: makePdf, paginate: paginate };
+  window.generateDirectPdfFromChapters = async function () {
+    if (running) return; var n; try { n = novels.find(function (x) { return x.id === currentNovelId; }); } catch (e) {} if (!n) return;
+    running = true; try { if (typeof closePdfModal === 'function') closePdfModal(); } catch (e) {}
+    var ui = overlay('جاري تجهيز ملف الـ PDF');
+    try {
+      var blob = await build(n, ui);
+      var name = 'رواية_' + String(n.title).replace(/&amp;/g, '&').replace(/[^؀-ۿa-zA-Z0-9_-]+/g, '_') + '.pdf';
+      ui.status('جاري حفظ الملف…', 92);
+      var res = await saveFile(blob, name, ui);
+      var mb = (blob.size / 1048576).toFixed(1) + ' ميجا';
+      if (res.where === 'downloads') ui.done('اتحفظ في مجلد التنزيلات (Downloads) باسم «' + name + '» — ' + mb, res.uri);
+      else if (res.where === 'share') ui.done('اختار مكان الحفظ من النافذة اللي ظهرت — ' + mb);
+      else ui.done('اتنزّل الملف على جهازك — ' + mb);
+    } catch (e) {
+      ui.close();
+      if (e && e.message === 'cancel') say('اتلغى تجهيز الـ PDF');
+      else { console.error('PDF engine failed', e); say('حصلت مشكلة في تجهيز الـ PDF. جرّب تاني'); }
+    } finally { running = false; }
+  };
+  window.triggerPrintPdf = window.generateDirectPdfFromChapters; window.triggerPrintPdf.__rp = true;
+})();
+</script>
 </body></html>
