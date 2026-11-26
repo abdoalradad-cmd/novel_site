@@ -11552,11 +11552,34 @@ document.addEventListener('click', function (e) {
   }
   function userNovelsInList() { try { return novels.some(function (n) { return n.isUser; }); } catch (e) { return false; } }
   function stripUserNovels() { try { novels = novels.filter(function (n) { return !n.isUser; }); } catch (e) {} }
+  /* نسخة السيرفر بتظهر بدل نسخة الـ index (بنفس الـ id علشان المفضلة والتقدم والقراءات ما تضيعش)، ونسخة الـ index بتتحط على جنب وترجع لو مفيش نت */
+  var SHADOW = [];
+  function restoreShadow() {
+    try { if (!SHADOW.length) return; var sh = SHADOW.slice().sort(function (a, b) { return a.i - b.i; }); SHADOW = [];
+      sh.forEach(function (x) { novels.splice(Math.min(x.i, novels.length), 0, x.n); }); } catch (e) { SHADOW = []; }
+  }
+  function fallbackStatic() {
+    try { if (!SHADOW.length) return; novels = novels.filter(function (n) { return !n.dupOf; }); restoreShadow();
+      try { if (typeof renderHeroBanner === 'function') renderHeroBanner(); } catch (e) {}
+      try { if (typeof renderNovelsGrid === 'function') renderNovelsGrid(); } catch (e) {}
+      try { if (window.__rpSchedule) window.__rpSchedule(); } catch (e) {} } catch (e) {}
+  }
   function mergeNovels(data) {
     if (!data || !Array.isArray(data.novels)) return;
     try { if (!isReaderOnlyMode) return; } catch (e) {}
+    restoreShadow();
     stripUserNovels();
-    data.novels.forEach(function (u) { novels.push(mapNovel(u)); });
+    var pos = new Map(), rm = new Set(), twins = [];
+    novels.forEach(function (n, i) { pos.set(n, i); });
+    data.novels.forEach(function (u) {
+      var nv = mapNovel(u), st = null;
+      for (var k = 0; k < novels.length; k++) { var c = novels[k]; if (c.srcUserNovel === u.id && !rm.has(c)) { st = c; break; } }
+      if (st) { nv.id = st.id; nv.dupOf = st.id; if (st.views) nv.views = st.views; rm.add(st); SHADOW.push({ i: pos.get(st), n: st }); }
+      twins.push(nv);
+    });
+    if (rm.size) novels = novels.filter(function (n) { return !rm.has(n); });
+    twins.forEach(function (t) { novels.push(t); });
+    try { if (window.__rpSchedule) window.__rpSchedule(); } catch (e) {}
     try { if (typeof renderHeroBanner === 'function') renderHeroBanner(); } catch (e) {}
     try { if (typeof renderNovelsGrid === 'function') renderNovelsGrid(); } catch (e) {}
   }
@@ -11564,11 +11587,12 @@ document.addEventListener('click', function (e) {
   function loadUserNovels() {
     if (!base()) return;
     if (!loadedOnce) { try { var cc = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (cc && cc.novels) mergeNovels(cc); } catch (e) {} } /* عرض فوري من آخر نسخة ثم التحديث */
-    fetch(base() + '/api/novels').then(function (r) { return r.json(); }).then(function (d) {
-      if (d && d.novels) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {} mergeNovels(d); }
+    fetch(base() + '/api/novels').then(function (r) { if (!r.ok) throw new Error('x'); return r.json(); }).then(function (d) {
+      if (!d || !d.novels) throw new Error('x');
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {} mergeNovels(d);
     }).catch(function () {
-      if (loadedOnce) return;
-      try { mergeNovels(JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')); } catch (e) {}
+      if (!loadedOnce) { try { mergeNovels(JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')); } catch (e) {} }
+      fallbackStatic(); /* مفيش نت/السيرفر مش بيرد: نرجع لنسخة الـ index */
     }).then(function () { loadedOnce = true; });
   }
   function findNovel(id) { try { return novels.filter(function (n) { return n.id === id; })[0]; } catch (e) { return null; } }
@@ -12197,7 +12221,7 @@ document.addEventListener('click', function (e) {
     if (t === 'pending') return '<div class="rp-card"><h3>' + ic('inbox') + ' طلبات النشر</h3><p class="rp-sub">الروايات اللي مستنية موافقتك.</p>' + (S.pending.length ? S.pending.map(function (n) {
       return '<div class="rp-item"><div class="rp-nv">' + coverBox(n) + '<div class="rp-nv-main"><b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:2px 0">بقلم: ' + esc(n.owner) + ' — ' + esc(n.ownerEmail) + '</div><div class="rp-meta">' + (n.lockAll ? '<span class="rp-pill lock">' + ic('lock') + ' مقفولة</span>' : '') + (n.promoUrl ? '<span class="rp-pill lock">' + ic('film') + ' برومو</span>' : '') + '</div><button type="button" class="rp-btn sm" data-act="review" data-id="' + n.id + '">' + ic('magnifying-glass') + ' مراجعة</button></div></div></div>';
     }).join('') : '<div class="rp-empty">' + ic('circle-check') + 'مفيش طلبات دلوقتي</div>') + '</div>';
-    if (t === 'live') return '<div class="rp-card"><h3>' + ic('earth-africa') + ' الروايات المنشورة من الناس (' + S.live.length + ')</h3><p class="rp-sub">«أضف للموقع» بتنسخ الرواية بكل فصولها للملف الأصلي للموقع (من وضع الأدمن)، وبعدين تصدّر الموقع وترفعه على GitHub. الرواية بتفضل في بروفايل كاتبها الأصلي مش بروفايلك.</p>' + (S.live.length ? S.live.map(function (n) {
+    if (t === 'live') return '<div class="rp-card"><h3>' + ic('earth-africa') + ' الروايات المنشورة من الناس (' + S.live.length + ')</h3><p class="rp-sub">«أضف للموقع» بتنسخ الرواية بكل فصولها للملف الأصلي للموقع (من وضع الأدمن)، وبعدين تصدّر الموقع وترفعه على GitHub. الرواية بتفضل في بروفايل كاتبها الأصلي مش بروفايلك.</p>' + (S.live.length ? '<button type="button" class="rp-btn block gold" data-act="importall" style="margin:6px 0 12px">' + ic('cloud-arrow-down') + ' أضف كل روايات السيرفر للموقع (' + S.live.length + ')</button>' + S.live.map(function (n) {
       return '<div class="rp-item"><div class="rp-nv">' + coverBox(n) + '<div class="rp-nv-main"><b>' + esc(n.title) + '</b><div class="rp-sub" style="margin:2px 0">بقلم: ' + esc(n.owner) + '</div><div class="rp-row"><button type="button" class="rp-btn sm gold" data-act="import" data-id="' + n.id + '">' + ic('download') + ' أضف للموقع</button><button type="button" class="rp-btn sm sec" data-act="unpub" data-id="' + n.id + '">إلغاء النشر</button><button type="button" class="rp-btn sm red" data-act="admdel" data-id="' + n.id + '">' + ic('trash') + '</button></div></div></div></div>';
     }).join('') : '<div class="rp-empty">' + ic('book') + 'لا يوجد روايات منشورة من المستخدمين</div>') + '<div class="rp-err" id="rp-imp-msg"></div></div>';
     if (t === 'users') return usersTab();
@@ -13193,11 +13217,11 @@ document.addEventListener('click', function (e) {
   }
 
   /* ---------- نسخ رواية منشورة إلى روايات الأدمن (GitHub) ---------- */
-  function importToMine(id) {
-    var msg = $('rp-imp-msg');
+  function importToMine(id, quiet) {
+    var msg = quiet ? null : $('rp-imp-msg');
     try { if (isReaderOnlyMode) { var rm = 'النشر على الموقع نفسه بيتعمل من الموقع في وضع الأدمن (زي ما بترفع الرواية للـ index). تعديلاتك محفوظة على السيرفر ✅'; if (msg) msg.textContent = rm; else flash(rm); return; } } catch (e) {}
     if (msg) { msg.style.color = '#047857'; msg.textContent = 'جاري النسخ…'; }
-    api('/api/admin/novels/' + id + '/live').then(function (d) {
+    return api('/api/admin/novels/' + id + '/live').then(function (d) {
       var u = d.novel, lockAll = !!u.lockAll && !!u.password, pw = u.password || '';
       var obj = {
         id: 'novel-' + Date.now(), srcUserNovel: u.id, authorUid: u.uid, title: esc(u.title), subtitle: esc(u.subtitle || ''), author: esc(u.author || u.owner), genre: esc(u.genre || 'عام'), tags: (u.tags || []).map(esc),
@@ -13206,14 +13230,33 @@ document.addEventListener('click', function (e) {
         chapters: u.chapters.map(function (c, i) { var lk = !lockAll && !!c.locked && !!pw; return { id: i + 1, title: esc(c.title), readTime: Math.max(1, Math.ceil(c.content.split(/\s+/).length / 200)) + ' دقائق', isLocked: lk, password: lk ? pw : '', content: esc(c.content), release: +c.release || 0 }; })
       };
       var ex = novels.filter(function (n) { return n.srcUserNovel === u.id; })[0];
-      if (ex) { if (!confirm('الرواية دي اتضافت للموقع قبل كده. تحدّث النسخة بآخر نسخة منشورة؟')) { if (msg) msg.textContent = ''; return; } obj.id = ex.id; obj.views = ex.views; if (u.siteId) { obj.coverGradient = ex.coverGradient || obj.coverGradient; obj.accentIcon = ex.accentIcon || obj.accentIcon; obj.rating = ex.rating || obj.rating; if (!obj.coverImg && ex.coverImg) obj.coverImg = ex.coverImg; } novels[novels.indexOf(ex)] = obj; }
+      if (ex) { if (!quiet && !confirm('الرواية دي اتضافت للموقع قبل كده. تحدّث النسخة بآخر نسخة منشورة؟')) { if (msg) msg.textContent = ''; return; } obj.id = ex.id; obj.views = ex.views; if (u.siteId) { obj.coverGradient = ex.coverGradient || obj.coverGradient; obj.accentIcon = ex.accentIcon || obj.accentIcon; obj.rating = ex.rating || obj.rating; if (!obj.coverImg && ex.coverImg) obj.coverImg = ex.coverImg; } novels[novels.indexOf(ex)] = obj; }
       else novels.unshift(obj);
+      if (quiet) return u.title;
       try { saveAllData(); } catch (e) {}
       try { applySiteConfiguration(); } catch (e) {}
       try { if (typeof renderAdminNovelsList === 'function') renderAdminNovelsList(); } catch (e) {}
       if (msg) msg.textContent = 'تمت الإضافة للملف الأصلي للموقع ✅ — دلوقتي صدّر الموقع وارفعه على GitHub زي ما بتعمل دايمًا.';
       flash('تمت إضافة «' + u.title + '» للموقع');
-    }).catch(function (e) { if (msg) { msg.style.color = '#dc2626'; msg.textContent = e.message; } });
+    }).catch(function (e) { if (quiet) throw e; if (msg) { msg.style.color = '#dc2626'; msg.textContent = e.message; } });
+  }
+  /* إضافة كل روايات السيرفر المنشورة للموقع (نسخة واحدة لكل رواية، والمتضافة قبل كده بتتحدّث) */
+  function importAllToMine() {
+    var msg = $('rp-imp-msg');
+    try { if (isReaderOnlyMode) { flash('الإضافة بتتعمل من الموقع في وضع الأدمن'); return; } } catch (e) {}
+    var ids = (S.live || []).map(function (n) { return n.id; });
+    if (!ids.length) { flash('مفيش روايات منشورة'); return; }
+    if (!confirm('هنضيف ' + ids.length + ' رواية من السيرفر للـ index، والمتضافة قبل كده بتتحدّث بآخر نسخة منشورة. نكمل؟')) return;
+    var ok = 0, bad = [], i = 0;
+    function say(t, err) { if (msg) { msg.style.color = err ? '#dc2626' : '#047857'; msg.textContent = t; } }
+    (function nextOne() {
+      if (i >= ids.length) {
+        try { saveAllData(); } catch (e) {} try { applySiteConfiguration(); } catch (e) {} try { if (typeof renderAdminNovelsList === 'function') renderAdminNovelsList(); } catch (e) {}
+        say('خلصت: ' + ok + ' رواية اتضافت/اتحدّثت ✅' + (bad.length ? ' — فشلت: ' + bad.join('، ') : '') + ' — دلوقتي صدّر الموقع وارفعه على GitHub.', !!bad.length); flash('خلصت إضافة روايات السيرفر'); return;
+      }
+      say('جاري النسخ ' + (i + 1) + ' من ' + ids.length + '…');
+      importToMine(ids[i], true).then(function () { ok++; }).catch(function (e) { bad.push('#' + ids[i] + ' (' + e.message + ')'); }).then(function () { i++; nextOne(); });
+    })();
   }
 
   /* ---------- الأحداث ---------- */
@@ -13390,6 +13433,7 @@ document.addEventListener('click', function (e) {
     else if (a === 'premopen') { S.premOpen = S.premOpen === +id ? 0 : +id; render(); }
     else if (a === 'setprem') api('/api/admin/users/' + id + '/premium', { method: 'POST', body: { months: b.getAttribute('data-m') } }).then(function () { S.premOpen = 0; flash(b.getAttribute('data-m') === '0' ? 'تم إلغاء الاشتراك' : 'تم تفعيل Premium ✅'); loadUsers(); }).catch(function (x) { flash(x.message); });
     else if (a === 'import') importToMine(id);
+    else if (a === 'importall') importAllToMine();
     else if (a === 'sitemig') siteMigrate();
     else if (a === 'unpub') { if (confirm('تلغي نشر الرواية دي؟')) api('/api/admin/novels/' + id + '/unpublish', { method: 'POST' }).then(function () { flash('تم إلغاء النشر'); refresh(); loadUserNovels(); }).catch(function (x) { flash(x.message); }); }
     else if (a === 'admdel') { if (confirm('تحذف الرواية دي نهائيًا من السيرفر؟ (يفضّل تنسخها لرواياتك الأول)')) api('/api/admin/novels/' + id, { method: 'DELETE' }).then(function () { flash('تم الحذف'); refresh(); loadUserNovels(); }).catch(function (x) { flash(x.message); }); }
@@ -13702,6 +13746,7 @@ document.addEventListener('click', function (e) {
     var prem = most.filter(isPremNovel);
     return { pop: pop.slice(0, 15), most: most, recent: recent, prem: prem, paper: most.filter(function (n) { return !!n.isPaper; }) };
   }
+  window.__rpSchedule = function () { schedule(); };
   function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} try { window.__rpRepaintViews && window.__rpRepaintViews(); } catch (e) {} try { fixDetailsViews(); } catch (e) {} }, 60); }
   window.__rpReadsOf = function (n) { return readsOf(n); };
   /* رقم المشاهدات جوه صفحة الرواية = نفس رقم الكارت بالظبط (من السيرفر) */
