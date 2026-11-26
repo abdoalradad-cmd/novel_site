@@ -16326,4 +16326,48 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
   document.addEventListener('copy', function (e) { if (!off() && e.target && e.target.closest && e.target.closest('#reader-paper,#chapter-content,.chapter-content')) e.preventDefault(); });
 })();
 </script>
-<script src="android-bridge.js"></script></body></html>
+<script src="android-bridge.js"></script><script id="rp-admin-copy-chapter">
+/* أدمن بس: دوسة مطولة على أي فصل في فهرس الفصول = نسخ نص الفصل كله */
+(function () {
+  function isAdm() { try { if (window.__alradadAdmin === true) return true; var r = window.__rp; return !!(r && r.me && r.me() && r.me().role === 'admin'); } catch (e) { return false; } }
+  function toPlain(h) {
+    var t = String(h == null ? '' : h).replace(/<\s*br\s*\/?>/gi, '\n').replace(/<\/(p|div|h[1-6]|li)>/gi, '\n').replace(/<[^>]+>/g, '');
+    var ta = document.createElement('textarea'); ta.innerHTML = t; return ta.value.replace(/\n{3,}/g, '\n\n').trim();
+  }
+  function say(m) { try { if (typeof showToast === 'function') return showToast(m); } catch (e) {} try { alert(m); } catch (e) {} }
+  function copy(txt) {
+    function fb() { var ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.focus(); ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) {} ta.remove(); return ok; }
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(txt).then(function () { return true; }, function () { return fb(); });
+    return Promise.resolve(fb());
+  }
+  var timer = null, sx = 0, sy = 0, fired = false;
+  function clear() { if (timer) { clearTimeout(timer); timer = null; } }
+  function grid() { return document.getElementById('chapters-list-grid'); }
+  function start(e) {
+    if (!isAdm()) return; var g = grid(); if (!g || !g.contains(e.target)) return;
+    var el = e.target.closest ? e.target.closest('[onclick*="requestChapterAccess("]') : null; if (!el) return;
+    var m = /requestChapterAccess\(\s*'([^']*)'\s*,\s*(\d+)\s*\)/.exec(el.getAttribute('onclick') || ''); if (!m) return;
+    var pt = (e.touches && e.touches[0]) || e; sx = pt.clientX; sy = pt.clientY; fired = false; clear();
+    timer = setTimeout(function () {
+      timer = null; fired = true;
+      var n = null; try { n = novels.find(function (x) { return String(x.id) === m[1]; }); } catch (er) {}
+      var ch = n && n.chapters && n.chapters[+m[2]];
+      try { if (navigator.vibrate) navigator.vibrate(35); } catch (er) {}
+      if (!ch) return say('مش لاقي الفصل ده');
+      if (!ch.content) return say('نص الفصل مقفول/مشفّر. ادخل الأدمن بالـ PIN الأول وجرب تاني');
+      var txt = (ch.title ? ch.title + '\n\n' : '') + toPlain(ch.content);
+      copy(txt).then(function (ok) { say(ok ? 'اتنسخ نص «' + (ch.title || 'الفصل') + '» (' + txt.length.toLocaleString('en') + ' حرف)' : 'المتصفح منع النسخ، جرب تاني'); });
+    }, 650);
+  }
+  function move(e) { if (!timer) return; var pt = (e.touches && e.touches[0]) || e; if (Math.abs(pt.clientX - sx) > 12 || Math.abs(pt.clientY - sy) > 12) clear(); }
+  document.addEventListener('touchstart', start, { passive: true });
+  document.addEventListener('mousedown', function (e) { if (e.button === 0) start(e); });
+  document.addEventListener('touchmove', move, { passive: true });
+  document.addEventListener('mousemove', move);
+  ['touchend', 'touchcancel', 'mouseup', 'scroll'].forEach(function (ev) { document.addEventListener(ev, clear, true); });
+  /* بعد الدوسة المطولة ما نفتحش الفصل */
+  document.addEventListener('click', function (e) { if (fired) { fired = false; var g = grid(); if (g && g.contains(e.target)) { e.stopPropagation(); e.preventDefault(); } } }, true);
+  document.addEventListener('contextmenu', function (e) { var g = grid(); if (isAdm() && g && g.contains(e.target)) e.preventDefault(); });
+})();
+</script>
+</body></html>
