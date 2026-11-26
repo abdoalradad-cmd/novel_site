@@ -16419,9 +16419,9 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
 /* محرك PDF جديد: بيبني ملف الـ PDF صفحة صفحة جوه الصفحة نفسها وبعدين يتحفظ لوحده (من غير نافذة الطباعة) */
 (function () {
   'use strict';
-  var W = 794, H = 1123, PX = 52, PT = 60, PB = 64, CW = W - PX * 2, CHH = H - PT - PB, SCALE = 1.5, QUAL = 0.6;
+  var W = 794, H = 1123, PX = 46, PT = 54, PB = 58, CW = W - PX * 2, CHH = H - PT - PB, SCALE = 1.5, QUAL = 0.6;
   var FONT = "'Amiri','Cairo','Noto Naskh Arabic',serif";
-  var PST = 'margin:0;line-height:1.95;font-size:18px;color:#111827;text-align:justify;font-family:' + FONT + ';direction:rtl;overflow-wrap:break-word;';
+  var PST = 'margin:0;line-height:1.85;font-size:18px;color:#111827;text-align:justify;font-family:' + FONT + ';direction:rtl;overflow-wrap:break-word;';
   function cfgv(k, d) { try { return (siteConfig && siteConfig[k]) || d; } catch (e) { return d; } }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function escH(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -16473,7 +16473,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     try { if (document.fonts && document.fonts.load) { await Promise.race([Promise.all([document.fonts.load('18px Amiri'), document.fonts.load('bold 26px Cairo')]), sleep(2500)]); } } catch (e) {}
     var probe = document.createElement('div'); host.appendChild(probe);
     function measure(html) { probe.innerHTML = html; return probe.firstElementChild.offsetHeight; }
-    function pHtml(t, fin, cont) { return '<div style="' + PST + 'padding:0 0 ' + (fin ? 14 : 0) + 'px 0;text-indent:' + (cont ? 0 : 15) + 'px;' + (fin ? '' : 'text-align-last:justify;') + '">' + t + '</div>'; }
+    function pHtml(t, fin, cont) { return '<div style="' + PST + 'padding:0 0 ' + (fin ? 10 : 0) + 'px 0;text-indent:' + (cont ? 0 : 15) + 'px;' + (fin ? '' : 'text-align-last:justify;') + '">' + t + '</div>'; }
     function titleHtml(t) { return '<h2 style="margin:0 0 24px 0;padding:6px 0 12px 0;font-size:26px;font-weight:bold;line-height:1.7;color:' + color + ';text-align:center;border-bottom:2px solid #e5e7eb;font-family:Cairo,Amiri,sans-serif;direction:rtl">' + t + '</h2>'; }
     var pages = [], cur = { items: [], used: 0 };
     function newPage() { if (cur.items.length) { pages.push(cur); cur = { items: [], used: 0 }; } }
@@ -16529,9 +16529,27 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     var cv = await html2pdf().set({ margin: 0, html2canvas: { scale: SCALE, useCORS: true, letterRendering: false, backgroundColor: '#ffffff', scrollY: 0 }, jsPDF: { unit: 'px', format: [W, H] } }).from(el).toCanvas().get('canvas');
     return cv;
   }
+  /* خطوط الموقع (أميري/كايرو) بتتضمّن جوه صورة الصفحة علشان الرسم السريع يطلع بنفس شكل الموقع */
+  var FCSS = null;
+  function ab64(buf) { var u = new Uint8Array(buf), s = '', CH = 0x8000; for (var i = 0; i < u.length; i += CH) s += String.fromCharCode.apply(null, u.subarray(i, i + CH)); return btoa(s); }
+  async function fontCss() {
+    if (FCSS !== null) return FCSS;
+    if (typeof window.__rpFontCss === 'string') return (FCSS = window.__rpFontCss);
+    try {
+      var css = await (await fetch('https://fonts.googleapis.com/css2?family=Amiri:wght@400&family=Cairo:wght@700&display=swap')).text(), out = '', blocks = css.split('/*').slice(1);
+      for (var i = 0; i < blocks.length; i++) {
+        var b = blocks[i], lab = (b.split('*/')[0] || '').trim(); if (lab !== 'arabic' && lab !== 'latin') continue;
+        var body = '@font-face' + b.split('@font-face')[1], m = /url\((https:[^)]+)\)/.exec(body); if (!m) continue;
+        var data = await (await fetch(m[1])).arrayBuffer();
+        out += body.replace(m[0], 'url(data:font/woff2;base64,' + ab64(data) + ')') + '\n';
+      }
+      FCSS = out;
+    } catch (e) { FCSS = ''; }
+    return FCSS;
+  }
   async function rasterSvg(el) {
-    var xml = new XMLSerializer().serializeToString(el);
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '"><foreignObject width="100%" height="100%">' + xml + '</foreignObject></svg>';
+    var xml = new XMLSerializer().serializeToString(el), fc = await fontCss();
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '">' + (fc ? '<style>' + fc + '</style>' : '') + '<foreignObject width="100%" height="100%">' + xml + '</foreignObject></svg>';
     var img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     await new Promise(function (ok, no) { img.onload = ok; img.onerror = function () { no(new Error('svg')); }; });
     var cv = document.createElement('canvas'); cv.width = Math.round(W * SCALE); cv.height = Math.round(H * SCALE);
@@ -16541,10 +16559,8 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
   var rasterMode = null;
   async function raster(el) {
     if (window.__rpRaster) return window.__rpRaster(el);
-    if (rasterMode !== 'svg' && typeof html2pdf !== 'undefined') {
-      try { var d = await rasterHtml2pdf(el); rasterMode = 'h2p'; return d; } catch (e) { if (rasterMode === 'h2p') throw e; rasterMode = 'svg'; }
-    }
-    rasterMode = 'svg'; return rasterSvg(el);
+    if (rasterMode !== 'h2p') return rasterSvg(el);
+    return rasterHtml2pdf(el);
   }
   function b64bytes(dataUrl) { var s = atob(dataUrl.split(',')[1]), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
   /* الصفحة بتتحوّل لرمادي 4 بت ومضغوطة (أصغر بكتير من JPEG وأوضح للنص)، ولو المتصفح مش بيدعم الضغط نستخدم JPEG */
@@ -16622,12 +16638,15 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     var total = pages.length + 1, imgs = [], host = document.createElement('div');
     host.style.cssText = 'position:fixed;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:-1;opacity:0.01;pointer-events:none;background:#fff';
     document.body.appendChild(host);
+    var t0 = Date.now();
     try {
       for (var i = 0; i < total; i++) {
         if (ui.cancelled) throw new Error('cancel');
         host.innerHTML = wrapPage(i === 0 ? coverHtml(n) : pages[i - 1].items.join(''), i === 0 ? 0 : i);
-        imgs.push(await encode(await raster(host.firstElementChild)));
-        ui.status('رسم الصفحة ' + (i + 1) + ' من ' + total, 20 + (i + 1) / total * 70);
+        try { imgs.push(await encode(await raster(host.firstElementChild))); }
+        catch (e) { if (rasterMode === 'h2p' || typeof html2pdf === 'undefined') throw e; rasterMode = 'h2p'; i--; continue; } /* الرسم السريع مش شغال عندك: نكمل بالطريقة الأبطأ */
+        var el = (Date.now() - t0) / (i + 1), left = Math.max(0, Math.round(el * (total - i - 1) / 1000));
+        ui.status('رسم الصفحة ' + (i + 1) + ' من ' + total + (i > 4 && left > 4 ? ' — باقي تقريبًا ' + (left >= 90 ? Math.round(left / 60) + ' دقيقة' : left + ' ثانية') : ''), 20 + (i + 1) / total * 70);
         await sleep(0);
       }
     } finally { host.remove(); }
