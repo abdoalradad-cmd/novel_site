@@ -168,6 +168,7 @@ html.dark .rp-rall{color:#6ee7b7}
 .rp-hs{display:flex;gap:12px;overflow-x:auto;padding:6px 6px 16px;margin:0 -6px;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .rp-hs::-webkit-scrollbar{display:none}
 .rp-bk{flex:none;width:110px;scroll-snap-align:start;display:flex;flex-direction:column}
+.rp-bk-cv.ld{background:#f1f5f9!important;border-color:rgba(148,163,184,.35)!important}.rp-bk-cv.ld::after{content:'';position:absolute;left:0;right:0;top:-30%;height:26%;background:linear-gradient(180deg,transparent,rgba(148,163,184,.45),transparent);animation:rpld 1.3s linear infinite}html.dark .rp-bk-cv.ld{background:#1e293b!important}@keyframes rpld{to{top:110%}}
 .rp-bk-cv{position:relative;aspect-ratio:2/3;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.9);font-size:1.8rem;cursor:pointer;box-shadow:0 10px 18px -10px rgba(0,0,0,.55);border:1px solid rgba(251,191,36,.35)}
 .rp-bk-cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .rp-bk-cv .tt{position:absolute;inset:auto 0 0 0;padding:20px 8px 8px;background:linear-gradient(transparent,rgba(0,0,0,.78));font:900 .72rem Cairo,sans-serif;text-align:center;color:#fbbf24}
@@ -348,6 +349,7 @@ html.dark .rp-edtabs{background:#0f1a2c;border-color:#1c2b44}
 .rp-savebar{position:fixed;left:0;right:0;bottom:calc(var(--rp-tabbar,0px));z-index:9320;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-top:1px solid #e3e8e5;display:none}
 html.dark .rp-savebar{background:rgba(7,13,24,.92);border-color:#1c2b44}
 #rp-acct-page.editing .rp-savebar{display:block}
+html.rp-editing #app-tabbar{display:none!important}html.rp-editing .rp-savebar{bottom:0}
 .rp-savebar .in{max-width:780px;margin:0 auto;display:flex;gap:8px}
 .rp-sw{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px;border:1.5px solid #dbe2de;border-radius:16px;cursor:pointer;margin-top:10px}
 html.dark .rp-sw{border-color:#26364f}
@@ -11874,7 +11876,7 @@ document.addEventListener('click', function (e) {
   window.rpCloseAccount = function () { close(); };
   function close() {
     var pg = $('rp-acct-page'); if (!pg) return;
-    pg.classList.remove('open', 'editing'); pg.setAttribute('aria-hidden', 'true');
+    pg.classList.remove('open', 'editing'); try { document.documentElement.classList.remove('rp-editing'); } catch (e) {} pg.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
     try { if (window.__appAfterOverlay) window.__appAfterOverlay(); } catch (e) {}
   }
@@ -11935,7 +11937,7 @@ document.addEventListener('click', function (e) {
     try { if (window.RadPadSecure) window.RadPadSecure.set(!isAdmin()); } catch (e) {}
     try { if (S.tab === 'vc' && !S.menu) vcRead(); } catch (e) {}
     try { if (VC.url && (S.menu || S.tab !== 'vc' || !token())) vcClear(); } catch (e) {}
-    var pg = $('rp-acct-page'); if (pg) pg.classList.toggle('editing', S.view === 'editor' && !!token());
+    var pg = $('rp-acct-page'); if (pg) { pg.classList.toggle('editing', S.view === 'editor' && !!token()); try { document.documentElement.classList.toggle('rp-editing', S.view === 'editor' && !!token()); } catch (e) {} }
     if (pg) { var ak = (S.menu ? 'menu' : S.view + ':' + S.tab); pg.classList.toggle('rp-still', pg.__key === ak); pg.__key = ak; }
     if (!base()) { setTitle('حسابي'); el.innerHTML = '<div class="rp-card"><div class="rp-empty">' + ic('plug-circle-xmark') + 'الحسابات مش متاحة دلوقتي.<br>' + (function () { try { return isReaderOnlyMode ? 'جرّب بعد شوية.' : 'حط رابط سيرفر الحسابات في لوحة التحكم (تبويب «التطبيق والإشعارات»).'; } catch (e) { return ''; } })() + '</div></div>' + themeCard(); return; }
     if (!token() || !me()) return renderAuth();
@@ -13550,7 +13552,21 @@ document.addEventListener('click', function (e) {
 (function () {
   'use strict';
   var R = window.__rp || {};
-  var READS = {}, TREND = {}, ADMIN_ID = 0, built = false, rafT = null;
+  var READS = {}, TREND = {}, ADMIN_ID = 0, built = false, rafT = null, readsOk = false, SC = {}, scOk = false, SCK = 'rp_site_covers', RDC = 'rp_reads_c', TRC = 'rp_trend_c';
+  /* كاش آخر قيم: القراءات والرائجة وأغلفة السيرفر بتظهر فورًا من آخر مرة، والتحديث بيتم في الخلفية */
+  try { var c0 = JSON.parse(localStorage.getItem(RDC) || 'null'); if (c0 && c0.reads) { READS = c0.reads; readsOk = true; } } catch (e) {}
+  try { var c1 = JSON.parse(localStorage.getItem(TRC) || 'null'); if (c1 && c1.scores) TREND = c1.scores; } catch (e) {}
+  try { var c2 = JSON.parse(localStorage.getItem(SCK) || 'null'); if (c2 && c2.covers) { SC = c2.covers; scOk = true; } } catch (e) {}
+  function applySC() { try { novels.forEach(function (n) { if (!n.isUser && SC[n.id]) { if (n._cv0 === undefined) n._cv0 = n.coverImg; n.coverImg = (/^https:\/\/[^\s<>"']+$/i.test(SC[n.id]) ? SC[n.id] : n.coverImg).replace(/&amp;/g, '&').replace(/&/g, '&amp;'); } }); } catch (e) {} }
+  var scBusy = false;
+  function loadSiteCovers() {
+    if (!base() || scBusy) { if (!base()) scOk = true; return; } scBusy = true;
+    var tm = setTimeout(function () { if (!scOk) { scOk = true; schedule(); } }, 4000); /* لو السيرفر اتأخر نرجع للغلاف الأصلي */
+    fetch(base() + '/api/site-covers').then(function (r) { return r.json(); }).then(function (d) {
+      SC = (d && d.covers) || {}; try { localStorage.setItem(SCK, JSON.stringify({ covers: SC })); } catch (e) {}
+    }).catch(function () {}).then(function () { clearTimeout(tm); scBusy = false; scOk = true; applySC(); schedule(); try { if (typeof renderHeroBanner === 'function') renderHeroBanner(); } catch (e) {} });
+  }
+  applySC();
   var GR = { 'from-emerald-900 via-slate-950 to-black': 'linear-gradient(135deg,#064e3b,#020617 60%,#000)', 'from-slate-900 via-blue-950 to-slate-950': 'linear-gradient(135deg,#0f172a,#172554 55%,#020617)', 'from-amber-950 via-stone-900 to-black': 'linear-gradient(135deg,#451a03,#1c1917 55%,#000)', 'from-rose-950 via-slate-950 to-black': 'linear-gradient(135deg,#4c0519,#020617 60%,#000)', 'from-purple-950 via-slate-900 to-black': 'linear-gradient(135deg,#3b0764,#0f172a 55%,#000)' };
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
@@ -13579,14 +13595,15 @@ document.addEventListener('click', function (e) {
   function trendOf(n) { var t = TREND[n.id]; return t ? (t.v || 0) + (t.c || 0) : 0; }
   function loadTrend() {
     if (!base()) return;
-    fetch(base() + '/api/trending', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { TREND = d.scores || {}; schedule(); }).catch(function () {});
+    fetch(base() + '/api/trending', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { TREND = d.scores || {}; try { localStorage.setItem(TRC, JSON.stringify({ scores: TREND })); } catch (e) {} schedule(); }).catch(function () {});
   }
   setInterval(function () { try { if (!document.hidden) loadTrend(); } catch (e) {} }, 120000);
+  var rdBusy = false;
   function loadReads() {
-    if (!base()) return;
-    fetch(base() + '/api/reads').then(function (r) { return r.json(); }).then(function (d) { READS = d.reads || {};
+    if (!base() || rdBusy) return; rdBusy = true;
+    fetch(base() + '/api/reads').then(function (r) { rdBusy = false; return r.json(); }).then(function (d) { READS = d.reads || {}; readsOk = true; try { localStorage.setItem(RDC, JSON.stringify({ reads: READS })); } catch (e) {}
       try { var ep = String(d.epoch || 0), old = localStorage.getItem('rp_rd_epoch'); if (old !== ep) { rdSeen = {}; localStorage.removeItem(RDK); localStorage.setItem('rp_rd_epoch', ep); } } catch (e) {}
-      schedule(); }).catch(function () {});
+      schedule(); }).catch(function () { rdBusy = false; });
   }
   var RDK = 'rp_rd_v2', rdSeen = {};
   try { rdSeen = JSON.parse(localStorage.getItem(RDK) || '{}') || {}; } catch (e) { rdSeen = {}; }
@@ -13607,6 +13624,7 @@ document.addEventListener('click', function (e) {
   /* ---------- كروت ---------- */
   function coverHtml(n, rank, withLock) {
     var bg = GR[n.coverGradient] || GR['from-emerald-900 via-slate-950 to-black'];
+    var wait = !n.isUser && !scOk && !SC[n.id] && !!n.coverImg; if (wait) return '<div class="rp-bk-cv ld" data-rp-read="' + esc(n.id) + '"></div>';
     var inner = n.coverImg ? '<img src="' + esc(plain(n.coverImg)) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '<i class="fa-solid ' + esc(n.accentIcon || 'fa-book') + '"></i><div class="tt">' + n.title + '</div>';
     var lk = withLock && (n.isLocked || n.gate) ? '<span class="rp-lk"><i class="fa-solid fa-lock"></i></span>' : '';
     return '<div class="rp-bk-cv" data-rp-read="' + esc(n.id) + '" style="background:' + bg + '">' + (rank ? '<span class="rp-rank">' + rank + '</span>' : '') + lk + inner + '</div>';
@@ -13615,7 +13633,7 @@ document.addEventListener('click', function (e) {
   function btns(n) { return '<button type="button" class="rp-bb g" data-rp-read="' + esc(n.id) + '"><i class="fa-solid fa-book-open"></i> قراءة</button><button type="button" class="rp-bb r" data-rp-pdf="' + esc(n.id) + '"><i class="fa-solid fa-file-pdf"></i> تحميل PDF</button>'; }
   function card(n, o) {
     o = o || {};
-    return '<div class="rp-bk">' + coverHtml(n, o.rank, true) + '<div class="rp-bk-t" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) + '<div class="rp-bk-m">' + '<svg class="rp-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3.2"/></svg>' + '<span>' + fnum(readsOf(n)) + '</span>' + (n.isPaper ? ' <span class="rp-ppr">📖 ورقية</span>' : '') + '</div><div class="rp-bbs">' + btns(n).replace('تحميل PDF', 'PDF') + '</div></div>';
+    return '<div class="rp-bk">' + coverHtml(n, o.rank, true) + '<div class="rp-bk-t" data-rp-read="' + esc(n.id) + '">' + n.title + '</div>' + authorHtml(n) + '<div class="rp-bk-m">' + '<svg class="rp-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3.2"/></svg>' + '<span>' + (readsOk ? fnum(readsOf(n)) : '–') + '</span>' + (n.isPaper ? ' <span class="rp-ppr">📖 ورقية</span>' : '') + '</div><div class="rp-bbs">' + btns(n).replace('تحميل PDF', 'PDF') + '</div></div>';
   }
   function section(icon, title, list, o) {
     o = o || {};
@@ -13852,7 +13870,8 @@ document.addEventListener('click', function (e) {
   /* ---------- تشغيل ---------- */
   var oApply = window.applySiteConfiguration;
   if (typeof oApply === 'function') window.applySiteConfiguration = function () { var r = oApply.apply(this, arguments); try { applyMode(); schedule(); } catch (e) {} return r; };
-  function boot() { applyMode(); renderRows(); loadReads(); loadTrend(); loadAuthors(); }
+  function boot() { applyMode(); renderRows(); loadReads(); loadTrend(); loadSiteCovers(); loadAuthors(); }
+  try { loadReads(); loadTrend(); loadSiteCovers(); } catch (e) {}
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 500); });
   else setTimeout(boot, 500);
   setTimeout(schedule, 2000); setTimeout(schedule, 4500);
@@ -14716,6 +14735,7 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
 
   /* ---- إخفاء زرار الاستماع (من الأدمن) + شارة «صوتية» على الروايات اللي فيها فصول مجهّزة ---- */
   var READY = { hide: false, novels: {} };
+  try { var rc = JSON.parse(localStorage.getItem('rp_ready_c') || 'null'); if (rc && rc.novels) { READY = { hide: !!rc.hide, open: !!rc.open, novels: rc.novels }; window.RP_READY = READY; } } catch (e) {}
   function applyHide() {
     var st = document.getElementById('rp-hide-listen'); if (!st) { st = document.createElement('style'); st.id = 'rp-hide-listen'; document.head.appendChild(st); }
     st.textContent = READY.hide ? '#tts-start-btn,#tts-hint,.rp-aud{display:none!important}' : '.rp-aud.ov{position:absolute;top:6px;left:6px;margin:0;padding:2px 7px;font-size:.6rem;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.4)}.rp-aud{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;border-radius:999px;font:800 .7rem Cairo,sans-serif;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.35);animation:rpAudIn .5s ease backwards}@keyframes rpAudIn{from{opacity:0;transform:translateY(6px) scale(.9)}to{opacity:1;transform:none}}';
@@ -14735,10 +14755,10 @@ window.NX_CLOUD_TTS_URL = window.NX_CLOUD_TTS_URL || '';
   }
   function loadReady() {
     if (!base()) return;
-    fetch(base() + '/api/tts/ready').then(function (r) { return r.json(); }).then(function (d) { READY = { hide: !!d.hide, open: !!d.open, novels: d.novels || {} }; window.RP_READY = READY; applyHide(); paintAud(); }).catch(function () {});
+    fetch(base() + '/api/tts/ready').then(function (r) { return r.json(); }).then(function (d) { READY = { hide: !!d.hide, open: !!d.open, novels: d.novels || {} }; window.RP_READY = READY; try { localStorage.setItem('rp_ready_c', JSON.stringify(READY)); } catch (e) {} applyHide(); paintAud(); }).catch(function () {});
   }
   try { var at = null; new MutationObserver(function () { clearTimeout(at); at = setTimeout(paintAud, 150); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
-  setTimeout(loadReady, 1500); setInterval(loadReady, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) loadReady(); });
+  applyHide(); setTimeout(paintAud, 0); setTimeout(loadReady, 100); setInterval(loadReady, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) loadReady(); });
   /* ---- لو الفصل لسه ما اتحولش لصوت: ما نفتحش المشغّل ونطلّع رسالة بس ---- */
   var gateRe = false;
   document.addEventListener('click', function (e) {
