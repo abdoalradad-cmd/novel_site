@@ -16176,8 +16176,19 @@ html.is-native-app #app-tabbar::after{display:none!important}
 html.is-native-app #app-tabbar .tb-bub{display:block;position:absolute;z-index:0;top:-18px;left:0;width:52px;height:52px;transform:translateX(calc(var(--tb-x,50px) - 26px));border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.4),transparent 55%),linear-gradient(150deg,rgba(var(--brand-primary-rgb),.98),rgba(var(--brand-primary-rgb),.74));
   box-shadow:0 0 0 4px rgba(255,255,255,.3),0 10px 20px -4px rgba(var(--brand-primary-rgb),.5),inset 0 1.5px 1px rgba(255,255,255,.6)}
-html.is-native-app #app-tabbar .tb-bub.jelly{animation:tbJelly .45s ease}
-@keyframes tbJelly{0%{scale:1 1}35%{scale:1.15 .88}70%{scale:.95 1.06}100%{scale:1 1}}
+html.is-native-app #app-tabbar .tb-bub.jelly{animation:tbJelly .6s cubic-bezier(.3,1.2,.5,1)}
+@keyframes tbJelly{0%{scale:1 1}28%{scale:1.4 .84}62%{scale:.95 1.09}100%{scale:1 1}}
+/* ===== عدسة زجاجية (زي الفيديو): شفافة، بلور وتشبّع للي وراها، حافة لامعة، بتكبر لما تلمسها وبتتمدد وهي بتتحرك ===== */
+html.is-native-app #app-tabbar{touch-action:none}
+html.is-native-app #app-tabbar.dragging{transition:transform .3s,opacity .2s!important}
+html.is-native-app #app-tabbar .tb-bub{transform:none!important;translate:calc(var(--tb-x,50px) - 29px) 0;transform-origin:50% 50%;width:58px;height:58px;top:-21px;will-change:transform,scale;
+  background:radial-gradient(120% 80% at 26% 8%,rgba(255,255,255,.8),rgba(255,255,255,0) 46%),radial-gradient(90% 55% at 74% 102%,rgba(255,255,255,.4),rgba(255,255,255,0) 62%),linear-gradient(160deg,rgba(var(--brand-primary-rgb),.6),rgba(var(--brand-primary-rgb),.32));
+  -webkit-backdrop-filter:blur(7px) saturate(1.9) brightness(1.12);backdrop-filter:blur(7px) saturate(1.9) brightness(1.12);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:inset 0 2px 3px rgba(255,255,255,.9),inset 0 -4px 7px rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.16),0 12px 22px -8px rgba(var(--brand-primary-rgb),.55),0 2px 7px rgba(0,0,0,.2);
+  transition:scale .28s cubic-bezier(.3,1.5,.5,1),filter .2s}
+html.is-native-app #app-tabbar .tb-bub.press{scale:1.22 1.22;filter:brightness(1.12) saturate(1.2)}
+html.is-native-app.dark #app-tabbar .tb-bub{border-color:rgba(255,255,255,.4);background:radial-gradient(120% 80% at 26% 8%,rgba(255,255,255,.5),rgba(255,255,255,0) 46%),radial-gradient(90% 55% at 74% 102%,rgba(255,255,255,.22),rgba(255,255,255,0) 62%),linear-gradient(160deg,rgba(var(--brand-primary-rgb),.55),rgba(var(--brand-primary-rgb),.26))}
 html.is-native-app #app-tabbar button{position:relative;z-index:1;height:100%;padding:0!important;color:rgba(15,23,42,.74)!important;gap:3px!important;background:none!important;-webkit-tap-highlight-color:transparent;justify-content:center!important}
 html.dark.is-native-app #app-tabbar button{color:rgba(255,255,255,.8)!important}
 html.is-native-app #app-tabbar button span{display:block!important;font-size:.64rem;line-height:1;font-weight:800;letter-spacing:0;text-shadow:0 0 6px rgba(255,255,255,.7);transition:color .2s,transform .3s}
@@ -16273,7 +16284,29 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     try { new MutationObserver(sched).observe(bar, { attributes: true, attributeFilter: ['class'], subtree: true }); } catch (e) {}
     try { if (window.ResizeObserver) new ResizeObserver(function () { place(true); }).observe(bar); } catch (e) {}
     window.addEventListener('resize', function () { place(true); });
+    /* لمس العدسة بتكبّرها، وسحبها بين التابات بتخليها تتبع صباعك */
+    var drag = null;
+    function centers() { var br = bar.getBoundingClientRect(); return [].map.call(bar.querySelectorAll('button'), function (b) { var r = b.getBoundingClientRect(); return { b: b, x: r.left + r.width / 2 - br.left }; }); }
+    function endDrag(e, commit) {
+      if (!drag) return; var d = drag; drag = null; bub.classList.remove('press'); bar.classList.remove('dragging');
+      try { bar.releasePointerCapture(d.id); } catch (x) {}
+      if (!d.moved) return;
+      window.__tbSwallow = true; setTimeout(function () { window.__tbSwallow = false; }, 80);
+      var br = bar.getBoundingClientRect(), x = (e && e.clientX != null ? e.clientX : d.last) - br.left, best = null, bd = 1e9;
+      centers().forEach(function (c) { var dd = Math.abs(c.x - x); if (dd < bd) { bd = dd; best = c.b; } });
+      if (commit && best) setTimeout(function () { try { best.click(); } catch (x2) {} }, 0); else place(false);
+    }
+    bar.addEventListener('pointerdown', function (e) { if (!(e.target.closest && e.target.closest('button'))) return; drag = { x0: e.clientX, id: e.pointerId, moved: false, last: e.clientX }; bub.classList.add('press'); }, true);
+    bar.addEventListener('pointermove', function (e) {
+      if (!drag) return; drag.last = e.clientX;
+      if (!drag.moved) { if (Math.abs(e.clientX - drag.x0) < 10) return; drag.moved = true; bar.classList.add('dragging'); try { bar.setPointerCapture(drag.id); } catch (x) {} }
+      var cs = centers(); if (!cs.length) return; var br = bar.getBoundingClientRect(), xs = cs.map(function (c) { return c.x; }), lo = Math.min.apply(null, xs), hi = Math.max.apply(null, xs);
+      bar.style.setProperty('--tb-x', Math.max(lo, Math.min(hi, e.clientX - br.left)) + 'px');
+    }, true);
+    bar.addEventListener('pointerup', function (e) { endDrag(e, true); }, true);
+    bar.addEventListener('pointercancel', function (e) { endDrag(e, false); }, true);
     bar.addEventListener('click', function (e) {
+      if (window.__tbSwallow) { window.__tbSwallow = false; e.stopImmediatePropagation(); e.preventDefault(); return; }
       var btn = e.target.closest && e.target.closest('button'); if (!btn) return;
       if (window.__tbRe) { window.__tbRe = false; return; }
       // نحرّك الفقاعة فورًا، وشغل الصفحة التقيل بعد ما الحركة تخلص علشان ما يحصلش لاج
