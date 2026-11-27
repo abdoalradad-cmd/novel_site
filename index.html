@@ -16209,15 +16209,15 @@ html.is-native-app #app-tabbar button.on[data-tone="light"] span,html.dark.is-na
 html.is-native-app #app-tabbar button i{transition:transform .38s cubic-bezier(.3,1.3,.5,1),color .3s!important}
 /* ===== عدسة كبسولة زجاجية جوه الشريط (زي فيديو iOS 26): الأيقونة تفضل مكانها وتتلوّن تحت العدسة ===== */
 html.is-native-app #app-tabbar::before{-webkit-mask-image:none!important;mask-image:none!important}
-html.is-native-app #app-tabbar .tb-bub{width:var(--tb-w,70px);height:56px;top:5px;border-radius:28px;translate:calc(var(--tb-x,50px) - var(--tb-w,70px) / 2) 0;
+html.is-native-app #app-tabbar .tb-bub{width:var(--tb-w,84px);height:56px;top:5px;border-radius:28px;translate:calc(var(--tb-x,50px) - var(--tb-w,84px) / 2) 0;
   background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.04) 45%,rgba(255,255,255,.08)),radial-gradient(120% 90% at 50% -10%,rgba(255,255,255,.25),rgba(255,255,255,0) 55%);
   -webkit-backdrop-filter:blur(2px) saturate(1.6) brightness(1.04);backdrop-filter:blur(2px) saturate(1.6) brightness(1.04);
   border:1px solid rgba(255,255,255,.5);
   box-shadow:inset 0 1.5px 1.5px rgba(255,255,255,.85),inset 0 -2px 4px rgba(255,255,255,.28),inset 0 0 14px rgba(255,255,255,.18),0 6px 14px -6px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.12);
   transition:scale .3s cubic-bezier(.3,1.5,.5,1),filter .2s}
 html.is-native-app.dark #app-tabbar .tb-bub{background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.06) 45%,rgba(255,255,255,.1)),radial-gradient(120% 90% at 50% -10%,rgba(255,255,255,.25),rgba(255,255,255,0) 55%);border-color:rgba(255,255,255,.36)}
-html.is-native-app #app-tabbar .tb-bub.press{scale:1.05 1.12;filter:brightness(1.1) saturate(1.2)}
-@keyframes tbJelly{0%{scale:1 1}28%{scale:1.08 .9}62%{scale:.98 1.05}100%{scale:1 1}}
+html.is-native-app #app-tabbar .tb-bub.press{scale:1.2 1.24;filter:brightness(1.1) saturate(1.2)}
+@keyframes tbJelly{0%{scale:1 1}30%{scale:1.035 .9}65%{scale:.985 1.05}100%{scale:1 1}}
 html.is-native-app #app-tabbar button.on i{transform:none!important}
 html.is-native-app #app-tabbar button.on i,html.is-native-app #app-tabbar button[data-lit] i{color:var(--brand-accent,#f59e0b)!important}
 html.is-native-app #app-tabbar.dragging button.on:not([data-lit]) i{color:inherit!important}
@@ -16231,11 +16231,12 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
 (function () {
   /* الشريط السفلي (زجاج سائل): فقاعة مشتركة بتنزلق + تقعير متحرك + قفل أي صفحة مفتوحة عند الضغط */
   var bar = null, bub = null, raf = 0, root = document.documentElement;
+  function clampX(x) { if (!bar) return x; var w = Math.min(84, Math.round((bar.querySelector('button') || { offsetWidth: 70 }).offsetWidth * 1.18)), W = bar.clientWidth; return Math.max(w / 2 + 3, Math.min(W - w / 2 - 3, x)); }
   function place(first) {
     raf = 0; if (!bar) return;
     var on = bar.querySelector('button.on') || bar.querySelector('button'); if (!on) return;
     var x = on.offsetLeft + on.offsetWidth / 2; if (!isFinite(x) || x <= 0) return;
-    bar.style.setProperty('--tb-w', Math.min(84, on.offsetWidth - 2) + 'px');
+    var w = Math.min(84, Math.round(on.offsetWidth * 1.18)); bar.style.setProperty('--tb-w', w + 'px'); x = clampX(x);
     if (first) { var tr = bar.style.transition; bar.style.transition = 'none'; bar.style.setProperty('--tb-x', x + 'px'); void bar.offsetWidth; bar.style.transition = tr; }
     else bar.style.setProperty('--tb-x', x + 'px');
   }
@@ -16317,7 +16318,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
       if (!drag) return; drag.last = e.clientX;
       if (!drag.moved) { if (Math.abs(e.clientX - drag.x0) < 10) return; drag.moved = true; bar.classList.add('dragging'); try { bar.setPointerCapture(drag.id); } catch (x) {} }
       var cs = centers(); if (!cs.length) return; var br = bar.getBoundingClientRect(), xs = cs.map(function (c) { return c.x; }), lo = Math.min.apply(null, xs), hi = Math.max.apply(null, xs);
-      bar.style.setProperty('--tb-x', Math.max(lo, Math.min(hi, e.clientX - br.left)) + 'px');
+      bar.style.setProperty('--tb-x', clampX(Math.max(lo, Math.min(hi, e.clientX - br.left))) + 'px');
       var cx = Math.max(lo, Math.min(hi, e.clientX - br.left)), nb = null, nd = 1e9; cs.forEach(function (c) { var dd = Math.abs(c.x - cx); if (dd < nd) { nd = dd; nb = c.b; } }); cs.forEach(function (c) { if (c.b === nb) c.b.setAttribute('data-lit', ''); else c.b.removeAttribute('data-lit'); });
     }, true);
     bar.addEventListener('pointerup', function (e) { endDrag(e, true); }, true);
@@ -16329,7 +16330,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
       // نحرّك الفقاعة فورًا، وشغل الصفحة التقيل بعد ما الحركة تخلص علشان ما يحصلش لاج
       e.stopImmediatePropagation(); e.preventDefault();
       [].forEach.call(bar.querySelectorAll('button'), function (x) { x.classList.toggle('on', x === btn); });
-      place(false); jelly();
+      place(false); bub.classList.add('press'); clearTimeout(window.__tbSet); window.__tbSet = setTimeout(function () { bub.classList.remove('press'); jelly(); }, 420);
       var id = btn.dataset.tab;
       setTimeout(function () {
         var fs = (id === 'home' || id === 'library') ? ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll', 'rpCloseAccount'] : id === 'account' ? ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll'] : ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll', 'rpCloseAccount'];
