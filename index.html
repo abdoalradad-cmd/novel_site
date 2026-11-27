@@ -16207,6 +16207,21 @@ html.is-native-app #app-tabbar button[data-tone="light"] span{text-shadow:0 0 5p
 html.is-native-app #app-tabbar button.on[data-tone="dark"] span,html.dark.is-native-app #app-tabbar button.on[data-tone="dark"] span{color:#fff!important}
 html.is-native-app #app-tabbar button.on[data-tone="light"] span,html.dark.is-native-app #app-tabbar button.on[data-tone="light"] span{color:#0b1220!important}
 html.is-native-app #app-tabbar button i{transition:transform .38s cubic-bezier(.3,1.3,.5,1),color .3s!important}
+/* ===== عدسة كبسولة زجاجية جوه الشريط (زي فيديو iOS 26): الأيقونة تفضل مكانها وتتلوّن تحت العدسة ===== */
+html.is-native-app #app-tabbar::before{-webkit-mask-image:none!important;mask-image:none!important}
+html.is-native-app #app-tabbar .tb-bub{width:84px;height:56px;top:5px;border-radius:28px;translate:calc(var(--tb-x,50px) - 42px) 0;
+  background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.04) 45%,rgba(255,255,255,.08)),radial-gradient(120% 90% at 50% -10%,rgba(255,255,255,.25),rgba(255,255,255,0) 55%);
+  -webkit-backdrop-filter:blur(2px) saturate(1.6) brightness(1.04);backdrop-filter:blur(2px) saturate(1.6) brightness(1.04);
+  border:1px solid rgba(255,255,255,.5);
+  box-shadow:inset 0 1.5px 1.5px rgba(255,255,255,.85),inset 0 -2px 4px rgba(255,255,255,.28),inset 0 0 14px rgba(255,255,255,.18),0 6px 14px -6px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.12);
+  transition:scale .3s cubic-bezier(.3,1.5,.5,1),filter .2s}
+html.is-native-app.dark #app-tabbar .tb-bub{background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.06) 45%,rgba(255,255,255,.1)),radial-gradient(120% 90% at 50% -10%,rgba(255,255,255,.25),rgba(255,255,255,0) 55%);border-color:rgba(255,255,255,.36)}
+html.is-native-app #app-tabbar .tb-bub.press{scale:1.14 1.2;filter:brightness(1.1) saturate(1.2)}
+@keyframes tbJelly{0%{scale:1 1}28%{scale:1.3 .86}62%{scale:.97 1.07}100%{scale:1 1}}
+html.is-native-app #app-tabbar button.on i{transform:none!important}
+html.is-native-app #app-tabbar button.on i,html.is-native-app #app-tabbar button[data-lit] i{color:var(--brand-accent,#f59e0b)!important}
+html.is-native-app #app-tabbar.dragging button.on:not([data-lit]) i{color:inherit!important}
+html.is-native-app #app-tabbar button.on span{transform:none!important}
 /* مساحة تحت المحتوى والصفحات الكاملة علشان الشريط العايم ما يغطيش آخر الصفحة */
 html.is-native-app body{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important}
 html.is-native-app #rp-all-page,html.is-native-app #rp-acct-page,html.is-native-app #rp-notif-page,html.is-native-app #rp-prof-page,html.is-native-app #app-search,html.is-native-app #app-lib{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;box-sizing:border-box}
@@ -16288,7 +16303,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     var drag = null;
     function centers() { var br = bar.getBoundingClientRect(); return [].map.call(bar.querySelectorAll('button'), function (b) { var r = b.getBoundingClientRect(); return { b: b, x: r.left + r.width / 2 - br.left }; }); }
     function endDrag(e, commit) {
-      if (!drag) return; var d = drag; drag = null; bub.classList.remove('press'); bar.classList.remove('dragging');
+      if (!drag) return; var d = drag; drag = null; bub.classList.remove('press'); bar.classList.remove('dragging'); [].forEach.call(bar.querySelectorAll('button[data-lit]'), function (x) { x.removeAttribute('data-lit'); });
       try { bar.releasePointerCapture(d.id); } catch (x) {}
       if (!d.moved) return;
       window.__tbSwallow = true; setTimeout(function () { window.__tbSwallow = false; }, 80);
@@ -16302,6 +16317,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
       if (!drag.moved) { if (Math.abs(e.clientX - drag.x0) < 10) return; drag.moved = true; bar.classList.add('dragging'); try { bar.setPointerCapture(drag.id); } catch (x) {} }
       var cs = centers(); if (!cs.length) return; var br = bar.getBoundingClientRect(), xs = cs.map(function (c) { return c.x; }), lo = Math.min.apply(null, xs), hi = Math.max.apply(null, xs);
       bar.style.setProperty('--tb-x', Math.max(lo, Math.min(hi, e.clientX - br.left)) + 'px');
+      var cx = Math.max(lo, Math.min(hi, e.clientX - br.left)), nb = null, nd = 1e9; cs.forEach(function (c) { var dd = Math.abs(c.x - cx); if (dd < nd) { nd = dd; nb = c.b; } }); cs.forEach(function (c) { if (c.b === nb) c.b.setAttribute('data-lit', ''); else c.b.removeAttribute('data-lit'); });
     }, true);
     bar.addEventListener('pointerup', function (e) { endDrag(e, true); }, true);
     bar.addEventListener('pointercancel', function (e) { endDrag(e, false); }, true);
