@@ -16160,7 +16160,7 @@ html.is-native-app.lib-open #app-lib,html.is-native-app.search-open #app-search{
 #chapters-list-grid h4,#chapters-list-grid>div:hover h4{color:var(--g-t)!important}
 /* ===== الشريط السفلي: زجاج سائل شفاف — فقاعة بتنزلق بين التابات + تقعير متحرك + اسم تحت كل أيقونة ===== */
 @property --tb-x{syntax:'<length>';inherits:true;initial-value:50px}
-html.is-native-app #app-tabbar{left:14px!important;right:14px!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;height:66px;padding:0 4px!important;border-radius:33px!important;background:transparent!important;border:0!important;align-items:center!important;box-shadow:0 10px 22px -12px rgba(15,23,42,.2),0 1px 4px rgba(15,23,42,.05)!important;isolation:isolate;z-index:9340;transition:--tb-x .42s cubic-bezier(.34,1.2,.5,1),transform .3s,opacity .2s}
+html.is-native-app #app-tabbar{left:14px!important;right:14px!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;height:66px;padding:0 4px!important;border-radius:33px!important;background:transparent!important;border:0!important;align-items:center!important;box-shadow:0 10px 22px -12px rgba(15,23,42,.2),0 1px 4px rgba(15,23,42,.05)!important;isolation:isolate;z-index:9340;transition:--tb-x .24s cubic-bezier(.3,1.12,.5,1),transform .3s,opacity .2s}
 html.is-native-app.dark #app-tabbar{box-shadow:0 12px 26px -12px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.25)!important}
 html.is-native-app.kb-open #app-tabbar{transform:translateY(140%);opacity:0;pointer-events:none}
 html.is-native-app #app-tabbar::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:33px;pointer-events:none;
@@ -16330,14 +16330,15 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
       // نحرّك الفقاعة فورًا، وشغل الصفحة التقيل بعد ما الحركة تخلص علشان ما يحصلش لاج
       e.stopImmediatePropagation(); e.preventDefault();
       [].forEach.call(bar.querySelectorAll('button'), function (x) { x.classList.toggle('on', x === btn); });
-      place(false); bub.classList.add('press'); clearTimeout(window.__tbSet); window.__tbSet = setTimeout(function () { bub.classList.remove('press'); jelly(); }, 420);
+      var fromDrag = !!window.__tbSynth;
+      place(false); bub.classList.add('press'); clearTimeout(window.__tbSet); window.__tbSet = setTimeout(function () { bub.classList.remove('press'); jelly(); }, fromDrag ? 130 : 240);
       var id = btn.dataset.tab;
       setTimeout(function () {
         var fs = (id === 'home' || id === 'library') ? ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll', 'rpCloseAccount'] : id === 'account' ? ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll'] : ['rpCloseNotifications', 'rpCloseProfile', 'rpCloseAll', 'rpCloseAccount'];
         fs.forEach(function (f) { try { if (window[f]) window[f](); } catch (x) {} });
         window.__tbRe = true; try { btn.click(); } catch (x) { window.__tbRe = false; }
         window.__tbRe = false; setTimeout(sched, 50);
-      }, 230);
+      }, fromDrag ? 30 : 150);
     }, true);
     // إخفاء الشريط وقت الكتابة (الكيبورد)
     document.addEventListener('focusin', function (e) { var t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) && !/^(checkbox|radio|button|range|file)$/.test(t.type || '') && !(t.closest && t.closest('#app-search'))) root.classList.add('kb-open'); });
