@@ -155,7 +155,10 @@ html.dark .rp-adm-in{background:#0f172a;border-color:#334155;color:#e2e8f0}
 .rp-adm-item{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 html.dark .rp-adm-item{background:#0f172a;border-color:#334155}
 </style>
+<script>document.documentElement.classList.add("rp-boot");setTimeout(function(){document.documentElement.classList.remove("rp-boot")},2200);</script>
 <style id="rp-home-style">
+html.rp-boot #view-home{opacity:0!important}
+#view-home{transition:opacity .22s ease}
 #author-bio-card{display:none!important}
 html.rp-rows .rp-libsec{display:none!important}
 #rp-rows{display:flex;flex-direction:column;gap:26px}
@@ -633,14 +636,15 @@ html.rp-boot #view-home>*:nth-child(2){animation-delay:.06s}html.rp-boot #view-h
             </div>
         </div>
 
+    </header>
+
         <!-- Mobile Search Bar -->
-        <div class="lg:hidden px-4 pb-3">
+        <div id="rp-msearch" class="lg:hidden px-4 pt-3 pb-1 max-w-7xl mx-auto w-full">
             <div class="relative w-full">
                 <input type="text" id="mobile-search-input" oninput="handleSearch(this.value)" placeholder="ابحث عن رواية أو تصنيف..." class="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-xl py-2 pr-10 pl-4 text-sm focus:outline-none">
                 <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-2.5 text-slate-400"></i>
             </div>
         </div>
-    </header>
 
     <!-- Main Dynamic Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -13747,7 +13751,7 @@ document.addEventListener('click', function (e) {
     return { pop: pop.slice(0, 15), most: most, recent: recent, prem: prem, paper: most.filter(function (n) { return !!n.isPaper; }) };
   }
   window.__rpSchedule = function () { schedule(); };
-  function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} try { window.__rpRepaintViews && window.__rpRepaintViews(); } catch (e) {} try { fixDetailsViews(); } catch (e) {} }, 60); }
+  function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} try { document.documentElement.classList.remove('rp-boot'); } catch (e) {} try { window.__rpRepaintViews && window.__rpRepaintViews(); } catch (e) {} try { fixDetailsViews(); } catch (e) {} }, 60); }
   window.__rpReadsOf = function (n) { return readsOf(n); };
   /* رقم المشاهدات جوه صفحة الرواية = نفس رقم الكارت بالظبط (من السيرفر) */
   function fixDetailsViews() {
