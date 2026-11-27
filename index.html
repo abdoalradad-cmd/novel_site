@@ -155,7 +155,7 @@ html.dark .rp-adm-in{background:#0f172a;border-color:#334155;color:#e2e8f0}
 .rp-adm-item{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 html.dark .rp-adm-item{background:#0f172a;border-color:#334155}
 </style>
-<script>document.documentElement.classList.add("rp-boot");setTimeout(function(){document.documentElement.classList.remove("rp-boot")},2200);</script>
+<script>document.documentElement.classList.add("rp-boot");window.__rpBootChk=function(){if(window.__rpRowsOk&&window.__rpHeroOk)requestAnimationFrame(function(){setTimeout(function(){document.documentElement.classList.remove("rp-boot")},60)})};setTimeout(function(){document.documentElement.classList.remove("rp-boot")},3200);</script>
 <style id="rp-home-style">
 html.rp-boot #view-home{opacity:0!important}
 #view-home{transition:opacity .22s ease}
@@ -13751,7 +13751,7 @@ document.addEventListener('click', function (e) {
     return { pop: pop.slice(0, 15), most: most, recent: recent, prem: prem, paper: most.filter(function (n) { return !!n.isPaper; }) };
   }
   window.__rpSchedule = function () { schedule(); };
-  function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} try { document.documentElement.classList.remove('rp-boot'); } catch (e) {} try { window.__rpRepaintViews && window.__rpRepaintViews(); } catch (e) {} try { fixDetailsViews(); } catch (e) {} }, 60); }
+  function schedule() { clearTimeout(rafT); rafT = setTimeout(function () { try { renderRows(); } catch (e) {} window.__rpRowsOk = 1; try { window.__rpBootChk(); } catch (e) {} try { window.__rpRepaintViews && window.__rpRepaintViews(); } catch (e) {} try { fixDetailsViews(); } catch (e) {} }, 60); }
   window.__rpReadsOf = function (n) { return readsOf(n); };
   /* رقم المشاهدات جوه صفحة الرواية = نفس رقم الكارت بالظبط (من السيرفر) */
   function fixDetailsViews() {
@@ -14580,6 +14580,7 @@ function actBox() {
     style(); if (timer) { clearInterval(timer); timer = null; }
     var html = SLIDES.map(slideHtml).join('') + novelSlide(), n = SLIDES.length + (novelSlide() ? 1 : 0);
     w.innerHTML = '<div class="rp-hc"><div class="rp-hc-track">' + html + '</div><div class="rp-hc-dots">' + Array.apply(null, Array(n)).map(function (_, i) { return '<i role="button" aria-label="كارت ' + (i + 1) + '"></i>'; }).join('') + '</div></div>';
+    window.__rpHeroOk = 1; try { window.__rpBootChk(); } catch (e) {}
     var tr = w.querySelector('.rp-hc-track'), sl = tr.children, dots = w.querySelectorAll('.rp-hc-dots i');
     idx = 0;
     function cur() { var b = 1e9, k = 0, r = tr.getBoundingClientRect(), c = r.left + r.width / 2; for (var i = 0; i < sl.length; i++) { var q = sl[i].getBoundingClientRect(), d = Math.abs(q.left + q.width / 2 - c); if (d < b) { b = d; k = i; } } return k; }
