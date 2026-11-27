@@ -16309,7 +16309,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
       window.__tbSwallow = true; setTimeout(function () { window.__tbSwallow = false; }, 80);
       var br = bar.getBoundingClientRect(), x = (e && e.clientX != null ? e.clientX : d.last) - br.left, best = null, bd = 1e9;
       centers().forEach(function (c) { var dd = Math.abs(c.x - x); if (dd < bd) { bd = dd; best = c.b; } });
-      if (commit && best) setTimeout(function () { try { best.click(); } catch (x2) {} }, 0); else place(false);
+      if (commit && best) setTimeout(function () { window.__tbSwallow = false; window.__tbSynth = true; try { best.click(); } catch (x2) {} window.__tbSynth = false; }, 0); else place(false);
     }
     bar.addEventListener('pointerdown', function (e) { if (!(e.target.closest && e.target.closest('button'))) return; drag = { x0: e.clientX, id: e.pointerId, moved: false, last: e.clientX }; bub.classList.add('press'); }, true);
     bar.addEventListener('pointermove', function (e) {
@@ -16322,7 +16322,7 @@ html.is-native-app #toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!im
     bar.addEventListener('pointerup', function (e) { endDrag(e, true); }, true);
     bar.addEventListener('pointercancel', function (e) { endDrag(e, false); }, true);
     bar.addEventListener('click', function (e) {
-      if (window.__tbSwallow) { window.__tbSwallow = false; e.stopImmediatePropagation(); e.preventDefault(); return; }
+      if (window.__tbSwallow && !window.__tbSynth) { window.__tbSwallow = false; e.stopImmediatePropagation(); e.preventDefault(); return; }
       var btn = e.target.closest && e.target.closest('button'); if (!btn) return;
       if (window.__tbRe) { window.__tbRe = false; return; }
       // نحرّك الفقاعة فورًا، وشغل الصفحة التقيل بعد ما الحركة تخلص علشان ما يحصلش لاج
